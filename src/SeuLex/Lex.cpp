@@ -1,4 +1,5 @@
 #include<bits/stdc++.h>
+#include<thread>
 #include"Logger.h"
 using namespace std;
 
@@ -11,20 +12,24 @@ private:
     vector<string> rawRE;
     vector<string> stdRE;
     Logger logger;
+    FILE *lexFile;
+    int lexReady;
+    vector<std::thread> threadPool;
+
+
     void scanStatement();
     void scanRules();
     void scanAuxiliaryFunction();
-    FILE *lexFile;
 
-    int lexReady;
 public:
     Lex(); //USE DEFAULT CONSTRUCTOR IS NOT PREFFERED
     Lex(string);
     Lex(string,string);
+    ~Lex();    
     bool setInputFile(string);
-    ~Lex();
     void start();
     void print();
+    static bool checkFileName(string fileName);
 };
 
 /*
@@ -67,20 +72,7 @@ Lex::~Lex(){
     logger.close();
 }
 
-/*
-    Initialization ended
-
-
-*/
-
-void Lex::start(){
-    if (!lexReady){
-        logger.error("try to start before input file is ready!");
-        return ;
-    }
-}
-
-bool checkFileName(string fileName){
+bool Lex::checkFileName(string fileName){
     if (fileName.substr(fileName.find_last_of('.'))!=string(".l")){
         cerr<<fileName<<" is not a valid lex file!"<<endl;
         return 0;
@@ -93,6 +85,47 @@ bool checkFileName(string fileName){
     fclose(tmp);
     return 1;
 }
+
+/*
+    Initialization ended
+
+
+*/
+
+/*
+    Scanning lex file
+*/
+void Lex::start(){
+    if (!lexReady){
+        logger.error("try to start before input file is ready!","Lex::start()");
+        return ;
+    }
+    logger.start("Scanning lex file");
+    scanStatement();
+    scanRules();
+    scanAuxiliaryFunction();
+}
+
+void Lex::scanStatement(){
+    logger.start("Scanning Statement");
+
+    logger.end("Scanning statement");
+}
+
+void Lex::scanRules(){
+    logger.start("Scanning Rules");
+
+    logger.end("Scanning Rules");
+}
+
+void Lex::scanAuxiliaryFunction(){
+    logger.start("Scanning AuxiliaryFunctions");
+
+    logger.end("Scanning AuxiliaryFunctions");    
+}
+/*
+    Scanning lex file ended
+*/
 
 int main(){
 string fileName;

@@ -36,7 +36,7 @@ public:
     int init();
     int start(string);
     int end(string);
-    int error(string,string,int);
+    int error(string,string,int = 0);
     int customMSG(string);
     int close();
 };
