@@ -7,12 +7,17 @@ using namespace std;
 class RE{
 public:
     static char transChar[256];   
+    static int Newpri[256];
+    static int Oldpri[256];
     static void init(){
         for (int i = 0; i < 256; ++i){
             transChar[i] = i;
         }
         transChar['n'] = '\n';
         transChar['r'] = '\r';
+        memset(Newpri,-1,sizeof(Newpri));
+        memset(Oldpri,-1,sizeof(Oldpri));
+        
     }
 
     static string repeat(string re,int x,int y){
