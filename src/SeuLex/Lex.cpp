@@ -12,18 +12,19 @@ private:
     int state = 0;
     vector<string> rawRE;
     vector<string> stdRE;
+    string codeBuff;
     Logger logger;
     FILE *lexFile;
     int lexReady;
     vector<std::thread> threadPool;
-
 
     void scanStatement();
     void scanRules();
     void scanAuxiliaryFunction();
 
 public:
-    Lex(); //USE DEFAULT CONSTRUCTOR IS NOT PREFFERED
+    //USE DEFAULT CONSTRUCTOR IS NOT PREFFERED
+    Lex(); 
     Lex(string);
     Lex(string,string);
     ~Lex();    
@@ -109,7 +110,7 @@ void Lex::start(){
 
 void Lex::scanStatement(){
     logger.start("Scanning Statement");
-    
+    getline(LexFile,)
     logger.end("Scanning statement");
 }
 
