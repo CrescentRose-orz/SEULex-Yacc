@@ -5,6 +5,7 @@
     Main class
 
 */
+#include<string>
 #include<bits/stdc++.h>
 #include<thread>
 #include<unordered_map>
@@ -34,11 +35,17 @@ private:
     lexState _state;
     int checkNewLine(string &);
     void scanStatement();    // todo : exception 
-    void scanRules();
-    void scanAuxiliaryFunction();
     void copyStatement();
     void eraseComments();
+    string readRE();
+    void readName_RE();
     bool checkSelfDef();
+
+    void scanRules();
+    string readAction();
+    void scanAuxiliaryFunction();
+
+
 public:
     //USE DEFAULT CONSTRUCTOR IS NOT PREFFERED
     Lex(); 
@@ -62,13 +69,6 @@ bool Lex::setInputFile(string lexFileName){
         cerr<<"lex file already opened!"<<endl;
         return 1;
     }
-    // lexFile = fopen(lexFileName.c_str(),"r");
-    // if (lexFile == NULL){
-    //     cerr<<"an error occurs, FILE open failed!"<<endl;
-    //     system("pause");    
-    //     lexReady = 0;
-    //     return 1;
-    // }
     lfile.open(lexFileName,ios::in);
         if (lexFile == NULL){
             cerr<<"an error occurs, FILE open failed!"<<endl;
@@ -122,18 +122,25 @@ bool Lex::checkFileName(string fileName){
     Scanning lex file
 */
 void Lex::start(){
+    logger.init();
     if (!lexReady){
         logger.error("try to start before input file is ready!","Lex::start()",1);
         return ;
     }
     logger.start("Scanning lex file");
     try{
+        cout<<"ok"<<endl;
         scanStatement();
+        cout<<"ok2"<<endl;
         scanRules();
         scanAuxiliaryFunction();
     } catch(exception e){
 
     }
+    logger.close();
+    cout<<"got code:";
+    cout<<codeBuff<<endl;
+    return;
 }
 /*
  possible status:
@@ -141,7 +148,7 @@ void Lex::start(){
 
  %}
 
-SINGLE CHARACTOR  + RE
+NAME + RE
 
 %%
 */
@@ -185,7 +192,7 @@ char c;
         } else {
             head+=c;
             logger.customMSG("RE detected");
-            return 2;
+            return 1;
         }
     } else {
         logger.error("file not completed ",partName[state],lineCnt);  
@@ -216,57 +223,58 @@ void Lex::eraseComments(){
 }
 
 void Lex::scanStatement(){    
-char c = 233; 
 bool end = 0;
-    logger.start("Scanning Statement");
+int lineStatus;
+string s;
+    logger.start("Scanning statement");
     state = STATEMENT;
-    // while (!end&&(c = fgetc(lexFile))!= EOF){
-    //     if (c == '%'){
-    //         c = fgetc(lexFile);
-    //         switch (c){
-    //             case '{':
-    //                 copyMode();
-    //                 break;
-    //             case '%':
-    //                 end = true;
-    //                 break;
-    //             default :
-    //                 logger.error("format error ","Statement part",lineCnt);  
-    //                 //todo: throw an exception
-    //                 break;                 
-    //         }
-    //     } else {
-    //         logger.error("format error ","Statement part",lineCnt);
-    //         // todo : throw an exception
-    //     }
-    // }
-    while (!end&&(c = fgetc(lexFile))!= EOF){
-        if (c == '%'){
-            c = fgetc(lexFile);
-            switch (c){
-                case '{':
-                    copyStatement();
-                    break;
-                case '%':
-                    end = true;
-                    break;
-                default :
-                    logger.error("format error ","Statement part",lineCnt);  
-                    //todo: throw an exception
-                    break;                 
-            }
-        } else {
-            logger.error("format error ","Statement part",lineCnt);
-            // todo : throw an exception
-        }
+    lineStatus = checkNewLine(s);
+    while(lineStatus){
+        
+        lineStatus = checkNewLine(s);
     }
     logger.end("Scanning statement");
 }
 
 void Lex::copyStatement(){
+    char c;
+    logger.start("copy statement");
+    fin.get(c);
+    while (!fin.eof()){
+        if (c == '%'){
+            fin.get(c);
+            if (c == '}'){
+                logger.end("copy statement");
+                while(!fin.eof()&&c!='\n'){
+                    fin.get(c);
+                }
+                break;
+            } else {
+                codeBuff+='%';
+            }
+        } else {
+            codeBuff+=c;
+            fin.get(c);            
+        }
+    }
 
 }
 
+// support regular name only      todo: escape.. etc;
+void Lex::readName_RE(){
+string name,RE;
+    fin>>name;
+    rawRE.emplace_back(name);
+    RE = readRE();
+    preDefine[name]=RE;
+    cout<<"get "<<RE<<" "<<"for "<<name<<endl;
+}
+
+string Lex::readRE(){
+string rt;
+    fin>>rt;
+    return rt;
+}
 void Lex::scanRules(){
     logger.start("Scanning Rules");
     state = RULE;
@@ -287,7 +295,8 @@ string fileName;
 FILE *input = NULL;
     while (input == NULL){
         cout<<"Please enter fileName(end with .l) , or exit with EXIT"<<endl;
-        cin>>fileName;
+       // cin>>fileName;
+        fileName="lex.l";
         if (fileName == "exit"){
             return 0;
         }
@@ -298,5 +307,7 @@ FILE *input = NULL;
     }
     fclose(input);
 Lex lextest(fileName,"testLogger");
+    lextest.start();
 
+    return 0;
 }
