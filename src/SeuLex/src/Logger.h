@@ -36,7 +36,10 @@ public:
     int init();
     int start(string);
     int end(string);
-    int error(string,string,int = 0);
+    /*
+        usage: error type&msg ,error part, error line
+    */
+    int error(string,string,int );
     int customMSG(string);
     int close();
 };

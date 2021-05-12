@@ -62,7 +62,9 @@ int Logger::end(string name){
     _timeStamp[name] = 0;
     return 0;
 }
-
+/*
+        usage: error type&msg ,error part, error line
+*/
 int Logger::error(string errorName,string partName,int line = 0){
     if (!printTime()){
         return -1;
