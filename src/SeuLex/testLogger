@@ -1,0 +1,614 @@
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: Logger has been initialized.
+<UTC:   Wed May 12 11:33:16 2021
+ > Scanning lex file started.
+<UTC:   Wed May 12 11:33:16 2021
+ > Scanning Statement started.
+<UTC:   Wed May 12 11:33:16 2021
+ > copy statement started.
+<UTC:   Wed May 12 11:33:16 2021
+ > copy statement ended ,[TIME]finished in 0.119000 s .
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: comments detected
+<UTC:   Wed May 12 11:33:16 2021
+ > erase comment started.
+<UTC:   Wed May 12 11:33:16 2021
+ > erase comment ended ,[TIME]finished in 0.119000 s .
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:33:16 2021
+ >[ERROR Scanning statement event didn't start ] <UTC:   Wed May 12 11:33:16 2021
+ > Scanning Rules started.
+<UTC:   Wed May 12 11:33:16 2021
+ > Scanning Rules ended ,[TIME]finished in 0.120000 s .
+<UTC:   Wed May 12 11:33:16 2021
+ > Scanning AuxiliaryFunctions started.
+<UTC:   Wed May 12 11:33:16 2021
+ > Scanning AuxiliaryFunctions ended ,[TIME]finished in 0.120000 s .
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: Logger has been initialized.
+<UTC:   Wed May 12 11:36:17 2021
+ > Scanning lex file started.
+<UTC:   Wed May 12 11:36:17 2021
+ > Scanning Statement started.
+<UTC:   Wed May 12 11:36:17 2021
+ > copy statement started.
+<UTC:   Wed May 12 11:36:17 2021
+ > copy statement ended ,[TIME]finished in 0.106000 s .
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: comments detected
+<UTC:   Wed May 12 11:36:17 2021
+ > erase comment started.
+<UTC:   Wed May 12 11:36:17 2021
+ > erase comment ended ,[TIME]finished in 0.106000 s .
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >MSG: RE detected
+<UTC:   Wed May 12 11:36:17 2021
+ >[ERROR Scanning statement event didn't start ] <UTC:   Wed May 12 11:36:17 2021
+ > Scanning Rules started.
+<UTC:   Wed May 12 11:36:17 2021
+ > Scanning Rules ended ,[TIME]finished in 0.106000 s .
+<UTC:   Wed May 12 11:36:17 2021
+ > Scanning AuxiliaryFunctions started.
+<UTC:   Wed May 12 11:36:17 2021
+ > Scanning AuxiliaryFunctions ended ,[TIME]finished in 0.106000 s .

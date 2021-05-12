@@ -127,6 +127,7 @@ public:
             if(thread.joinable())
                 thread.join(); // 等待任务结束， 前提：线程一定会执行完
         }
+        return 0;
     }
 };
 

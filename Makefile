@@ -2,10 +2,10 @@ CXX		  := g++
 CXXFLAGS = -std=c++11 -stdlib=libstdc++ -Wall -Werror -Wextra -pedantic  -g -fsanitize=address
 LDFLAGS =  -fsanitize=address
 
-BIN		:= bin
-SRC		:= src
-INCLUDE	:= include
-LIB		:= lib
+BIN		:= src/SeuLex/bin
+SRC		:= src/SeuLex/src
+INCLUDE	:= src/SeuLex/include
+LIB		:= src/SeuLex/lib
 
 LIBRARIES	:=
 EXECUTABLE	:= Lex

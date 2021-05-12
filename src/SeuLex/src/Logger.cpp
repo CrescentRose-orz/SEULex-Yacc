@@ -25,6 +25,9 @@ int Logger::init(){
     }
     _beginTime = time(NULL);
     flag = 1; 
+    customMSG("Logger has been initialized.");
+    cout<<"ok!"<<endl;
+    return 0;
 }
 
 bool Logger::printTime(){
@@ -33,7 +36,7 @@ bool Logger::printTime(){
         return 0;
     }
     time_t _tmp = time(NULL);
-    fprintf(_log,"<UTC:   %s >", asctime(gmtime(&_tmp)));
+    fprintf(_log,"<UTC:   %s >                  ", asctime(gmtime(&_tmp)));
     return 1;
 }
 
@@ -74,6 +77,7 @@ int Logger::error(string errorName,string partName,int line = 0){
         fprintf(_log," at line %d ",line);
     }
     fprintf(_log,"]\n");
+    close();
     return 0;
 }
 
