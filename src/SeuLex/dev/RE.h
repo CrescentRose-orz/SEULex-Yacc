@@ -9,6 +9,10 @@ public:
     static char transChar[256];   
     static int Newpri[256];
     static int Oldpri[256];
+    static vector<int> topSort();
+    static void buildGraph(vector<string> &,vector<string,string> &);
+    static void checkCircle();
+    
     static string prepareRE(string RE){
         string rt;
         int j = 0,i = 0;
@@ -101,6 +105,7 @@ public:
 
         }
     }
+
     // static string squareBar(string re){
     //     bool enable[256] = {0};  
     //     bool rev = re[0] == '^' ? 1 : 0;   // todo : exception may occur if re is empty

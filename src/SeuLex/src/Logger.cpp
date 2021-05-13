@@ -16,6 +16,7 @@ Logger::Logger(string fileName){
         cerr<<"LOG FIlE OPEN error!/n"<<endl;
         flag = -1;
     }
+    this -> fileName = fileName;
     flag = 0;
 }
 
@@ -77,7 +78,7 @@ int Logger::error(string errorName,string partName,int line = 0){
         fprintf(_log," at line %d ",line);
     }
     fprintf(_log,"]\n");
-    close();
+    save(); 
     return 0;
 }
 
@@ -100,3 +101,10 @@ int Logger::close(){
     Logger::~Logger(){
         close();
     }
+
+int Logger::save(){
+    if (flag == 1){
+        fclose(_log);
+        _log = fopen(fileName.c_str(),"a");
+    }
+}

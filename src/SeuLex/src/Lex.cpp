@@ -1,6 +1,6 @@
 /*
     created by CrescentRose 2021/5/7
-    update: 2021/5/12 12:21
+    update: 2021/5/13 11:24
     Lexscanner
     Main class
 
@@ -23,10 +23,11 @@ class Lex{
 private:
     int lineCnt = 1; //line count, for logging the place where error occurs.
     int state = 0;
-    vector<string> rawRE;
-    vector<string> stdRE;
+    vector<string> rawRE;   //store the name of the preDefined RE
+    vector<string> stdRE;   //
     map<string,string> preDefine;
     string codeBuff;
+    string funCodeBuff;
     Logger logger;
     FILE *lexFile;
     ifstream lfile;
@@ -133,9 +134,12 @@ void Lex::start(){
         scanStatement();
         cout<<"ok2"<<endl;
         scanRules();
+        cout<<"ok3"<<endl;
         scanAuxiliaryFunction();
     } catch(exception e){
-
+        logger.error("Exception occured ","parsing lex file",lineCnt);
+        logger.close();
+        return ;
     }
     logger.close();
     cout<<"got code:";
@@ -153,8 +157,9 @@ NAME + RE
 %%
 */
 
-int Lex::checkNewLine(string &head){
+int Lex::checkNewLine(string &head){           // todo: head is not required anymore
 char c;
+streampos _pos = fin.tellg();
     ++lineCnt;
     fin.get(c);
     while (c==' '){fin.get(c);}
@@ -191,6 +196,7 @@ char c;
             // todo : throw an exception
         } else {
             head+=c;
+            fin.seekg(_pos);
             logger.customMSG("RE detected");
             return 1;
         }
@@ -201,7 +207,7 @@ char c;
     return 0;
 }
 
-void Lex::eraseComments(){
+void Lex::eraseComments(){                     // lineCnt ok;
     char c;
     logger.start("erase comment");
     fin.get(c);
@@ -214,8 +220,11 @@ void Lex::eraseComments(){
                     fin.get(c);
                 }
                 break;
-            }
+            } 
         } else {
+            if (c=='\n')
+                ++lineCnt;
+            }
             fin.get(c);
         }
     }
@@ -230,7 +239,7 @@ string s;
     state = STATEMENT;
     lineStatus = checkNewLine(s);
     while(lineStatus){
-        
+        readName_RE();
         lineStatus = checkNewLine(s);
     }
     logger.end("Scanning statement");
@@ -276,14 +285,27 @@ string rt;
     return rt;
 }
 void Lex::scanRules(){
+int lineStatus;
+string s;
     logger.start("Scanning Rules");
     state = RULE;
+    lineStatus = checkNewLine(s);
+    while(lineStatus){
+        
+        lineStatus = checkNewLine(s);
+    }
     logger.end("Scanning Rules");
 }
 
 void Lex::scanAuxiliaryFunction(){
+string tmp;
     logger.start("Scanning AuxiliaryFunctions");
     state = FUNCTIONS;
+    fin >> tmp;
+    while (!fin.eof()){
+        funCodeBuff += tmp;
+        fin >> tmp;
+    }
     logger.end("Scanning AuxiliaryFunctions");    
 }
 /*

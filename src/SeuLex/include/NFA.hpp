@@ -1,11 +1,7 @@
 #include<bits/stdc++.h>
+#include<action.hpp>
 using namespace std;
 const int NFA_t =258;
-
-class action{
-public :
-    string code;
-};
 
 
 class NFA_Node{
@@ -18,6 +14,10 @@ public:
         hasAction = 0;
     }
     NFA_Node(action act):act(act){
+        hasAction = 1;
+    }
+    void setAction(action act){
+        this->act = act;
         hasAction = 1;
     }
     void addMultiTrans(int target,int l,int r);
