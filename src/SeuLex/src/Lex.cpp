@@ -222,7 +222,7 @@ void Lex::eraseComments(){                     // lineCnt ok;
                 break;
             } 
         } else {
-            if (c=='\n')
+            if (c=='\n'){
                 ++lineCnt;
             }
             fin.get(c);

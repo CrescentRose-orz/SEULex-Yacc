@@ -11,7 +11,7 @@ private:
     bool hasAction;
 public:
     NFA_Node(){
-        hasAction = 0;
+        hasAction = -1;
     }
     NFA_Node(action act):act(act){
         hasAction = 1;
@@ -23,6 +23,9 @@ public:
     void addMultiTrans(int target,int l,int r);
     void addTrans(int target,int l,int r);
     int transfer(int input);
+    bool valid(){
+        return hasAction == -1 ? 0 : 1;
+    }
 };
 
 
@@ -43,6 +46,9 @@ public:
             case ' ':
 
                 break;
+            default:
+
+
         }
 
     }

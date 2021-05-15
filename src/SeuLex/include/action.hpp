@@ -19,6 +19,12 @@ public:
     bool operator > (action &other) const {
         return this->index > other.index;
     }
+    bool operator == (action &other) const {
+        return this->index == other.index;
+    }
+    bool operator != (action &other) const {
+        return this->index != other.index;
+    }
     string getCode(){
         return code;
     }
