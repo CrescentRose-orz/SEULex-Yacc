@@ -37,7 +37,7 @@ public :
         head.resize(10000);    //resize will set all empty head to 0
     }
     int add_edge(int from,int to){
-        if (from >= head.size()){
+        while (max(from,to) >= head.size()){
             head.resize(head.size()<<1);
         }
         edge _tmpEdge(to,head[from]);
@@ -77,9 +77,15 @@ public :
                 }
             }  
         }
+        cout<<"basic topsort done"<<endl;
         if (rt.size()!=n){
             hasCircle = true;
         }
+        cout<<"top sort ended"<<endl;
+        for (auto &t:rt){
+            cout<<t<<" ";
+        }
+        cout<<endl;
         return rt;
     }
 };
@@ -95,20 +101,34 @@ private:
         if (mp.count(newNode)){
             return mp[newNode];
         }
-        map[newNode] = ++tot;
-        reverseMp.emplace_back(T);
+        mp[newNode] = ++tot;
+        reverseMp.emplace_back(newNode);
         return tot;
     }
 public :
+    mappingGraph(){
+        tot = 0;
+        reverseMp.emplace_back("NULL");
+    }
     void add_edge(T from,T to){
-        _graph.add_edge(checkExist(from), checkExist(to))
+        _graph.add_edge(checkExist(from), checkExist(to));
+    }
+    void add_node(T name){
+        checkExist(name);
     }
     vector<T> topSort(bool &hasCircle){
+        cout<<"has tot "<<tot<<" node"<<endl;
         vector<int> &&tmp = _graph.topSort(tot,hasCircle);
         vector<T> rt;
         rt.resize(tot);
         for (int i = 0 ; i < rt.size(); ++i){
             rt[i] = reverseMp[tmp[i]];
         }
+        cout<<"top sort ended"<<endl;
+        for (auto &t:rt){
+            cout<<t<<" ";
+        }
+        cout<<endl;
+        return rt;
     }
 };

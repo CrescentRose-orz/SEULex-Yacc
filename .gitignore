@@ -8,3 +8,7 @@
 *.tmp
 
 Makefile.txt
+*.txt
+*.log
+testlogger.*
+testlogger
