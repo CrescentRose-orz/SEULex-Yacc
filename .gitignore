@@ -12,3 +12,4 @@ Makefile.txt
 *.log
 testlogger.*
 testlogger
+*.exe
