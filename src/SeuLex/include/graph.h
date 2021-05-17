@@ -57,6 +57,7 @@ public :
         queue<int> toHandle;
         inDeg.resize(maxN+1);
         int e;
+        inDeg.resize(n+1);
         for (int s = 1; s <= n; ++s){
             for (e = head[s] ; e ; e =next(e) ){
                 ++inDeg[to(e)];
@@ -80,6 +81,12 @@ public :
         cout<<"basic topsort done"<<endl;
         if (rt.size()!=n){
             hasCircle = true;
+            cerr<<n<<" node but with rt"<<rt.size()<<endl;
+            for (int i = 1; i <= n;++i){
+                if(inDeg[i]){
+                    cout<<i<< " has degree"<<inDeg[i]<<endl;
+                }
+            }
         }
         cout<<"top sort ended"<<endl;
         for (auto &t:rt){
