@@ -16,7 +16,8 @@
 #include "RE.hpp"
 using namespace std;
 #define fin lfile 
-
+#define USE_MULTITHREAD
+#define DEBUG
 // transform NFA DFA miniDFA Logger visualGraph
 
 inline bool space(char &c){
@@ -25,6 +26,15 @@ inline bool space(char &c){
 
 inline bool enter(char &c){
     return c=='\r';
+}
+
+inline void trim(string &s) 
+{
+    if (s.empty()) {
+        return ;
+    }
+    s.erase(0,s.find_first_not_of(" ""\x20""\x09""\n""\r"));
+    s.erase(s.find_last_not_of(" ""\x20""\x09""\n""\r") + 1);
 }
 
 const string partName[5] = {"unknow","statement part","rule part","function part",""};
@@ -51,21 +61,20 @@ private:
     lexState _state;
     threadpool threadPool;
 
-    int checkNewLine(string &);
+    int checkNewLine();
     void scanStatement();    // todo : exception 
     void copyStatement();
     void eraseComments();
     string readRE();
     void readName_RE();
-    void handlePredefinedStatement();
 
     void scanRules();
     void readRE_action();
     string readAction();
 
-
     void scanAuxiliaryFunction();
 
+    void handlePredefinedStatement();
 
 public:
     //USE DEFAULT CONSTRUCTOR IS NOT PREFFERED
@@ -153,8 +162,11 @@ void Lex::start(){
     logger.start("Scanning lex file");
     try{
         scanStatement();
-        threadPool.commit(std::bind(&Lex::handlePredefinedStatement,this));
-        //handlePredefinedStatement();
+        #ifdef USE_MULTITHREAD
+            threadPool.commit(std::bind(&Lex::handlePredefinedStatement,this));
+        #else
+            handlePredefinedStatement();
+        #endif
         scanRules();
         scanAuxiliaryFunction();
         fin.close();
@@ -171,7 +183,9 @@ void Lex::start(){
         logger.close();
         return ;
     }
-    threadPool.join();
+    #ifdef USE_MULTITHREAD
+        threadPool.join();
+    #endif
     logger.end("main");
     logger.close();
 
@@ -180,18 +194,9 @@ void Lex::start(){
 
     return;
 }
-/*
- possible status:
- %{
 
- %}
 
-NAME + RE
-
-%%
-*/
-
-int Lex::checkNewLine(string &head){           // todo: head is not required anymore
+int Lex::checkNewLine(){       
 char c;
 streampos _pos = fin.tellg();
     //++lineCnt;
@@ -203,14 +208,11 @@ streampos _pos = fin.tellg();
     }
     if(!fin.eof()){
         if (c == '%'){
-            head += c;
             fin.get(c);
-            head += c;
             switch (c){
                 case '{':
                     copyStatement();   //todo: check if scanner is in statement part;
-                    head.clear();
-                    return checkNewLine(head);
+                    return checkNewLine();
                     break;
                 case '%':
                     return 0;
@@ -225,21 +227,15 @@ streampos _pos = fin.tellg();
             if (c=='*'){
                 logger.customMSG("comments detected");
                 eraseComments();
-                head.clear();
-                return checkNewLine(head);
+                return checkNewLine();
             } else {
                 logger.error("format error ",partName[state],lineCnt);                         
             }
 
             // todo : throw an exceptiond
         } else {
-            head+=c;
-            // cout<<"now "<<fin.tellg()<<" to "<<_pos<<endl;
-            //cout<<"found "<<c<<"with head"<<head<<endl;
             fin.seekg(_pos);
             logger.customMSG("RE detected");
-            // cout<<"will read "<<(char)fin.get()<<endl;
-            // cout<<"now "<<fin.tellg()<<endl;
             return 1;
         }
     } else {
@@ -283,15 +279,12 @@ void Lex::eraseComments(){                     // lineCnt ok;
 void Lex::scanStatement(){    
 bool end = 0;
 int lineStatus;
-string s;
     logger.start("Scanning statement");
     state = STATEMENT;
-    lineStatus = checkNewLine(s);
+    lineStatus = checkNewLine();
     while(lineStatus){
-        readName_RE();
-      //  system("pause");       
-        s.clear();
-        lineStatus = checkNewLine(s);
+        readName_RE();  
+        lineStatus = checkNewLine();
     }
     logger.end("Scanning statement");
 }
@@ -415,59 +408,14 @@ bool tran = 0;
     return rt;
 }
 
-void Lex::handlePredefinedStatement(){
-    // map<string,string>::iterator iter = preDefine.begin();
-    // for (;iter!=preDefine.end();++iter){
-
-    // }
-    mappingGraph<string> g;
-    for (auto &s:rawRE){
-        g.add_node(s);
-        for (auto &target:rawRE){
-            if (s == target){
-                continue;
-            }
-            cout<<s<<" "<<target<<" processing"<<endl;
-            cout<<preDefine[s]<<" "<<preDefine[target]<<endl;
-            int idx = preDefine[s].find(target);
-            while(idx != string::npos){
-                cout<<"possible match!"<<endl;
-                if (idx == 0 || preDefine[s][idx-1]!='{' || preDefine[s][idx+target.length()] !='}'){ // todo: may be fooled when meet {{}} ( illegal )
-                    idx = preDefine[s].find(target, idx + 1 );
-                    continue;
-                }
-                g.add_edge(target,s);
-                cout<<s<<" need "<<target<<" to be done first!"<<endl;
-                idx = s.find(target, idx + 1) ;
-            }
-            cout<<s<<" "<<target<<" ok!"<<endl;
-        }
-    }
-    bool hasCircle;
-    vector<string> &&order = g.topSort(hasCircle);
-    cout<<"topSort ok"<<endl;
-    if (hasCircle){
-        cerr<<" circle found!"<<endl;
-        logger.error("self define problem found","statement processing",lineCnt);       //todo: lineCnt is not correct
-        throw invalid_argument("self define problem found");
-    }
-    cout<<"prefered order"<<": ";
-    for (auto &s:order){
-        cout<<s<<" "<<endl;
-    }
-    cout<<endl;
-    return ;
-}
-
 void Lex::scanRules(){
 int lineStatus;
-string s;
     logger.start("Scanning Rules");
     state = RULE;
-    lineStatus = checkNewLine(s);
+    lineStatus = checkNewLine();
     while(lineStatus){
         readRE_action();
-        lineStatus = checkNewLine(s);
+        lineStatus = checkNewLine();
     }
     logger.end("Scanning Rules");
 }
@@ -477,7 +425,6 @@ string &&RE = readRE(),act;
 char c;
 int cnt = 0;    
     targetRE.emplace_back(RE);
-
     c = fin.get();
     while (space(c)){
         c = fin.get();
@@ -509,7 +456,6 @@ int cnt = 0;
         }
         c = fin.get();
     }
-    //act = act.substr(0,act.size()-1);
     Action.emplace_back(Action.size(),act);
     cout<<"get "<<RE<<" "<<"for "<<act<<endl;
     while (c !='\n'){
@@ -533,13 +479,99 @@ char buff[1000];
     Scanning lex file ended
 */
 
+void Lex::handlePredefinedStatement(){
+    // map<string,string>::iterator iter = preDefine.begin();
+    // for (;iter!=preDefine.end();++iter){
+
+    // }
+    mappingGraph<string> g;
+    for (auto &s:rawRE){
+        g.add_node(s);
+        for (auto &target:rawRE){
+            if (s == target){
+                continue;
+            }
+            //cout<<s<<" "<<target<<" processing"<<endl;
+            //cout<<preDefine[s]<<" "<<preDefine[target]<<endl;
+            int idx = preDefine[s].find(target);
+            while(idx != string::npos){
+                cout<<"possible match!"<<endl;
+                if (idx == 0 || preDefine[s][idx-1]!='{' || preDefine[s][idx+target.length()] !='}'){ // todo: may be fooled when meet {{}} ( illegal )
+                    idx = preDefine[s].find(target, idx + 1 );
+                    continue;
+                }
+                g.add_edge(target,s);
+                //cout<<s<<" need "<<target<<" to be done first!"<<endl;
+                idx = s.find(target, idx + 1) ;
+            }
+            //cout<<s<<" "<<target<<" ok!"<<endl;
+        }
+    }
+    bool hasCircle;
+    vector<string> &&order = g.topSort(hasCircle);
+    //cout<<"topSort ok"<<endl;
+    if (hasCircle){
+        cerr<<" circle found!"<<endl;
+        logger.error("self define problem found","statement processing",lineCnt);       //todo: lineCnt is not correct
+        throw invalid_argument("self define problem found");
+    }
+    cout<<"prefered order"<<": ";
+    for (auto &s:order){
+        cout<<s<<" "<<endl;
+    }
+    cout<<endl;
+    for (auto &s:order){
+        string &&raw = preDefine[s];
+        string newRE;
+        int last = 0,pos,tail;
+        while ((pos = raw.find('{',last))!=string::npos){
+            newRE.append(raw,last,pos - last );
+            if ((tail = raw.find('}',pos + 1)) == string ::npos){
+                string tmp(" '}' expected in " );
+                tmp += raw;
+                throw invalid_argument(tmp);
+            } 
+            if (raw.at(pos + 1)<='9'&&raw.at(pos + 1)>='0'){
+                newRE.append(raw,pos,tail - pos + 1);
+                last = tail + 1;
+            } else {
+                string &&name = raw.substr(pos + 1,tail - pos - 1);
+                if (!preDefine.count(name)){
+                    string tmp("undefined identifier ");
+                    tmp += name;
+                    tmp +=" occurs in RE ";
+                    tmp += s;
+                    throw invalid_argument(tmp);
+                }
+                newRE.append(preDefine[name]);
+                last = tail + 1;
+            }
+        }
+        if (last < raw.size()){
+            newRE.append(raw,last,raw.size());
+        }
+        preDefine[s] = newRE;
+        logger.customMSG(raw);
+        logger.customMSG(newRE);
+    }
+
+
+    return ;
+}
+
+
+
+
 int main(){
 string fileName;
 FILE *input = NULL;
     while (input == NULL){
         cout<<"Please enter fileName(end with .l) , or exit with EXIT"<<endl;
-       // cin>>fileName;
+        #ifndef DEBUG
+        cin>>fileName;
+        #else
         fileName="lex.l";
+        #endif
         if (fileName == "exit"){
             return 0;
         }
@@ -551,6 +583,8 @@ FILE *input = NULL;
     fclose(input);
     Lex lextest(fileName,"testLogger.txt");
     lextest.start();
+    #ifdef DEBUG
     system("pause");
+    #endif
     return 0;
 }

@@ -41,10 +41,13 @@ class threadpool
     //空闲线程数量
     std::atomic<int>  idlThrNum;
 
+    int size;
+
 public:
     inline threadpool(unsigned short size = 4) :stoped{ false },closeCommit{ false }
     {
-        idlThrNum = size < 1 ? 1 : size;
+        this->size = size < 1 ? 1 : size;
+        idlThrNum = this -> size;
         for (size = 0; size < idlThrNum; ++size)
         {   //初始化线程数量
             pool.emplace_back(
@@ -120,13 +123,8 @@ public:
     int join(){
         closeCommit.store(true);
         while(!tasks.empty());
-        stoped.store(true);
-        cv_task.notify_all(); // 唤醒所有线程执行
-        for (std::thread& thread : pool) {
-            //thread.detach(); // 让线程“自生自灭”
-            if(thread.joinable())
-                thread.join(); // 等待任务结束， 前提：线程一定会执行完
-        }
+        while(idlThrNum != size);
+        closeCommit.store(false);
         return 0;
     }
 };
