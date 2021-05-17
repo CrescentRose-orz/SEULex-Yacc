@@ -521,40 +521,12 @@ void Lex::handlePredefinedStatement(){
     }
     cout<<endl;
     for (auto &s:order){
-        string &&raw = preDefine[s];
-        string newRE;
-        int last = 0,pos,tail;
-        while ((pos = raw.find('{',last))!=string::npos){
-            newRE.append(raw,last,pos - last );
-            if ((tail = raw.find('}',pos + 1)) == string ::npos){
-                string tmp(" '}' expected in " );
-                tmp += raw;
-                throw invalid_argument(tmp);
-            } 
-            if (raw.at(pos + 1)<='9'&&raw.at(pos + 1)>='0'){
-                newRE.append(raw,pos,tail - pos + 1);
-                last = tail + 1;
-            } else {
-                string &&name = raw.substr(pos + 1,tail - pos - 1);
-                if (!preDefine.count(name)){
-                    string tmp("undefined identifier ");
-                    tmp += name;
-                    tmp +=" occurs in RE ";
-                    tmp += s;
-                    throw invalid_argument(tmp);
-                }
-                newRE.append(preDefine[name]);
-                last = tail + 1;
-            }
-        }
-        if (last < raw.size()){
-            newRE.append(raw,last,raw.size());
-        }
+        string raw = preDefine[s];
+        string &&newRE = RE::unfoldRE(raw,preDefine);
         preDefine[s] = newRE;
         logger.customMSG(raw);
         logger.customMSG(newRE);
     }
-
 
     return ;
 }

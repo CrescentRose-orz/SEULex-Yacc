@@ -13,7 +13,39 @@ public:
     static char trans(char a){
         return transChar[a];
     }
-
+    static string unfoldRE(string &raw,map<string,string> &preDefine){
+        string newRE;
+        int last = 0,pos,tail;
+        while ((pos = raw.find('{',last))!=string::npos){
+            newRE.append(raw,last,pos - last );
+            if ((tail = raw.find('}',pos + 1)) == string ::npos){
+                string tmp(" '}' expected in " );
+                tmp += raw;
+                throw invalid_argument(tmp);
+            } 
+            if (raw.at(pos + 1)<='9'&&raw.at(pos + 1)>='0'){
+                newRE += '(';
+                newRE.append(raw,pos,tail - pos + 1);
+                newRE += ')';
+                last = tail + 1;
+            } else {
+                string &&name = raw.substr(pos + 1,tail - pos - 1);
+                if (!preDefine.count(name)){
+                    string tmp("undefined identifier ");
+                    tmp += name;
+                    tmp +=" occurs in RE ";
+                    tmp += raw;
+                    throw invalid_argument(tmp);
+                }
+                newRE.append(preDefine[name]);
+                last = tail + 1;
+            }
+        }
+        if (last < raw.size()){
+            newRE.append(raw,last,raw.size());
+        }
+        return newRE;
+    }
     // static string prepareRE(string RE){
     //     string rt;
     //     int j = 0,i = 0;
