@@ -144,6 +144,7 @@ bool Lex::checkFileName(string fileName){
 */
 void Lex::start(){
     logger.init();
+    logger.start("main");
     RE::init();
     if (!lexReady){
         logger.error("try to start before input file is ready!","Lex::start()",1);
@@ -152,8 +153,8 @@ void Lex::start(){
     logger.start("Scanning lex file");
     try{
         scanStatement();
-       // threadPool.commit(std::bind(&Lex::handlePredefinedStatement,this));
-        handlePredefinedStatement();
+        threadPool.commit(std::bind(&Lex::handlePredefinedStatement,this));
+        //handlePredefinedStatement();
         scanRules();
         scanAuxiliaryFunction();
         fin.close();
@@ -170,9 +171,13 @@ void Lex::start(){
         logger.close();
         return ;
     }
+    threadPool.join();
+    logger.end("main");
     logger.close();
+
     cout<<"got code:";
     cout<<codeBuff<<endl;
+
     return;
 }
 /*
@@ -544,7 +549,7 @@ FILE *input = NULL;
         }
     }
     fclose(input);
-Lex lextest(fileName,"testLogger.txt");
+    Lex lextest(fileName,"testLogger.txt");
     lextest.start();
     system("pause");
     return 0;
