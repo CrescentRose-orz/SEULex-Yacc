@@ -62,7 +62,7 @@ int Logger::end(string name){
         fprintf(_log,"[ERROR %s event didn't start ] ",name.c_str());
         return 1;
     }
-    fprintf(_log," %s ended ,[TIME]finished in %lf s .\n",name.c_str(),(double)clock()/(double)CLOCKS_PER_SEC);
+    fprintf(_log," %s ended ,[TIME]finished in %lf s .\n",name.c_str(),(double)(clock()-_timeStamp[name])/(double)CLOCKS_PER_SEC);
     _timeStamp[name] = 0;
     return 0;
 }
@@ -107,4 +107,5 @@ int Logger::save(){
         fclose(_log);
         _log = fopen(fileName.c_str(),"a");
     }
+    return 0;
 }
