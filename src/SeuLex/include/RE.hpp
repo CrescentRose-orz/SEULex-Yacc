@@ -16,6 +16,89 @@ public:
     static string unfoldRE(const string &raw,map<string,string> &preDefine){
         string newRE;
         int last = 0,pos,tail,Ql,Qr = 0;
+        int idx = 0;
+        bool trans = false;
+        bool q = false;
+        bool sq = false;
+        while (idx < raw.size()){
+            if (trans){
+                newRE += raw[idx++];
+                continue;
+            }
+            if (q){
+                if (raw[idx] == '"'){
+                    q =false;
+                }                
+                newRE += raw[idx++];
+                continue;
+            } 
+            if (sq){
+                if (raw[idx] == ']'){
+                    sq =false;
+                }                
+                newRE += raw[idx++];
+                continue;
+            }
+            switch (raw[idx]){
+                case '{':
+                    if (raw.at(idx+1)<='9'&&0<=raw.at(idx+1)){
+                        newRE += raw[idx];
+                        while (raw.at(idx)!='}'){
+                            newRE += raw.at(++idx);
+                        }
+                    } else {
+                        // append
+                        string name;
+                        int pos;
+                        if ((pos = raw.find('}',idx)) == string::npos){
+                            string tmp(" '}' expected in ");
+                            tmp += raw;
+                            throw invalid_argument(tmp);
+                            //throw invalid_argument("} expecte")
+                        }
+                        name = raw.substr(idx+1,pos-idx-1);
+                        if (!preDefine.count(name)){
+                            string tmp("undefined identifier ");
+                            tmp += name;
+                            tmp +=" occurs in RE ";
+                            tmp += raw;
+                            throw invalid_argument(tmp);                        
+                        }
+                        newRE +='(';
+                        newRE .append(preDefine[name]);
+                        newRE +=')';
+                    }
+                    break;
+                case '[':
+                    newRE += '[';
+                    sq = true;
+                    break;
+                case '"':
+                    newRE +='"';
+                    q = true;
+                    break;
+                case '\\':
+                    newRE +='\\';
+                    trans = true;
+                    break;
+                default:
+                    newRE += raw[idx++];
+            }
+        }
+         
+        if (sq){
+            string tmp(" ']' expected in ");
+            tmp += raw;
+            throw invalid_argument(tmp);
+        }
+        if (q){
+            string tmp(" '\"' expected in ");
+            tmp += raw;
+            throw invalid_argument(tmp);
+        }
+        /*
+        string newRE;
+        int last = 0,pos,tail,Ql,Qr = 0;
         while ((Ql = raw.find('"',Qr + 1)) != string::npos){
             if(Ql != 0 && raw[Ql-1] =='\\'){
                 Qr = Ql + 1;
@@ -77,7 +160,7 @@ public:
         if (last < raw.size()){
             newRE.append(raw,last,raw.size());
         }
-        return newRE;
+        return newRE;*/
     }
     // static string prepareRE(string RE){
     //     string rt;
