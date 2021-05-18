@@ -16,7 +16,7 @@
 #include "RE.hpp"
 using namespace std;
 #define fin lfile 
-#define USE_MULTITHREAD
+//#define USE_MULTITHREAD
 #define DEBUG
 // transform NFA DFA miniDFA Logger visualGraph
 
@@ -50,6 +50,7 @@ private:
     int state = 0;
     vector<string> rawRE;   //store the name of the preDefined RE
     vector<string> targetRE;   //store the RE that we need
+    mutex REwr;
     vector<action> Action;
     map<string,string> preDefine;
     string codeBuff;
@@ -75,6 +76,8 @@ private:
     void scanAuxiliaryFunction();
 
     void handlePredefinedStatement();
+
+    void unfoldAllRE();
 
 public:
     //USE DEFAULT CONSTRUCTOR IS NOT PREFFERED
@@ -171,6 +174,7 @@ void Lex::start(){
         scanAuxiliaryFunction();
         fin.close();
         cout<<"file close ok"<<endl;
+        unfoldAllRE();
     }catch (invalid_argument e){
         logger.customMSG(e.what());
         cerr<<e.what()<<endl;
@@ -531,7 +535,30 @@ void Lex::handlePredefinedStatement(){
     return ;
 }
 
-
+void Lex::unfoldAllRE(){
+#ifdef USE_MULTITHREAD
+    threadpool tp(8);
+#endif
+    logger.start("unfold all RE");
+    for (int i = 0; i < targetRE.size(); ++i){
+        string s = targetRE[i];
+        #ifdef USE_MULTITHREAD
+        tp.commit(bind([this](int i,string s){
+            string &&rt = RE::unfoldRE(s,this->preDefine);
+            std::unique_lock<std::mutex> lock{ this->REwr};
+            this->targetRE[i] = rt;
+        },i,s));
+        #else
+        string &&rt = RE::unfoldRE(s,preDefine);
+        targetRE[i] = rt;
+        logger.customMSG(rt);
+        #endif
+    }
+    for (auto &s:targetRE){
+        logger.customMSG(s);
+    }
+    logger.end("unfold all RE");
+}
 
 
 int main(){
