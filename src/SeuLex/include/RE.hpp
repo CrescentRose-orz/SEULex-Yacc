@@ -13,11 +13,44 @@ public:
     static char trans(char a){
         return transChar[a];
     }
-    static string unfoldRE(string &raw,map<string,string> &preDefine){
+    static string unfoldRE(const string &raw,map<string,string> &preDefine){
         string newRE;
-        int last = 0,pos,tail;
+        int last = 0,pos,tail,Ql,Qr = 0;
+        while ((Ql = raw.find('"',Qr + 1)) != string::npos){
+            if(Ql != 0 && raw[Ql-1] =='\\'){
+                Qr = Ql + 1;
+                continue;
+            }
+            
+            if ((Qr = raw.find('"',Ql + 1)) == string::npos){
+                string tmp(" '\"' expected in " );
+                tmp += raw;
+                throw invalid_argument(tmp);
+            }
+            break;
+        }
         while ((pos = raw.find('{',last))!=string::npos){
-            newRE.append(raw,last,pos - last );
+            if (pos != 0 && raw[pos - 1] == '\\'){
+                last = pos + 1;
+                continue;
+            }
+            while (Ql != string::npos && pos > Qr){
+                if ((Ql = raw.find('"',Qr)) != string::npos){
+                    if ((Qr = raw.find('"',Ql + 1)) == string::npos){
+                        string tmp(" '\"' expected in " );
+                        tmp += raw;
+                        throw invalid_argument(tmp);
+                    }
+                }                
+            }
+
+            if (Ql < pos && pos < Qr){
+                newRE.append(raw,last,Qr - last + 1);
+                last = Qr + 1;
+                continue;
+            } else {
+                newRE.append(raw,last,pos - last );
+            }
             if ((tail = raw.find('}',pos + 1)) == string ::npos){
                 string tmp(" '}' expected in " );
                 tmp += raw;
