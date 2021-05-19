@@ -23,6 +23,7 @@ public:
         while (idx < raw.size()){
             if (trans){
                 newRE += raw[idx++];
+                trans = 0;
                 continue;
             }
             if (q){
@@ -43,8 +44,12 @@ public:
                 case '{':
                     if (raw.at(idx+1)<='9'&&0<=raw.at(idx+1)){
                         newRE += raw[idx];
-                        while (raw.at(idx)!='}'){
-                            newRE += raw.at(++idx);
+                        while (raw[idx]!='}'){
+                            if (++idx<raw.size()){
+                                newRE += raw[idx];
+                            } else {
+                                throw invalid_argument("'}' expected in "+raw);
+                            }
                         }
                     } else {
                         // append
@@ -67,25 +72,28 @@ public:
                         newRE +='(';
                         newRE .append(preDefine[name]);
                         newRE +=')';
+                        idx = pos + 1;
                     }
                     break;
                 case '[':
                     newRE += '[';
                     sq = true;
+                    ++idx;
                     break;
                 case '"':
                     newRE +='"';
                     q = true;
+                    ++idx;
                     break;
                 case '\\':
                     newRE +='\\';
                     trans = true;
+                    ++idx;
                     break;
                 default:
                     newRE += raw[idx++];
             }
         }
-         
         if (sq){
             string tmp(" ']' expected in ");
             tmp += raw;
@@ -96,6 +104,8 @@ public:
             tmp += raw;
             throw invalid_argument(tmp);
         }
+        return newRE;
+    }
         /*
         string newRE;
         int last = 0,pos,tail,Ql,Qr = 0;
@@ -160,8 +170,8 @@ public:
         if (last < raw.size()){
             newRE.append(raw,last,raw.size());
         }
-        return newRE;*/
-    }
+        return newRE;
+    }*/
     // static string prepareRE(string RE){
     //     string rt;
     //     int j = 0,i = 0;

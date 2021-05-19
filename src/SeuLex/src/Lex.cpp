@@ -46,6 +46,7 @@ enum lexState{
 
 class Lex{
 private:
+    int threadCnt = 8;
     int lineCnt = 1; //line count, for logging the place where error occurs.
     int state = 0;
     vector<string> rawRE;   //store the name of the preDefined RE
@@ -184,6 +185,7 @@ void Lex::start(){
     } 
     catch(exception e){
         logger.error("Exception occured ","parsing lex file",lineCnt);
+        logger.customMSG(e.what());
         logger.close();
         return ;
     }
@@ -341,7 +343,7 @@ string name;
     rawRE.emplace_back(name);
     string &&RE = readRE();
     preDefine[name] = RE;
-    cout<<"get "<<preDefine[name]<<" "<<"for "<<name<<endl;
+    //cout<<"get "<<preDefine[name]<<" "<<"for "<<name<<endl;
     while (c !='\n'){
         c = fin.get();
     }
@@ -461,7 +463,7 @@ int cnt = 0;
         c = fin.get();
     }
     Action.emplace_back(Action.size(),act);
-    cout<<"get "<<RE<<" "<<"for "<<act<<endl;
+    //cout<<"get "<<RE<<" "<<"for "<<act<<endl;
     while (c !='\n'){
         c = fin.get();
     }    
@@ -499,7 +501,7 @@ void Lex::handlePredefinedStatement(){
             //cout<<preDefine[s]<<" "<<preDefine[target]<<endl;
             int idx = preDefine[s].find(target);
             while(idx != string::npos){
-                cout<<"possible match!"<<endl;
+                //cout<<"possible match!"<<endl;
                 if (idx == 0 || preDefine[s][idx-1]!='{' || preDefine[s][idx+target.length()] !='}'){ // todo: may be fooled when meet {{}} ( illegal )
                     idx = preDefine[s].find(target, idx + 1 );
                     continue;
@@ -519,10 +521,10 @@ void Lex::handlePredefinedStatement(){
         logger.error("self define problem found","statement processing",lineCnt);       //todo: lineCnt is not correct
         throw invalid_argument("self define problem found");
     }
-    cout<<"prefered order"<<": ";
-    for (auto &s:order){
-        cout<<s<<" "<<endl;
-    }
+    // cout<<"prefered order"<<": ";
+    // for (auto &s:order){
+    //     cout<<s<<" "<<endl;
+    // }
     cout<<endl;
     for (auto &s:order){
         string raw = preDefine[s];
@@ -537,7 +539,7 @@ void Lex::handlePredefinedStatement(){
 
 void Lex::unfoldAllRE(){
 #ifdef USE_MULTITHREAD
-    threadpool tp(8);
+    threadpool tp(threadCnt);
 #endif
     logger.start("unfold all RE");
     for (int i = 0; i < targetRE.size(); ++i){
@@ -545,6 +547,7 @@ void Lex::unfoldAllRE(){
         #ifdef USE_MULTITHREAD
         tp.commit(bind([this](int i,string s){
             string &&rt = RE::unfoldRE(s,this->preDefine);
+            //cout<<"got result "<<rt<<endl;
             std::unique_lock<std::mutex> lock{ this->REwr};
             this->targetRE[i] = rt;
         },i,s));
@@ -554,6 +557,9 @@ void Lex::unfoldAllRE(){
         logger.customMSG(rt);
         #endif
     }
+    #ifdef USE_MULTITHREAD
+    tp.join();
+    #endif
     for (auto &s:targetRE){
         logger.customMSG(s);
     }
