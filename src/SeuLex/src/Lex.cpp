@@ -241,7 +241,7 @@ streampos _pos = fin.tellg();
             // todo : throw an exceptiond
         } else {
             fin.seekg(_pos);
-            logger.customMSG("RE detected");
+            //logger.customMSG("RE detected");
             return 1;
         }
     } else {
@@ -554,7 +554,7 @@ void Lex::unfoldAllRE(){
         #else
         string &&rt = RE::unfoldRE(s,preDefine);
         targetRE[i] = rt;
-        logger.customMSG(rt);
+        logger.customMSG("unfold :" + rt);
         #endif
     }
     #ifdef USE_MULTITHREAD
