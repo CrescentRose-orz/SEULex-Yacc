@@ -2,7 +2,11 @@
 
 using namespace std;
 
-
+/*
+。 * 【】 ^ $ {} \ + ? | "" / {}
+.[] {name} \ "" 
+* $ ^ {}
+*/
 class RE{
 public:
     static char transChar[256];   
@@ -18,24 +22,23 @@ public:
         int last = 0,pos,tail,Ql,Qr = 0;
         int idx = 0;
         bool trans = false;
-        bool q = false;
-        bool sq = false;
+        bool brace = false, bracket = false , parenthese = false ,starting = true;
         while (idx < raw.size()){
             if (trans){
                 newRE += raw[idx++];
                 trans = 0;
                 continue;
             }
-            if (q){
+            if (brace){
                 if (raw[idx] == '"'){
-                    q =false;
+                    brace =false;
                 }                
                 newRE += raw[idx++];
                 continue;
             } 
-            if (sq){
+            if (bracket){
                 if (raw[idx] == ']'){
-                    sq =false;
+                    bracket =false;
                 }                
                 newRE += raw[idx++];
                 continue;
@@ -55,6 +58,7 @@ public:
                         // append
                         string name;
                         int pos;
+                        newRE += '^';
                         if ((pos = raw.find('}',idx)) == string::npos){
                             string tmp(" '}' expected in ");
                             tmp += raw;
@@ -76,30 +80,47 @@ public:
                     }
                     break;
                 case '[':
-                    newRE += '[';
-                    sq = true;
+                    newRE += "^[";
+                    bracket = true;
                     ++idx;
                     break;
                 case '"':
-                    newRE +='"';
-                    q = true;
+                    newRE +="^\"";
+                    brace = true;
                     ++idx;
                     break;
                 case '\\':
-                    newRE +='\\';
+                    newRE +="+\\";
                     trans = true;
                     ++idx;
                     break;
+                case '*':
+                    newRE += '*';
+                    ++idx;
+                    break;
+                case '?':
+                    newRE +='?';
+                    ++idx;
+                    break;
+                case '$':
+                    newRE +='$';
+                    ++idx;
+                    break;
+                case ')':
+                    newRE +=']';
+                    ++idx;
+                    parenthese = false;
                 default:
+                    newRE += '^';
                     newRE += raw[idx++];
             }
         }
-        if (sq){
+        if (bracket){
             string tmp(" ']' expected in ");
             tmp += raw;
             throw invalid_argument(tmp);
         }
-        if (q){
+        if (brace){
             string tmp(" '\"' expected in ");
             tmp += raw;
             throw invalid_argument(tmp);
