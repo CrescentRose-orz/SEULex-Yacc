@@ -12,7 +12,7 @@ Logger::Logger(){
 }
 
 Logger::Logger(string fileName){
-    if ((_log = fopen(fileName.c_str(),"a")) == NULL){
+    if ((_log = fopen(fileName.c_str(),"w")) == NULL){
         cerr<<"LOG FIlE OPEN error!/n"<<endl;
         flag = -1;
     }

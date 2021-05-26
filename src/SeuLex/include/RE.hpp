@@ -2,7 +2,11 @@
 
 using namespace std;
 
-
+/*
+。 * 【】 ^ $ {} \ + ? | "" / {}
+.[] {name} \ "" 
+* $ ^ {}
+*/
 class RE{
 public:
     static char transChar[256];   
@@ -10,32 +14,130 @@ public:
     static int Oldpri[256];
     //static void buildGraph(vector<string> &,vector<string,string> &);
     //static void checkCircle();
-    static char trans(char a){
-        return transChar[a];
+    static char trans(int &idx,string s){
+        ++idx;
+        if (idx < s.size()){
+            throw invalid_argument("char expected after '\\");
+        }
+        return transChar[s[idx]];
+    }
+    static char trans(char c){
+        return transChar[c];
+    }
+    static int skipFirst(string & newRE,const string &raw,int &idx,map<string,string> &preDefine){
+        int rt = 0;
+        cout<<"skipping first start at"<< idx<<raw[idx]<<endl;
+        if (raw[idx] == '^'){
+            if (idx){
+                string tmp = "'^' should be at the begin of  a line in" + raw;
+                throw invalid_argument(tmp);
+            }
+            ++idx;
+            if (idx == raw.size()){
+                throw invalid_argument("the RE statement after '^' shouldn't be empty in " + raw);
+            }
+        }
+        switch(raw[idx]){
+            case '[':{
+                    int tail = idx;
+                    while (tail < raw.size()&&raw[tail] != ']'){
+                        ++tail;
+                    }
+                    if (tail == raw.size()){
+                        throw invalid_argument(" missing ']' expected in " + raw);
+                    }
+                    newRE += raw.substr(idx,tail - idx + 1);
+                    idx = tail + 1;
+                }
+                break;
+            case '{':{
+                    int tail = idx;
+                    while (tail < raw.size()&&raw[tail] != '}'){
+                        ++tail;
+                    }
+                    if (tail == raw.size()&& raw[raw.size()-1] != '}'){
+                        throw invalid_argument(" missing '}' expected in " + raw);
+                    }
+                    string &&name = raw.substr(idx + 1,tail - idx - 1);
+                    idx = tail + 1;
+                    if (preDefine.count(name)){
+                        newRE +='(';
+                        newRE += preDefine[name];
+                        newRE +=')';
+                    } else {
+                        throw invalid_argument(name + "not found int predefined statement in" + raw );
+                    }
+                }
+                break;
+            case '\"':{
+                    cout<<"\""<<" detected"<<endl;
+                    int tail = idx + 1;
+                    while (tail < raw.size()&&raw[tail] != '\"'){
+                        ++tail;
+                    }
+                    if (tail == raw.size() && raw[raw.size()-1] != '\"'){
+                        cout<<raw.size()<<" "<<tail<<endl;
+                        throw invalid_argument(" missing '\"' expected in " + raw);
+                    }
+                    newRE += raw.substr(idx,tail - idx + 1);
+                    idx = tail + 1;
+                }
+                break;
+            case '(':{
+                    ++idx;
+                    newRE += '(';
+                    rt += 1 + skipFirst(newRE,raw,idx,preDefine);
+                }
+                break;            
+            case '?':
+            case '|':
+            case '+':
+            case '*':
+            case '$':
+            case ')':
+            case ']':
+            case '}':
+           // case '.'
+                throw invalid_argument("char expected before operator" + raw[idx]);
+                break;
+            default:
+                cout<<"get default"<<endl;
+                if (raw[idx] =='\\'){
+                    newRE +='\\';
+                    newRE += raw[++idx];
+                    ++idx;
+                    //newRE+=(trans(idx,raw));
+                } else {
+                    newRE+=raw[idx++];
+                }
+        }
+        cout<<"ended at "<< idx<<raw[idx]<<endl;
+            return rt;
     }
     static string unfoldRE(const string &raw,map<string,string> &preDefine){
         string newRE;
         int last = 0,pos,tail,Ql,Qr = 0;
         int idx = 0;
         bool trans = false;
-        bool q = false;
-        bool sq = false;
+        bool brace = false, bracket = false;
+        int  parenthese = skipFirst(newRE,raw,idx,preDefine);
+        cout<<"now idx "<<idx<<" "<<raw.size()<<endl;
         while (idx < raw.size()){
             if (trans){
                 newRE += raw[idx++];
                 trans = 0;
                 continue;
             }
-            if (q){
+            if (brace){
                 if (raw[idx] == '"'){
-                    q =false;
+                    brace =false;
                 }                
                 newRE += raw[idx++];
                 continue;
             } 
-            if (sq){
+            if (bracket){
                 if (raw[idx] == ']'){
-                    sq =false;
+                    bracket =false;
                 }                
                 newRE += raw[idx++];
                 continue;
@@ -55,6 +157,7 @@ public:
                         // append
                         string name;
                         int pos;
+                        newRE += '^';
                         if ((pos = raw.find('}',idx)) == string::npos){
                             string tmp(" '}' expected in ");
                             tmp += raw;
@@ -76,33 +179,76 @@ public:
                     }
                     break;
                 case '[':
-                    newRE += '[';
-                    sq = true;
+                    newRE += "^[";
+                    bracket = true;
                     ++idx;
                     break;
                 case '"':
-                    newRE +='"';
-                    q = true;
+                    newRE +="^\"";
+                    brace = true;
                     ++idx;
                     break;
                 case '\\':
-                    newRE +='\\';
+                    newRE +="^\\";
                     trans = true;
                     ++idx;
                     break;
+                case '*':
+                    newRE += '*';
+                    ++idx;
+                    break;
+                case '?':
+                    newRE +='?';
+                    ++idx;
+                    break;
+                case '$':
+                    newRE +='$';
+                    ++idx;
+                    break;
+                case '(':
+                    newRE +="^(";
+                    ++idx;
+                    parenthese += skipFirst(newRE,raw,idx,preDefine);
+                    ++parenthese;
+                    break;
+                case ')':
+                    newRE +=')';
+                    ++idx;
+                    --parenthese ;
+                    cout<<") detected "<<endl;
+                    break;
+                case '|':
+                    newRE +='|';
+                    ++idx;
+                    parenthese += skipFirst(newRE,raw,idx,preDefine);               
+                    break; 
+                case '+':
+                    newRE +='+';
+                    ++idx;
+                    break;
                 default:
+                    cout<<"ex default at "<<idx<<raw[idx]<<endl;
+                    newRE += '^';
                     newRE += raw[idx++];
             }
         }
-        if (sq){
+        if (bracket){
             string tmp(" ']' expected in ");
             tmp += raw;
             throw invalid_argument(tmp);
         }
-        if (q){
+        if (brace){
             string tmp(" '\"' expected in ");
             tmp += raw;
             throw invalid_argument(tmp);
+        }
+        if (parenthese){
+            cout<<newRE<<endl;
+            cout<<parenthese<<endl;
+            string tmp(" ) expected in ");
+            tmp += raw;
+            throw invalid_argument(tmp);
+
         }
         return newRE;
     }
