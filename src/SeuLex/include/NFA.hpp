@@ -51,6 +51,10 @@ class NFA_Cluster{
 public:    
     int head;
     int tail;
+    NFA_Cluster(int head){
+        this->head = head;
+        this->tail = -1;
+    }
     NFA_Cluster(int head,int tail){
         this->head = head;
         this->tail = tail;
@@ -141,10 +145,62 @@ public:
         }
     }
     NFA_Cluster(vector<NFA_Node> &buff ,string quotation , int l = 0,int r = -1){
-
+        
 
     }
+
+    static NFA_Cluster createEmpty(NFA &buff){
+        int && idx = buff.add(NFA_Node());
+        return NFA_Cluster(idx,idx);
+    }
+    static NFA_Cluster createSingle(NFA &buff,NFA_Node node){
+        int && idx = buff.add(node);
+        return NFA_Cluster(idx,idx);
+    }
 };
+
+NFA_Cluster RE2NFA_Cluster(string RE,NFA &buff){
+stack<NFA_Cluster> content;
+stack<char> op; 
+int i = 0,j;
+    NFA_Cluster &&head = NFA_Cluster::createEmpty(buff);
+    NFA_Node nhead;
+    nhead.addTrans(head.tail,'\n');
+    if (RE[0] != '^'){
+        nhead.addTrans(head.tail,eps);
+    } else {
+        ++i;
+    }
+    head.head = buff.add(nhead);
+
+    content.push(head);
+    op.push()
+
+
+    return head;
+
+}
+
+NFA_Cluster RE2NFA(string RE,NFA &buff){
+stack<NFA_Cluster> content;
+stack<char> op; 
+int i = 0,j;
+    NFA_Cluster &&head = RE2NFA_Cluster(RE[0]=='^'?RE.substr(1,RE.size()-1):RE,buff);
+    NFA_Node nhead;
+    nhead.addTrans(head.tail,'\n');
+    if (RE[0] != '^'){
+        nhead.addTrans(head.tail,eps);
+    } else {
+        ++i;
+    }
+    head.head = buff.add(nhead);
+
+    content.push(head);
+    op.push()
+
+
+    return head;
+}
 
 
 
