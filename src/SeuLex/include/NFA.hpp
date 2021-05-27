@@ -1,4 +1,5 @@
 #include<bits/stdc++.h>
+#include"RE.hpp"
 #include<action.hpp>
 #define eps 256
 
@@ -94,9 +95,9 @@ public:
 
 
     }
+    //single op : * ? +
     NFA_Cluster(NFA &buff,char op ,NFA_Cluster a ){
         NFA_Node _head,_tail;      
-
         switch(op){
             case '*':
                 tail  = buff.add(_tail);            
@@ -144,19 +145,44 @@ public:
                 break;
         }
     }
-    NFA_Cluster(vector<NFA_Node> &buff ,string quotation , int l = 0,int r = -1){
-        
-
+   //quotation 
+    NFA_Cluster(NFA &buff ,string &quotation , int l ,int r ){ //[l,r)
+        NFA_Cluster &&rt = NFA_Cluster::createEmpty(buff);
+        NFA_Node _head,_tail;      
+        bool trans;
+        for (int i = l ; i < r; ++i){
+            if (trans){
+                int tailIdx = buff.add(NFA_Node());
+                lock_guard<mutex> lock(buff.Wrlock);
+                buff.pool[rt.tail].addTrans(tailIdx,RE::trans(quotation[i]));
+                rt.tail = tailIdx;
+                trans = false;
+            }
+            if (quotation[i] =='\\'){
+                trans = true;
+                continue;
+            }
+            int tailIdx = buff.add(NFA_Node());
+            lock_guard<mutex> lock(buff.Wrlock);
+            buff.pool[rt.tail].addTrans(tailIdx,quotation[i]);            
+            rt.tail = tailIdx;
+        }
+        this -> head = rt.head;
+        this -> tail = rt.tail;
     }
-
     static NFA_Cluster createEmpty(NFA &buff){
         int && idx = buff.add(NFA_Node());
         return NFA_Cluster(idx,idx);
+    }
+    NFA_Cluster getBrace(NFA &buff,string &brace ,int l ,int r){
+        NFA_Cluster rt;
+        return rt;
     }
     static NFA_Cluster createSingle(NFA &buff,NFA_Node node){
         int && idx = buff.add(node);
         return NFA_Cluster(idx,idx);
     }
+
 };
 
 NFA_Cluster RE2NFA_Cluster(string RE,NFA &buff){
@@ -174,31 +200,38 @@ int i = 0,j;
     head.head = buff.add(nhead);
 
     content.push(head);
-    op.push()
+    
+
+    while (i < RE.size()){
 
 
+
+    }
+    while (!op.empty()){
+
+
+    }
     return head;
 
 }
 
 NFA_Cluster RE2NFA(string RE,NFA &buff){
-stack<NFA_Cluster> content;
-stack<char> op; 
-int i = 0,j;
-    NFA_Cluster &&head = RE2NFA_Cluster(RE[0]=='^'?RE.substr(1,RE.size()-1):RE,buff);
+    NFA_Cluster &&head = RE2NFA_Cluster(RE[0]=='^'?RE.substr(1,RE.size()-(RE[RE.size()-1]=='$'?2:1)):RE,buff);
     NFA_Node nhead;
-    nhead.addTrans(head.tail,'\n');
+    nhead.addTrans(head.head,'\n');
     if (RE[0] != '^'){
-        nhead.addTrans(head.tail,eps);
-    } else {
-        ++i;
-    }
+        nhead.addTrans(head.head,eps);
+    } 
     head.head = buff.add(nhead);
+    /*
+    todo : $ at  tail;
 
-    content.push(head);
-    op.push()
 
 
+
+
+
+    */
     return head;
 }
 

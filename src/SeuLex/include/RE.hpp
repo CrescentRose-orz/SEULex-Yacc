@@ -10,8 +10,8 @@ using namespace std;
 class RE{
 public:
     static char transChar[256];   
-    static int Newpri[256];
-    static int Oldpri[256];
+    static int newPri[256];
+    static int oldPri[256];
     //static void buildGraph(vector<string> &,vector<string,string> &);
     //static void checkCircle();
     static char trans(int &idx,string s){
@@ -341,6 +341,7 @@ public:
     //                 break;
 
     //             case '[':
+
     //                 rt += '^';
     //                 rt += RE[i];
     //                 while (RE[i]!=']'){
@@ -367,15 +368,55 @@ public:
     //     }
     //     return rt;
     // }
+    /*
+/*
+. 匹配任何单个字符，除\n.                       
+
+- 表示匹配范围，如：a-z，表示匹配a-z之间的任何字符
+
+* 匹配前面表达式的零个或多个拷贝。
+
+[] 匹配括号内的任意字符的字符类，第一个符号是"^"，表示匹配除括号中的字符以外的任意字符。
+
+^ 作为正则表达式的第一个字符，匹配行的开头。   例：^ab.,表示以ab开头的字符串.
+
+$ 作为正则表达式的最后一字符，匹配行的结尾。
+
+
+\ 用于转义字符                                                                      OK
+
++ 匹配前面表达式一次或多次出现。                                                      OK
+
+? 匹配前面表达式零次或1次出现。                                                       OK
+
+| 匹配前面表达式或随后表达式                                                          OK
+
+"" 引号中的每个字符解释为字面意思
+
+
+{} 指示一个模式可能出现的次数
+
+
+    */
     static void init(){
         for (int i = 0; i < 256; ++i){
             transChar[i] = i;
         }
         transChar['n'] = '\n';
         transChar['r'] = '\r';
+        memset(newPri,0,sizeof(newPri));
+        memset(oldPri,0,sizeof(newPri));    
+        newPri['|'] = 1;    
+        newPri['^'] = 3;
+        newPri['+'] = newPri['*'] = newPri['?'] = 5;
+        newPri['-'] = newPri['$'] = -1;
+        oldPri['|'] = 2;    
+        oldPri['^'] = 4;
+        oldPri['+'] = oldPri['*'] = oldPri['?'] = 6;
+
       //  transChar['\\'] = '\\';
-      //  memset(Newpri,-1,sizeof(Newpri));
-      //  memset(Oldpri,-1,sizeof(Oldpri));
+      //  memset(newPri,-1,sizeof(newPri));
+      //  memset(oldPri,-1,sizeof(oldPri));
         
     }
 
@@ -413,6 +454,6 @@ public:
 
 
 char RE::transChar[256];   
-int RE::Newpri[256];
-int RE::Oldpri[256];
+int RE::newPri[256];
+int RE::oldPri[256];
 
