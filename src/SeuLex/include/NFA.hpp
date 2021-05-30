@@ -60,6 +60,7 @@ public:
         this->head = head;
         this->tail = tail;
     }
+    //single char
     NFA_Cluster(NFA &buff,char c){
         NFA_Node _head,_tail;
         tail = buff.add(_tail);
@@ -70,18 +71,37 @@ public:
         }
         head = buff.add(_head);
     }
+    // '\' '^'
     NFA_Cluster(NFA &buff,char op ,NFA_Cluster a ,NFA_Cluster b ){
-        NFA_Node _head,_tail;
-        _head.addTrans(a.head,eps);
-        _head.addTrans(b.head,eps);
-        head = buff.add(_head);        
-        tail = buff.add(_tail);
-        {
-            lock_guard<mutex> lock(buff.Wrlock);
-            buff.pool[a.tail].addTrans(tail,eps);
-            buff.pool[b.tail].addTrans(tail,eps);
+        switch(op){
+            case '|':{
+                NFA_Node _head,_tail;
+                _head.addTrans(a.head,eps);
+                _head.addTrans(b.head,eps);
+                head = buff.add(_head);        
+                tail = buff.add(_tail);
+                {
+                    lock_guard<mutex> lock(buff.Wrlock);
+                    buff.pool[a.tail].addTrans(tail,eps);
+                    buff.pool[b.tail].addTrans(tail,eps);
+                }
+                return ;
+            }
+            break;
+            case '^':{
+                this->head = a.head;
+                this->tail = b.tail;                
+                lock_guard<mutex> lock(buff.Wrlock);
+                buff.pool[a.tail].addTrans(b.head,eps);
+                return;
+            }
+            break;
+            default:
+                throw invalid_argument("only  accept '^' or '|', but found " + op);
+            
         }
     }
+    // multi {}
     NFA_Cluster(NFA &buff,int l,int r,NFA_Cluster a ){
         if (l < 0 || r < l){
             throw invalid_argument("error, {l,r} must have l >= 0 && r >= l");
@@ -170,14 +190,15 @@ public:
         this -> head = rt.head;
         this -> tail = rt.tail;
     }
+    NFA_Cluster getBracket(NFA &buff,string &bracket,int l ,int r){
+        NFA_Cluster rt(0,0);
+        return rt;
+    }
     static NFA_Cluster createEmpty(NFA &buff){
         int && idx = buff.add(NFA_Node());
         return NFA_Cluster(idx,idx);
     }
-    NFA_Cluster getBrace(NFA &buff,string &brace ,int l ,int r){
-        NFA_Cluster rt;
-        return rt;
-    }
+
     static NFA_Cluster createSingle(NFA &buff,NFA_Node node){
         int && idx = buff.add(node);
         return NFA_Cluster(idx,idx);
