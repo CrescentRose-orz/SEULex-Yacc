@@ -6,7 +6,24 @@
 #define dev
 using namespace std;
 const int NFA_t =258;
-
+enum operandType{opNFA = 0,opNum,opString};
+class operand {
+public:
+    operandType type;
+    string content;
+    int num;
+    operand(){
+        type = opNFA;
+    }
+    operand(int num){
+        this -> type = opNum;
+        this -> num = num;
+    }
+    operand(string content){
+        this -> type = opString;
+        this -> content = content;
+    }
+};
 
 class NFA_Node{
 private:
@@ -48,7 +65,7 @@ public:
     }
 };
 
-class NFA_Cluster{
+class NFA_Cluster:public operand{
 public:    
     int head;
     int tail;
@@ -60,7 +77,7 @@ public:
         this->head = head;
         this->tail = tail;
     }
-    //single char
+    //single char,.
     NFA_Cluster(NFA &buff,char c){
         NFA_Node _head,_tail;
         tail = buff.add(_tail);
@@ -166,6 +183,7 @@ public:
         }
     }
    //quotation 
+
     NFA_Cluster(NFA &buff ,string &quotation , int l ,int r ){ //[l,r)
         NFA_Cluster &&rt = NFA_Cluster::createEmpty(buff);
         NFA_Node _head,_tail;      
@@ -190,7 +208,12 @@ public:
         this -> head = rt.head;
         this -> tail = rt.tail;
     }
-    NFA_Cluster getBracket(NFA &buff,string &bracket,int l ,int r){
+    //bracket todo
+    NFA_Cluster(NFA &buff,string bracket){
+        
+    }
+    //todo
+    static NFA_Cluster getBrace(NFA &buff,string &bracket,int l ,int r){
         NFA_Cluster rt(0,0);
         return rt;
     }
@@ -207,31 +230,81 @@ public:
 };
 
 NFA_Cluster RE2NFA_Cluster(string RE,NFA &buff){
-stack<NFA_Cluster> content;
-stack<char> op; 
+//stack<operand*> operandStack;
+stack<NFA_Cluster> operandStack;
+stack<char> operatorStack; 
 int i = 0,j;
+    RE += '$';
+    operatorStack.push('`');
     NFA_Cluster &&head = NFA_Cluster::createEmpty(buff);
+    while(i<RE.size()){
+        switch(RE[i]){
+            case '(': //todo
+                for (j = i + 1; RE[j] != ')';++j);
+                if (j == i + 1){
+                    i = j + 1;
+                    continue;
+                }
+                operandStack.push(RE2NFA_Cluster(RE.substr(i+1,j-i-1),buff));
+                //operand* p;
+                //*p = RE2NFA_Cluster(RE.substr(i+1,j-i-1),buff);
+                //operandStack.push(p);
+                i = j + 1;
+                break;
+            case '[': //todo
+                for (j = i + 1; RE[j] != ']';++j);
+                if (j == i + 1){
+                    i = j + 1;
+                    continue;
+                }
+               // operand* p;
+                //*p = NFA_Cluster::getBracket(buff,)//RE2NFA_Cluster(RE.substr(i+1,j-i-1),buff);
+                //operandStack.push(p);
+                operandStack.push(NFA_Cluster::getBracket(buff,));
+                i = j + 1;
+                break;                
+                break;
+            case '*':
+            case '?':
+            case '+':  //todo
+                if (RE::newPri[RE[i]] > RE::oldPri[operatorStack.top()]){
+                    operatorStack.push(RE[i]);
+                    break;
+                }
+                break;
+            case '^': //todo
+                if (RE::newPri[RE[i]] > RE::oldPri[operatorStack.top()]){
+                    operatorStack.push(RE[i]);
+                    break;
+                }
+                break;
+            case '{': //todo
+                if (RE::newPri[RE[i]] > RE::oldPri[operatorStack.top()]){
+                    operatorStack.push(RE[i]);
+                    break;
+                }
+                break;
+            case '.':
+                operandStack.push(NFA_Cluster('.'));
+                break;
+            case '|': //todo
+                if (RE::newPri[RE[i]] > RE::oldPri[operatorStack.top()]){
+                    operandStack.push(RE[i]);
+                    break;
+                }
+                break;
+            default: 
+                //operand* p = new NFA_Cluster(RE[i]);
+                //operandStack.push(p);
+                operandStack.push(NFA_Cluster(RE[i]));
+                break;
+        }
+
+
+    }
     NFA_Node nhead;
     nhead.addTrans(head.tail,'\n');
-    if (RE[0] != '^'){
-        nhead.addTrans(head.tail,eps);
-    } else {
-        ++i;
-    }
     head.head = buff.add(nhead);
-
-    content.push(head);
-    
-
-    while (i < RE.size()){
-
-
-
-    }
-    while (!op.empty()){
-
-
-    }
     return head;
 
 }
