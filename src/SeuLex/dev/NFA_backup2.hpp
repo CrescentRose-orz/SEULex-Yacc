@@ -32,7 +32,7 @@ private:
     action act;
     bool hasAction;
     #ifdef VISUAL
-    
+
     #endif
 public:
     NFA_Node(){
@@ -43,6 +43,11 @@ public:
     }
     void setAction(action act){
         this->act = act;
+        if (hasAction) continue;
+            #ifdef VISUAL
+    visualFA<int> vNFA;
+
+    #endif
         hasAction = 1;
     }
     void addMultiTrans(int target,int l,int r);
@@ -61,6 +66,10 @@ public:
     vector<NFA_Node> pool;
     int head = 0;
     int tail = 0;
+    NFA_Node* add(){
+        pool.emplace_back();
+    }
+
     int add(NFA_Node node){
         unique_lock<mutex> lock(Wrlock);
         pool.emplace_back(node);

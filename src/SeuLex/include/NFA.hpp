@@ -32,21 +32,59 @@ private:
     action act;
     bool hasAction;
     #ifdef VISUAL
-
+    visualFA<int> &fa; 
+    vector<pair<int,string>> edge;
     #endif
 public:
+    int idx;
+    #ifdef VISUAL
+    NFA_Node(visualFA<int> &_fa):fa(_fa){
+        hasAction = -1;
+        idx = -1;
+    }
+    NFA_Node(action act,visualFA<int> &_fa):act(act),fa(_fa){
+        hasAction = 1;
+        idx = -1;
+    }
+    void update(){
+        for (auto &p:edge){
+            fa.addEdge(idx, p.first, p.second);
+        }
+    }
+    #else
     NFA_Node(){
         hasAction = -1;
+        idx = -1;
     }
     NFA_Node(action act):act(act){
         hasAction = 1;
+        idx = -1;
     }
+    #endif
     void setAction(action act){
         this->act = act;
+        if (hasAction) return;
+        #ifdef VISUAL
+        fa.addNode(idx);
+        #endif
         hasAction = 1;
     }
-    void addMultiTrans(int target,int l,int r);
-    void addTrans(int target,int c);
+    void addMultiTrans(int target,int l,int r){
+        for (int i = l; i <= r; ++i){
+            addTrans(target,i);
+        }
+    }
+    void addTrans(int target,int c){
+        string s;
+        s += c == eps?'\238':(char)c;
+        #ifdef VISUAL
+        if( idx != -1){
+            fa.addEdge(idx , target, s);
+        } else {
+            edge.push_back(make_pair(target,s));
+        }
+        #endif
+    }
    // int transfer(int input);
     bool valid(){
         return hasAction == -1 ? 0 : 1;
@@ -61,19 +99,24 @@ public:
     vector<NFA_Node> pool;
     int head = 0;
     int tail = 0;
-    NFA_Node* add(){
-        pool.emplace_back();
+    NFA_Node& operator [](int i){
+        return pool[i];
     }
-
+    int add(){
+        unique_lock<mutex> lock(Wrlock);
+        pool.emplace_back(NFA_Node(vNFA));
+        pool[tail].idx = tail;
+        return tail++;       
+    }
     int add(NFA_Node node){
         unique_lock<mutex> lock(Wrlock);
         pool.emplace_back(node);
-        ++tail;
-        return tail-1;
+        pool[tail].idx = tail;
+        pool[tail].update();
+        return tail++;
     }
-    #ifdef VISUAL
     visualFA<int> vNFA;
-
+    #ifdef VISUAL    
     #endif
 };
 
@@ -91,37 +134,40 @@ public:
     }
     //single char,.
     NFA_Cluster(NFA &buff,char c){
-        NFA_Node _head,_tail;
-        tail = buff.add(_tail);
-        if (c!='.'){
-            _head.addTrans(tail,c);
-        } else {
-            _head.addMultiTrans(tail,0,255);
+        tail = buff.add();
+        head = buff.add();
+        {                    
+            lock_guard<mutex> lock(buff.Wrlock);
+            if (c!='.'){
+                buff[head].addTrans(tail,c);
+            } else {
+                buff[head].addMultiTrans(tail,0,255);
+            }
         }
-        head = buff.add(_head);
     }
     // '\' '^'
     NFA_Cluster(NFA &buff,char op ,NFA_Cluster a ,NFA_Cluster b ){
         switch(op){
             case '|':{
-                NFA_Node _head,_tail;
-                _head.addTrans(a.head,eps);
-                _head.addTrans(b.head,eps);
-                head = buff.add(_head);        
-                tail = buff.add(_tail);
+                head = buff.add();
+                tail = buff.add();
                 {
                     lock_guard<mutex> lock(buff.Wrlock);
-                    buff.pool[a.tail].addTrans(tail,eps);
-                    buff.pool[b.tail].addTrans(tail,eps);
+                    buff[head].addTrans(a.head,eps);
+                    buff[head].addTrans(b.head,eps);  
+                    buff[a.tail].addTrans(tail,eps);
+                    buff[b.tail].addTrans(tail,eps);
                 }
                 return ;
             }
             break;
             case '^':{
-                this->head = a.head;
-                this->tail = b.tail;                
-                lock_guard<mutex> lock(buff.Wrlock);
-                buff.pool[a.tail].addTrans(b.head,eps);
+                head = a.head;
+                tail = b.tail;
+                {                
+                    lock_guard<mutex> lock(buff.Wrlock);
+                    buff[a.tail].addTrans(b.head,eps);
+                }
                 return;
             }
             break;
@@ -132,21 +178,24 @@ public:
     }
     // multi {}
     NFA_Cluster(NFA &buff,int l,int r,NFA_Cluster a ){
+        throw invalid_argument("multi{} this function is not available");
         if (l < 0 || r < l){
             throw invalid_argument("error, {l,r} must have l >= 0 && r >= l");
         }
-        NFA_Node _tail;
-        vector<NFA_Node> _heads(r+1);
-        tail = buff.add(_tail);
-        for (int i = l; i <= r; ++i){
-            _heads[i].addTrans(tail,);
-        }
+        // //NFA_Node _tail;
+        // vector<NFA_Node> _heads(r+1);
+        // tail = buff.add(_tail);
+        // for (int i = l; i <= r; ++i){
+        //     _heads[i].addTrans(tail,);
+        // }
 
 
     }
     //single op : * ? +
     NFA_Cluster(NFA &buff,char op ,NFA_Cluster a ){
-        NFA_Node _head,_tail;      
+        NFA_Node _head(buff.vNFA),_tail(buff.vNFA);
+        head = buff.add();
+        tail = buff.add();      
         switch(op){
             case '*':
                 tail  = buff.add(_tail);            
@@ -175,7 +224,7 @@ public:
                 head = a.head;
                 {
                     lock_guard<mutex> lock(buff.Wrlock);
-                    buff.pool[head].addTrans(tail,eps);
+                    buff[head].addTrans(tail,eps);
                 }            
                 #endif        
                 break;
@@ -198,23 +247,28 @@ public:
 
     NFA_Cluster(NFA &buff ,string &quotation , int l ,int r ){ //[l,r)
         NFA_Cluster &&rt = NFA_Cluster::createEmpty(buff);
-        NFA_Node _head,_tail;      
+        NFA_Node _head(buff.vNFA),_tail(buff.vNFA);      
         bool trans;
         for (int i = l ; i < r; ++i){
             if (trans){
-                int tailIdx = buff.add(NFA_Node());
-                lock_guard<mutex> lock(buff.Wrlock);
-                buff.pool[rt.tail].addTrans(tailIdx,RE::trans(quotation[i]));
+                int tailIdx = buff.add();
+                {
+                    lock_guard<mutex> lock(buff.Wrlock);
+                    buff[rt.tail].addTrans(tailIdx,RE::trans(quotation[i]));
+                }
                 rt.tail = tailIdx;
                 trans = false;
+            
             }
             if (quotation[i] =='\\'){
                 trans = true;
                 continue;
             }
-            int tailIdx = buff.add(NFA_Node());
-            lock_guard<mutex> lock(buff.Wrlock);
-            buff.pool[rt.tail].addTrans(tailIdx,quotation[i]);            
+            int tailIdx = buff.add();
+            {
+                lock_guard<mutex> lock(buff.Wrlock);
+                buff.pool[rt.tail].addTrans(tailIdx,quotation[i]);            
+            }
             rt.tail = tailIdx;
         }
         this -> head = rt.head;
@@ -230,7 +284,7 @@ public:
         return rt;
     }
     static NFA_Cluster createEmpty(NFA &buff){
-        int && idx = buff.add(NFA_Node());
+        int && idx = buff.add();
         return NFA_Cluster(idx,idx);
     }
 
@@ -323,12 +377,12 @@ int i = 0,j;
 
 NFA_Cluster RE2NFA(string RE,NFA &buff){
     NFA_Cluster &&head = RE2NFA_Cluster(RE[0]=='^'?RE.substr(1,RE.size()-(RE[RE.size()-1]=='$'?2:1)):RE,buff);
-    NFA_Node nhead;
-    nhead.addTrans(head.head,'\n');
+    int nhead = buff.add();
+    buff[nhead].addTrans(head.head,'\n');
     if (RE[0] != '^'){
-        nhead.addTrans(head.head,eps);
+        buff[nhead].addTrans(head.head,eps);
     } 
-    head.head = buff.add(nhead);
+    head.head = nhead;
     /*
     todo : $ at  tail;
 
