@@ -32,7 +32,7 @@ private:
     action act;
     bool hasAction;
     #ifdef VISUAL
-
+    
     #endif
 public:
     NFA_Node(){
@@ -61,10 +61,6 @@ public:
     vector<NFA_Node> pool;
     int head = 0;
     int tail = 0;
-    NFA_Node* add(){
-        pool.emplace_back();
-    }
-
     int add(NFA_Node node){
         unique_lock<mutex> lock(Wrlock);
         pool.emplace_back(node);
