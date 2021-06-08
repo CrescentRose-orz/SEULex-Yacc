@@ -3,6 +3,11 @@
 using namespace std;
 
 
+
+
+template<typename T>
+class visualFA{
+private:
 template<typename T>
 class edge{
 private:
@@ -17,10 +22,6 @@ public :
     edge(T from,T to,string label);
     edge();
 };
-
-template<typename T>
-class visualFA{
-private:
     vector<T> doubleCircle;
     vector<edge<T> > edgePool;
 public :
