@@ -1,3 +1,5 @@
+#ifndef ACTION
+#define ACTION
 #include<string>
 
 using namespace std;
@@ -33,3 +35,4 @@ public:
     }
 };
 
+#endif

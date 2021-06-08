@@ -121,47 +121,6 @@ public:
     }
 };
 
-class NFA{
-private:
-    int tmp;
-public:
-    mutex Wrlock;
-    vector<NFA_Node> pool;
-    int head = 0;
-    int tail = 0;
-    NFA(){
-        add();
-    }
-    NFA_Node& operator [](int i){
-        return pool[i];
-    }
-    int add(){
-        unique_lock<mutex> lock(Wrlock);
-        pool.emplace_back(NFA_Node(vNFA));
-        pool[tail].idx = tail;
-        return tail++;       
-    }
-    int add(NFA_Node node){
-        unique_lock<mutex> lock(Wrlock);
-        pool.emplace_back(node);
-        pool[tail].idx = tail;
-        pool[tail].update();
-        return tail++;
-    }
-    int head(){
-        return 0;
-    }
-    void addRE(string &RE,action _action){
-        NFA_Cluster &&rt = RE2NFA(RE,*this,_action);
-        {
-            lock_guard<mutex> lock(Wrlock);
-            pool[0].addTrans(rt.head,eps);
-        }
-    }
-    #ifdef VISUAL       
-    visualFA<int> vNFA;
-    #endif
-};
 
 class NFA_Cluster:public operand{
 public:    
@@ -369,32 +328,11 @@ public:
         return NFA_Cluster(idx,idx);
     }
 
-};
 
 
-NFA_Cluster cal(NFA &buff,stack<NFA_Cluster> &operandStack,RE_operator op){
-NFA_Cluster operand1 = operandStack.top();
-    operandStack.pop();
-NFA_Cluster operand2 = operandStack.top();
-    switch(op.op){
-        case '|':
-        case '^':
-            operandStack.pop();        
-            return NFA_Cluster(buff,op,operand1,operand2);
-        case '?':
-        case '+':
-        case '*':
-            return NFA_Cluster(buff,op,operand1);
-        case '{':
-            throw invalid_argument("{ not supported yet");
-        default:
-            stringstream s;
-            s << "unknown operator occurs" << op.op<<" founded";
-            throw invalid_argument(s.str());
-    };
-}
 
-NFA_Cluster RE2NFA_Cluster(string RE,NFA &buff){
+
+static NFA_Cluster RE2NFA_Cluster(string RE,NFA &buff){
 //stack<operand*> operandStack;
 stack<NFA_Cluster> operandStack;
 stack<RE_operator> operatorStack; 
@@ -447,7 +385,7 @@ int i = 0,j;
             case '^': 
                 newOp = RE_operator(RE[i]);
                 while (RE::newPri[newOp] < RE::oldPri[operatorStack.top()]){
-                    cal(buff,operandStack,operatorStack.top());
+                    NFA_Cluster::cal(buff,operandStack,operatorStack.top());
                     operatorStack.pop();
                 } 
                 operatorStack.push(RE[i]);
@@ -470,8 +408,8 @@ int i = 0,j;
     return operandStack.top();
 }
 
-NFA_Cluster RE2NFA(string RE,NFA &buff,action _action){
-    NFA_Cluster &&head = RE2NFA_Cluster(RE[0]=='^'?RE.substr(1,RE.size()-(RE[RE.size()-1]=='$'?2:1)):RE,buff);
+static NFA_Cluster RE2NFA(string RE,NFA &buff,action _action){
+    NFA_Cluster &&head = NFA_Cluster::RE2NFA_Cluster(RE[0]=='^'?RE.substr(1,RE.size()-(RE[RE.size()-1]=='$'?2:1)):RE,buff);
     int nhead = buff.add(),ntail = buff.add();
     {
         lock_guard<mutex> lock(buff.Wrlock);
@@ -494,6 +432,30 @@ NFA_Cluster RE2NFA(string RE,NFA &buff,action _action){
     }  
     head.tail = ntail;  
     return head;
+}
+
+
+
+static NFA_Cluster cal(NFA &buff,stack<NFA_Cluster> &operandStack,RE_operator op){
+NFA_Cluster operand1 = operandStack.top();
+    operandStack.pop();
+NFA_Cluster operand2 = operandStack.top();
+    switch(op.op){
+        case '|':
+        case '^':
+            operandStack.pop();        
+            return NFA_Cluster(buff,op,operand1,operand2);
+        case '?':
+        case '+':
+        case '*':
+            return NFA_Cluster(buff,op,operand1);
+        case '{':
+            throw invalid_argument("{ not supported yet");
+        default:
+            stringstream s;
+            s << "unknown operator occurs" << op.op<<" founded";
+            throw invalid_argument(s.str());
+    };
 }
 
 
@@ -533,3 +495,47 @@ $ 作为正则表达式的最后一字符，匹配行的结尾。
 
 
 */
+
+
+};
+
+class NFA{
+private:
+    int tmp;
+public:
+    mutex Wrlock;
+    int tail = 0;
+    vector<NFA_Node> pool;
+    NFA(){
+        add();
+    }
+    NFA_Node& operator [](int i){
+        return pool[i];
+    }
+    int add(){
+        unique_lock<mutex> lock(Wrlock);
+        pool.emplace_back(NFA_Node(vNFA));
+        pool[tail].idx = tail;
+        return tail++;       
+    }
+    int add(NFA_Node node){
+        unique_lock<mutex> lock(Wrlock);
+        pool.emplace_back(node);
+        pool[tail].idx = tail;
+        pool[tail].update();
+        return tail++;
+    }
+    int head(){
+        return 0;
+    }
+    void addRE(string &RE,action _action){
+        NFA_Cluster &&rt = NFA_Cluster::RE2NFA(RE,*this,_action);
+        {
+            lock_guard<mutex> lock(Wrlock);
+            pool[0].addTrans(rt.head,eps);
+        }
+    }
+    #ifdef VISUAL       
+    visualFA<int> vNFA;
+    #endif
+};

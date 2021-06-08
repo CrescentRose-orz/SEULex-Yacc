@@ -8,18 +8,18 @@ using namespace std;
 template<typename T>
 class visualFA{
 private:
-template<typename T>
+template<typename D>
 class edge{
 private:
     string label;
-    T from;
-    T to;
+    D from;
+    D to;
 public :
     void print(fstream &fout)
     {
          fout<<from<<" -> "<<to<<" [label =\" "<<label<<"\" ]"<<endl;
     }
-    edge(T from,T to,string label);
+    edge(D from,D to,string label);
     edge();
 };
     vector<T> doubleCircle;
@@ -35,7 +35,7 @@ public :
 
     void addEdge(T from,T to, string label)
     {
-        edgePool.push_back(label,from,to);
+        edgePool.push_back(edge<T>(from,to,label));
     }
 
     void print(fstream &fout)
