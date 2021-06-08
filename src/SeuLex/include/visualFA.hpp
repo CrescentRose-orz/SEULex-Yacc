@@ -22,7 +22,7 @@ template<typename T>
 class visualFA{
 private:
     vector<T> doubleCircle;
-    vector<edge> edgePool;
+    vector<edge<T> > edgePool;
 public :
     //visualFA(vector<T> dC,vector<edge> eP);
     visualFA();
@@ -40,7 +40,7 @@ public :
     void print(fstream &fout)
     {
         fout<<"digraph finite_state_machine {"<<endl<<"rankdir=LR;"<<endl;
-        fout<<"size = \""<<i+j<<","<<doubleCircle.size()<<"\""<<endl;
+      //  fout<<"size = \""<<i+j<<","<<doubleCircle.size()<<"\""<<endl;
 
         fout<<"node [shape = doublecircle]; ";
         for(int i=0;i<doubleCircle.size();i++)
