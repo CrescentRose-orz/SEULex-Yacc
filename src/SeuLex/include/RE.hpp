@@ -1,19 +1,7 @@
 #ifndef RE_H
 #define RE_H
-
 #include<bits/stdc++.h>
-
 using namespace std;
-
-/*
-。 * 【】 ^ $ {} \ + ? | "" / {}
-.[] {name} \ "" 
-* $ ^ {}
-*/
-
-
-
-
 class RE_operator{
 public:
     char op;
@@ -281,153 +269,7 @@ public:
 
         }
         return newRE;
-    }
-        /*
-        string newRE;
-        int last = 0,pos,tail,Ql,Qr = 0;
-        while ((Ql = raw.find('"',Qr + 1)) != string::npos){
-            if(Ql != 0 && raw[Ql-1] =='\\'){
-                Qr = Ql + 1;
-                continue;
-            }
-            
-            if ((Qr = raw.find('"',Ql + 1)) == string::npos){
-                string tmp(" '\"' expected in " );
-                tmp += raw;
-                throw invalid_argument(tmp);
-            }
-            break;
-        }
-        while ((pos = raw.find('{',last))!=string::npos){
-            if (pos != 0 && raw[pos - 1] == '\\'){
-                last = pos + 1;
-                continue;
-            }
-            while (Ql != string::npos && pos > Qr){
-                if ((Ql = raw.find('"',Qr)) != string::npos){
-                    if ((Qr = raw.find('"',Ql + 1)) == string::npos){
-                        string tmp(" '\"' expected in " );
-                        tmp += raw;
-                        throw invalid_argument(tmp);
-                    }
-                }                
-            }
-
-            if (Ql < pos && pos < Qr){
-                newRE.append(raw,last,Qr - last + 1);
-                last = Qr + 1;
-                continue;
-            } else {
-                newRE.append(raw,last,pos - last );
-            }
-            if ((tail = raw.find('}',pos + 1)) == string ::npos){
-                string tmp(" '}' expected in " );
-                tmp += raw;
-                throw invalid_argument(tmp);
-            } 
-            if (raw.at(pos + 1)<='9'&&raw.at(pos + 1)>='0'){
-                newRE += '(';
-                newRE.append(raw,pos,tail - pos + 1);
-                newRE += ')';
-                last = tail + 1;
-            } else {
-                string &&name = raw.substr(pos + 1,tail - pos - 1);
-                if (!preDefine.count(name)){
-                    string tmp("undefined identifier ");
-                    tmp += name;
-                    tmp +=" occurs in RE ";
-                    tmp += raw;
-                    throw invalid_argument(tmp);
-                }
-                newRE.append(preDefine[name]);
-                last = tail + 1;
-            }
-        }
-        if (last < raw.size()){
-            newRE.append(raw,last,raw.size());
-        }
-        return newRE;
-    }*/
-    // static string prepareRE(string RE){
-    //     string rt;
-    //     int j = 0,i = 0;
-    //      rt.resize(RE.length()<<1);
-    //     if (RE[i] == '^'){
-    //         rt += RE[i++];
-    //     }
-    //     // if (RE[i] == '\\'){
-    //     //     rt+=RE[i++];
-    //     // }
-    //     // rt+=RE[i++];
-    //     while(i < RE.length()){
-    //         switch (RE[i]){
-    //             case '\\':
-    //                 rt += '^';
-    //                 rt += RE[i++];
-    //                 rt += RE[i++];        // todo: exception 
-    //                 break;
-    //             case '{':
-
-    //                 break;
-
-    //             case '[':
-
-    //                 rt += '^';
-    //                 rt += RE[i];
-    //                 while (RE[i]!=']'){
-    //                     rt += RE[++i];
-    //                 }
-    //                 break;
-    //             case '?':
-    //                 ++i;
-    //                 break;
-    //             case '+':
-    //                 ++i;
-    //                 break;
-    //             case '*':
-    //                 ++i;
-    //                 break;
-    //             case '|':
-    //                 ++i;
-    //                 break;
-    //             default:
-    //                 rt += '^';
-    //                 rt += RE[i++];
-    //                 break;
-    //         }
-    //     }
-    //     return rt;
-    // }
-    /*
-/*
-. 匹配任何单个字符，除\n.                       
-
-- 表示匹配范围，如：a-z，表示匹配a-z之间的任何字符
-
-* 匹配前面表达式的零个或多个拷贝。
-
-[] 匹配括号内的任意字符的字符类，第一个符号是"^"，表示匹配除括号中的字符以外的任意字符。
-
-^ 作为正则表达式的第一个字符，匹配行的开头。   例：^ab.,表示以ab开头的字符串.
-
-$ 作为正则表达式的最后一字符，匹配行的结尾。
-
-
-\ 用于转义字符                                                                      OK
-
-+ 匹配前面表达式一次或多次出现。                                                      OK
-
-? 匹配前面表达式零次或1次出现。                                                       OK
-
-| 匹配前面表达式或随后表达式                                                          OK
-
-"" 引号中的每个字符解释为字面意思
-
-
-{} 指示一个模式可能出现的次数
-
-
-    */
+    }                                                       
     static void init(){
         for (int i = 0; i < 256; ++i){
             transChar[i] = i;
@@ -449,39 +291,7 @@ $ 作为正则表达式的最后一字符，匹配行的结尾。
       //  memset(oldPri,-1,sizeof(oldPri));
         
     }
-
-    // static string repeat(string re,int x,int y){
-    //     string tmp;
-    //     --x;
-    //     while(x--){
-    //         tmp.append(re);
-    //     }
-    //     if (x!=-1){
-
-    //     }
-    // }
-
-    // static string getAll(){
-    //     string tmp;
-    //     char c = 0;
-    //     tmp.resize(256);
-    //     tmp += c;
-    //     for (c = 1; c < 255; ++c){
-    //         if (c == '\n'){
-    //             continue;
-    //         }
-    //         tmp += '|';
-    //         tmp += c;
-    //     }
-    //     tmp += '|';
-    //     tmp += c;
-    //     return tmp;
-    // }
-
-
-
 };
-
 
 char RE::transChar[256];   
 int RE::newPri[256];

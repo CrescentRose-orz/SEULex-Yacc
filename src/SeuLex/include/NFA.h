@@ -104,8 +104,15 @@ public:
     bool valid(){
         return hasAction == -1 ? 0 : 1;
     }
+    vector<int> getTrans(int c){
+        vector<int> rt;
+        auto pr = state.equal_range(c);
+        for (auto iter = pr.first; iter != pr.second;++iter){
+            rt.emplace_back(iter->second);
+        }   
+        return rt;
+    }
 };
-
 
 class NFA{
 private:
@@ -125,3 +132,12 @@ public:
     #endif
 };
 
+class NFA_Iterator{
+private:
+    NFA& data;
+    int place;
+public:
+    NFA_Iterator(NFA& d):data(d){
+
+    }
+};

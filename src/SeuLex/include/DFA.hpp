@@ -1,6 +1,6 @@
 #include"Hash.hpp"
 #include<bits/stdc++.h>
-#include"NFA.hpp"
+#include"NFA.h"
 using namespace std;
 
 class NFA_eclosure{
@@ -21,14 +21,14 @@ queue<NFA_eclosure> q;
 unordered_map<eclosureHash,hashFunction> hasVisited;
     q.push(NFA_eclosure())
 
-}；
+};
 
 
 
 
 
 class DFA_Node{
-
+private
 
 
 };
