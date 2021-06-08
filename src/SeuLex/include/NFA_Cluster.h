@@ -2,7 +2,15 @@
 #define NFA_CLUSTER
 #include<bits/stdc++.h>
 #include"NFA.h"
+#include"RE.hpp"
 #include"action.hpp"
+
+
+
+
+
+class NFA;
+class NFA_Node;
 
 class NFA_Cluster{
 public:    

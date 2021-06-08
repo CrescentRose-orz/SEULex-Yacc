@@ -3,7 +3,7 @@
 #include"RE.hpp"
 #include"action.hpp"
 #include"visualFA.hpp"
-
+#include"NFA_Cluster.h"
 
 
 #define eps 256
@@ -13,26 +13,6 @@ using namespace std;
 const int NFA_t =258;
 enum operandType{opNFA = 0,opNum,opString};
 
-class RE_operator{
-public:
-    char op;
-    int l,r;
-    RE_operator(char c){
-        op = c;
-        l = 0,r = 0;
-    }
-    RE_operator(char c,int l,int r){
-        op = c;
-        this->l = l;
-        this->r = r;
-    }
-    // operator int(){
-    //     return (int)op;
-    // }
-    operator char(){
-        return op;
-    }
-};
 
 class operand {
 public:
@@ -109,7 +89,7 @@ public:
                 return;
             }
         }
-        state.insert(c,target);
+        state.insert({c,target});
         #ifdef VISUAL
         string s;        
         s += (c == eps)?'\238':(char)c;
@@ -126,7 +106,7 @@ public:
     }
 };
 
-#include"NFA_Cluster.h"
+
 class NFA{
 private:
     int tmp;
