@@ -1,21 +1,16 @@
 #include"NFA_Cluster.h"
 
     bool NFA_Cluster::checkBracket(string &bracket,int l,int r){
-        int wrong = 0;
         int last = l - 1;
-        if (l>r){
+        if (l>r || bracket[r] =='-'){
             return 0;
         }
         for (int i = l; i <= r;++i){
             if (bracket[i] =='-'){
-                if (i - 1 <= last ||i == r|| i == l|| bracket[i-1]>=bracket[i+1]){
-                    ++wrong;
-                    if (wrong == 2){
-                        return 0;
-                    }
-                } else {
-                    last = i + 1;
+                if (i - 1 <= last){
+                    return 0;
                 }
+                last = i + 1;
             }
         }
         return true;
@@ -37,18 +32,9 @@
             if (c!='.'){
                 buff[head].addTrans(tail,c);
             } else {
-                buff[head].addMultiTrans(tail,0,charSetMAX);
+                buff[head].addMultiTrans(tail,0,255);
             }
         }
-    }
-    NFA_Cluster NFA_Cluster::getTrans(NFA &buff,char c){
-        int tail = buff.add();
-        int head = buff.add();
-        {                    
-            lock_guard<mutex> lock(buff.Wrlock);
-            buff[head].addTrans(tail,RE::trans(c));
-        }        
-        return NFA_Cluster(head,tail);
     }
     // '|' '^'
     NFA_Cluster::NFA_Cluster(NFA &buff,char op ,NFA_Cluster a ,NFA_Cluster b ){
@@ -99,11 +85,11 @@
     //single op : * ? +
     NFA_Cluster::NFA_Cluster(NFA &buff,char op ,NFA_Cluster a ){
         NFA_Node _head(buff.vNFA),_tail(buff.vNFA);
-        // head = buff.add();
-        // tail = buff.add();      
+        head = buff.add();
+        tail = buff.add();      
         switch(op){
             case '*':
-                tail  = buff.add();            
+                tail  = buff.add(_tail);            
                 _head.addTrans(a.head,eps);
                 _head.addTrans(tail,eps);
                 head = buff.add(_head);
@@ -134,14 +120,12 @@
                 #endif        
                 break;
             case '+':
-                //tail  = buff.add();            
-                //_head.addTrans(a.head,eps);
-                //head = buff.add(_head);
-                head = a.head;
-                tail = a.tail;
+                tail  = buff.add(_tail);            
+                _head.addTrans(a.head,eps);
+                head = buff.add(_head);
                 {
                     lock_guard<mutex> lock(buff.Wrlock);
-                    //buff.pool[a.tail].addTrans(tail,eps);
+                    buff.pool[a.tail].addTrans(tail,eps);
                     buff.pool[a.tail].addTrans(a.head,eps);
                 }       
                 break;
@@ -154,9 +138,10 @@
 
     NFA_Cluster::NFA_Cluster(NFA &buff ,string &quotation , int l ,int r ){ //[l,r]
 
-        NFA_Cluster &&rt = createEmpty(buff);  
-        bool trans = 0;
-        for (int i = l ; i <= r; ++i){
+        NFA_Cluster &&rt = NFA_Cluster::createEmpty(buff);
+        NFA_Node _head(buff.vNFA),_tail(buff.vNFA);      
+        bool trans;
+        for (int i = l ; i < r; ++i){
             if (trans){
                 int tailIdx = buff.add();
                 {
@@ -197,16 +182,10 @@
                 lock_guard<mutex> lock(buff.Wrlock);
                 buff[rt.head].addTrans(rt.tail,bracket[i]);
             } else {
-                if (i == l||i == r|| bracket[i-1]>=bracket[i+1]){
-                    lock_guard<mutex> lock(buff.Wrlock);
-                    buff[rt.head].addTrans(rt.tail,'-');    
-                } else {
-                    lock_guard<mutex> lock(buff.Wrlock);
-                    buff[rt.head].addMultiTrans(rt.tail,bracket[i-1],bracket[i+1]);
-                }
+                lock_guard<mutex> lock(buff.Wrlock);
+                buff[rt.head].addMultiTrans(rt.tail,bracket[i-1],bracket[i+1]);
             }
         }
-        return rt;
     }
     //todo{}
     NFA_Cluster NFA_Cluster::getBrace(NFA &buff,string &bracket,int l ,int r){
@@ -215,7 +194,6 @@
     }
     NFA_Cluster NFA_Cluster::createEmpty(NFA &buff){
         int && idx = buff.add();
-        cout<<"creating empty! "<<idx<<endl;
         return NFA_Cluster(idx,idx);
     }
 
@@ -233,55 +211,18 @@ stack<NFA_Cluster> operandStack;
 stack<RE_operator> operatorStack; 
 RE_operator newOp('.');
 int i = 0,j;
-bool trans = 0;
     RE += '$';
-    stringstream s;
-    s<<RE<<" started 2 NFA";
-    cout<<RE<<" started 2 NFA"<<endl;
-    buff.logger.customMSG(s.str());
     //operatorStack.push('`');
     NFA_Cluster &&head = NFA_Cluster::createEmpty(buff);
     while(i<RE.size()){
-        fstream ftmp;
-        ftmp.open("tmp.dot",ios::out);
-        buff.vNFA.print(ftmp);
-        stringstream s;
-        s<<"meet "<<RE[i]<<"the size of operandStack is "<<operandStack.size()<<" opstack is "<<operatorStack.size();
-        cout<<"meet "<<RE[i]<<"the size of operandStack is "<<operandStack.size()<<" opstack is "<<operatorStack.size()<<endl;      
-        buff.logger.customMSG(s.str());
-        buff.logger.save();
-        if (trans){
-                operandStack.push(NFA_Cluster::getTrans(buff,RE[i]));
-                {
-                stringstream s;
-                s<<"add "<<RE[i]<<endl;
-                buff.logger.customMSG(s.str());
-                }
-                trans = 0;
-                ++i;
-                continue;
-        }
         switch(RE[i]){
             case ')': 
-                while(!operatorStack.empty()&&(char)operatorStack.top() != '('){
+                while((char)operatorStack.top() != '('){
                     cal(buff,operandStack,operatorStack.top());
                     operatorStack.pop();
                 }
-                if (operatorStack.empty()){
-                    throw invalid_argument("missing '(");
-                }
                 operatorStack.pop();
                 ++i;
-                break;
-            case '\"':
-                for (j= i + 1;RE[j]!='\"'&&j<RE.size();++j);
-                if (j == RE.size()){
-                    stringstream s;
-                    s<<"\" didn't match in "<<RE;
-                    throw invalid_argument(s.str());
-                }
-                operandStack.push(NFA_Cluster(buff,RE,i+1,j-1));
-                i = j + 1;
                 break;
             case '[': //todo
                 for (j = i + 1; RE[j] != ']';++j);
@@ -291,6 +232,15 @@ bool trans = 0;
                 }
                 operandStack.push(NFA_Cluster::getBracket(buff,RE,i+1,j-1));
                 i = j + 1;
+                break;
+            case '\"':
+                for (j = i + 1; RE[j] !='"'&&j < RE.size();++j);
+                if (j == RE.size()){
+                    stringstream s;
+                    s<<"\" didn't match in "<<RE;
+                    throw invalid_argument(s.str());
+                }
+                operandStack.push(NFA_Cluster(buff,RE,i+1,j-1));
                 break;
             case '{': //todo
                 throw invalid_argument("not supported yet");
@@ -306,55 +256,26 @@ bool trans = 0;
             case '?':
             case '+': 
             case '^': 
-                cout<<"get single op!"<<endl;
                 newOp = RE_operator(RE[i]);
-                cout<<"wrapped!"<<endl;
-                if (!operatorStack.empty())
-                cout<<RE::newPri[newOp] <<" "<< RE::oldPri[operatorStack.top()]<<endl;
-                while (!operatorStack.empty()&&RE::newPri[newOp] < RE::oldPri[operatorStack.top()]){
+                while (RE::newPri[newOp] < RE::oldPri[operatorStack.top()]){
                     NFA_Cluster::cal(buff,operandStack,operatorStack.top());
-                    cout<<"cal ok!"<<endl;
                     operatorStack.pop();
                 } 
-                cout<<"juding ok!"<<endl;
                 operatorStack.push(RE[i]);
-                cout<<"store ok!"<<endl;
-                ++i;
                 break;
-            case '$':
-                while(!operatorStack.empty()){
-                    cout<<"handling "<<operatorStack.top().op<<"!"<<endl;
-                    cal(buff,operandStack,operatorStack.top());
-                    cout<<"ok!"<<endl;
-                    operatorStack.pop();
-                }{
-                stringstream s;
-                s<<"find end of RE "<<RE[i]<<endl;
-                buff.logger.customMSG(s.str());
-                }
-                ++i;
-                break;
-            case '\\':
-                ++i;
-                trans = 1;
+            case '.':
+                operandStack.push(NFA_Cluster('.'));
                 break;
             default: 
                 //operand* p = new NFA_Cluster(RE[i]);
                 //operandStack.push(p);
-                operandStack.push(NFA_Cluster(buff,RE[i]));
-                {
-                stringstream s;
-                s<<"add "<<RE[i]<<endl;
-                buff.logger.customMSG(s.str());
-                }
-                ++i;
+                operandStack.push(NFA_Cluster(RE[i]));
                 break;
         }
     }
     if (operandStack.size() != 1){
         stringstream s;
         s <<"expeceted 1 operand left but found"<<operandStack.size()<< "operands";
-        s <<endl<<" the top is "<<operandStack.top().head<<" "<<operandStack.top().head<<endl;
         throw invalid_argument(s.str());
     }
     return operandStack.top();
@@ -374,7 +295,6 @@ NFA_Cluster NFA_Cluster::RE2NFA(string RE,NFA &buff,action _action){
     head.head = nhead;
     {
         lock_guard<mutex> lock(buff.Wrlock);
-        cout<<"setting action"<<endl;
         buff[ntail].setAction(_action);
         buff[head.tail].addTrans(ntail,'\n');
     }
@@ -384,49 +304,24 @@ NFA_Cluster NFA_Cluster::RE2NFA(string RE,NFA &buff,action _action){
         buff[head.tail].addTrans(ntail,eps);
     }  
     head.tail = ntail;  
-    stringstream s;
-    s<<"finish with head: "<<head.head<<" and tail: "<<head.tail<<endl;
-    buff.logger.customMSG(s.str());
-       // system("pause");
     return head;
 }
 
 
-void NFA_Cluster::cal(NFA &buff,stack<NFA_Cluster> &operandStack,RE_operator op){
+
+NFA_Cluster NFA_Cluster::cal(NFA &buff,stack<NFA_Cluster> &operandStack,RE_operator op){
 NFA_Cluster operand1 = operandStack.top();
-operandStack.pop();  
-NFA_Cluster operand2(0,0);
-if (!operandStack.empty()){
-    operand2 = operandStack.top();
-}
-stringstream s;
+    operandStack.pop();
+NFA_Cluster operand2 = operandStack.top();
     switch(op.op){
         case '|':
         case '^':
-            cout<<"connecting ok? "<<operandStack.size()<<endl;
-            operandStack.pop();      
-            {  
-            cout<<"creating!"<<" for ["<<operand2.head<<","<<operand2.tail<<"]"<<op.op<<" ["<<operand1.head<<","<<operand1.tail<<"]"<<endl;
-            NFA_Cluster &&tmp = NFA_Cluster(buff,op,operand2,operand1);
-            s<<"get "<<tmp.head<<" "<<tmp.tail<<" for ["<<operand2.head<<","<<operand2.tail<<"]"<<op.op<<" ["<<operand1.head<<","<<operand1.tail<<"]"<<endl;
-            buff.logger.customMSG(s.str());
-            buff.logger.save();
-            operandStack.push(tmp);
-            }
-            break;
+            operandStack.pop();        
+            return NFA_Cluster(buff,op,operand1,operand2);
         case '?':
         case '+':
         case '*':
-            cout<<"single ok? "<<operandStack.size()<<endl;   
-            {  
-                cout<<"creating!"<<" for ["<<operand1.head<<","<<operand1.tail<<"]"<<op.op<<endl;
-                NFA_Cluster &&tmp = NFA_Cluster(buff,op,operand1);
-                s<<"get "<<tmp.head<<" "<<tmp.tail<<" for ["<<operand1.head<<","<<operand1.tail<<"]"<<op.op<<endl;
-                buff.logger.customMSG(s.str());
-                buff.logger.save();
-                operandStack.push(tmp);
-            }
-            break;
+            return NFA_Cluster(buff,op,operand1);
         case '{':
             throw invalid_argument("{ not supported yet");
         default:
@@ -434,7 +329,6 @@ stringstream s;
             s << "unknown operator occurs" << op.op<<" founded";
             throw invalid_argument(s.str());
     };
-
 }
 
 

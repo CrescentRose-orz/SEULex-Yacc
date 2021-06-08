@@ -1,13 +1,12 @@
-#ifndef NFA_HEADER
-#define NFA_HEADER
+#pragma once
 #include<bits/stdc++.h>
-#include"RE.h"
+#include"RE.hpp"
 #include"action.hpp"
 #include"visualFA.hpp"
 #include"NFA_Cluster.h"
-#include"Logger.h"
-#include"CONSTANT.h"
 
+
+#define eps 256
 #define VISUAL
 #define dev
 using namespace std;
@@ -39,17 +38,16 @@ class NFA_Node{
 private:
     multimap<int,int> state;
     action act;
-    bool hasAction = 0;
+    bool hasAction;
     #ifdef VISUAL
     visualFA<int> &fa; 
-    vector<pair<int,int>> edge;
-    bool aflag = 0;
+    vector<pair<int,string>> edge;
     #endif
 public:
     int idx;
     #ifdef VISUAL
     NFA_Node(visualFA<int> &_fa):fa(_fa){
-        hasAction = 0;
+        hasAction = -1;
         idx = -1;
     }
     NFA_Node(action act,visualFA<int> &_fa):act(act),fa(_fa){
@@ -59,9 +57,6 @@ public:
     void update(){
         for (auto &p:edge){
             fa.addEdge(idx, p.first, p.second);
-        }
-        if (aflag){
-            fa.addNode(idx);
         }
     }
     #else
@@ -77,19 +72,10 @@ public:
     void setAction(action act){
         this->act = act;
         if (hasAction) return;
-        hasAction = 1;        
         #ifdef VISUAL
-        cout<<"try to add double node"<<endl;
-        if (idx!=-1){
-            cout<<"add ok"<<endl;
-            fa.addNode(idx);
-        } else {
-            cout<<"not finished yet";
-
-            aflag = 1;
-        }
+        fa.addNode(idx);
         #endif
-
+        hasAction = 1;
     }
     void addMultiTrans(int target,int l,int r){
         for (int i = l; i <= r; ++i){
@@ -105,10 +91,12 @@ public:
         }
         state.insert({c,target});
         #ifdef VISUAL
+        string s;        
+        s += (c == eps)?'\238':(char)c;
         if( idx != -1){
-            fa.addEdge(idx , target, c);
+            fa.addEdge(idx , target, s);
         } else {
-            edge.push_back(make_pair(target,c));
+            edge.push_back(make_pair(target,s));
         }
         #endif
     }
@@ -130,12 +118,10 @@ class NFA{
 private:
     int tmp;
 public:
-    Logger logger;
     mutex Wrlock;
     int tail = 0;
     vector<NFA_Node> pool;
     NFA();
-    NFA(Logger &log);
     NFA_Node& operator [](int i);
     int add();
     int add(NFA_Node node);
@@ -155,4 +141,3 @@ public:
 
     }
 };
-#endif

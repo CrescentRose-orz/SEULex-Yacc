@@ -5,12 +5,6 @@ NFA::NFA(){
         add();
 }
 
-NFA::NFA(Logger &log):logger(log){
-        add();
-}
-
-
-
 int NFA::add(){
         unique_lock<mutex> lock(Wrlock);
         pool.emplace_back(NFA_Node(vNFA));
@@ -37,6 +31,5 @@ void NFA::addRE(string &RE,action _action){
         {
             lock_guard<mutex> lock(Wrlock);
             pool[0].addTrans(rt.head,eps);
-            //pool[rt.tail].setAction
         }
 }
