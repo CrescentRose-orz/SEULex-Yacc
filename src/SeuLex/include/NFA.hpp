@@ -8,6 +8,28 @@
 using namespace std;
 const int NFA_t =258;
 enum operandType{opNFA = 0,opNum,opString};
+
+class RE_operator{
+public:
+    char op;
+    int l,r;
+    RE_operator(char c){
+        op = c;
+        l = 0,r = 0;
+    }
+    RE_operator(char c,int l,int r){
+        op = c;
+        this->l = l;
+        this->r = r;
+    }
+    // operator int(){
+    //     return (int)op;
+    // }
+    operator char(){
+        return op;
+    }
+};
+
 class operand {
 public:
     operandType type;
@@ -145,7 +167,7 @@ public:
             }
         }
     }
-    // '\' '^'
+    // '|' '^'
     NFA_Cluster(NFA &buff,char op ,NFA_Cluster a ,NFA_Cluster b ){
         switch(op){
             case '|':{
@@ -295,27 +317,44 @@ public:
 
 };
 
+
+NFA_Cluster cal(NFA &buff,stack<NFA_Cluster> &operandStack,RE_operator op){
+NFA_Cluster operand1 = operandStack.top();
+    operandStack.pop();
+NFA_Cluster operand2 = operandStack.top();
+    switch(op.op){
+        case '|':
+        case '^':
+            operandStack.pop();        
+            return NFA_Cluster(buff,op,operand1,operand2);
+        case '?':
+        case '+':
+        case '*':
+            return NFA_Cluster(buff,op,operand1);
+        case '{':
+            throw invalid_argument("{ not supported yet");
+        default:
+            throw invalid_argument("unknown operator occurs");
+    };
+}
+
 NFA_Cluster RE2NFA_Cluster(string RE,NFA &buff){
 //stack<operand*> operandStack;
 stack<NFA_Cluster> operandStack;
-stack<char> operatorStack; 
+stack<RE_operator> operatorStack; 
+RE_operator newOp('.');
 int i = 0,j;
     RE += '$';
-    operatorStack.push('`');
+    //operatorStack.push('`');
     NFA_Cluster &&head = NFA_Cluster::createEmpty(buff);
     while(i<RE.size()){
         switch(RE[i]){
-            case '(': //todo
-                for (j = i + 1; RE[j] != ')';++j);
-                if (j == i + 1){
-                    i = j + 1;
-                    continue;
+            case ')': 
+                while((char)operatorStack.top() != '('){
+                    cal(buff,operandStack,operatorStack.top());
+                    operatorStack.pop();
                 }
-                operandStack.push(RE2NFA_Cluster(RE.substr(i+1,j-i-1),buff));
-                //operand* p;
-                //*p = RE2NFA_Cluster(RE.substr(i+1,j-i-1),buff);
-                //operandStack.push(p);
-                i = j + 1;
+                ++i;
                 break;
             case '[': //todo
                 for (j = i + 1; RE[j] != ']';++j);
@@ -330,34 +369,29 @@ int i = 0,j;
                 i = j + 1;
                 break;                
                 break;
+            case '{': //todo
+                throw invalid_argument("not supported yet");
+                // if (RE::newPri[RE[i]] > RE::oldPri[operatorStack.top()]){
+                //     operatorStack.push(RE[i]);
+                //     break;
+                // }
+                // break;
+                newOp = RE_operator('{',0,0);
+            case '(':
+            case '|': 
             case '*':
             case '?':
-            case '+':  //todo
-                if (RE::newPri[RE[i]] > RE::oldPri[operatorStack.top()]){
-                    operatorStack.push(RE[i]);
-                    break;
-                }
-                break;
-            case '^': //todo
-                if (RE::newPri[RE[i]] > RE::oldPri[operatorStack.top()]){
-                    operatorStack.push(RE[i]);
-                    break;
-                }
-                break;
-            case '{': //todo
-                if (RE::newPri[RE[i]] > RE::oldPri[operatorStack.top()]){
-                    operatorStack.push(RE[i]);
-                    break;
-                }
+            case '+': 
+            case '^': 
+                newOp = RE_operator(RE[i]);
+                while (RE::newPri[newOp] < RE::oldPri[operatorStack.top()]){
+                    cal(buff,operandStack,operatorStack.top());
+                    operatorStack.pop();
+                } 
+                operatorStack.push(RE[i]);
                 break;
             case '.':
                 operandStack.push(NFA_Cluster('.'));
-                break;
-            case '|': //todo
-                if (RE::newPri[RE[i]] > RE::oldPri[operatorStack.top()]){
-                    operandStack.push(RE[i]);
-                    break;
-                }
                 break;
             default: 
                 //operand* p = new NFA_Cluster(RE[i]);
