@@ -130,36 +130,46 @@ public:
     mutex Wrlock;
     int tail = 0;
     vector<NFA_Node> pool;
-    NFA(){
+    NFA();
+    NFA_Node& operator [](int i);
+    int add();
+    int add(NFA_Node node);
+    int head();
+    void addRE(string &RE,action _action);
+    #ifdef VISUAL       
+    visualFA<int> vNFA;
+    #endif
+};
+
+NFA::NFA(){
         add();
-    }
-    NFA_Node& operator [](int i){
-        return pool[i];
-    }
-    int add(){
+}
+
+int NFA::add(){
         unique_lock<mutex> lock(Wrlock);
         pool.emplace_back(NFA_Node(vNFA));
         pool[tail].idx = tail;
         return tail++;       
+}
+
+NFA_Node& NFA::operator[](int i){
+        return pool[i];
     }
-    int add(NFA_Node node){
+int NFA::add(NFA_Node node){
         unique_lock<mutex> lock(Wrlock);
         pool.emplace_back(node);
         pool[tail].idx = tail;
         pool[tail].update();
         return tail++;
-    }
-    int head(){
+}
+int NFA::head(){
         return 0;
-    }
-    void addRE(string &RE,action _action){
+}
+
+void NFA::addRE(string &RE,action _action){
         NFA_Cluster &&rt = NFA_Cluster::RE2NFA(RE,*this,_action);
         {
             lock_guard<mutex> lock(Wrlock);
             pool[0].addTrans(rt.head,eps);
         }
-    }
-    #ifdef VISUAL       
-    visualFA<int> vNFA;
-    #endif
-};
+}
