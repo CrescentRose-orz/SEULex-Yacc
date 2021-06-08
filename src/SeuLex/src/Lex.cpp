@@ -179,11 +179,11 @@ void Lex::start(){
         fin.close();
         cout<<"file close ok"<<endl;
         unfoldAllRE();
-        for (int i = 0; i < targetRE.size()){
+        for (int i = 0; i < targetRE.size();++i){
             _NFA.addRE(targetRE[i],Action[i]);
         }
         fstream fout;
-        fout.open("output.dot",'w');
+        fout.open("output.dot",ios::out);
         _NFA.vNFA.print(fout);
     }catch (invalid_argument e){
         logger.customMSG(e.what());
@@ -191,7 +191,7 @@ void Lex::start(){
         logger.error("invalid input, program ended ","parsing lex file",lineCnt);
         logger.close();
         fstream fout;
-        fout.open("output.dot",'w');
+        fout.open("output.dot",ios::out);
         _NFA.vNFA.print(fout);
         return ;
     } 
