@@ -1,3 +1,6 @@
+#ifndef RE_H
+#define RE_H
+
 #include<bits/stdc++.h>
 
 using namespace std;
@@ -457,3 +460,4 @@ char RE::transChar[256];
 int RE::newPri[256];
 int RE::oldPri[256];
 
+#endif

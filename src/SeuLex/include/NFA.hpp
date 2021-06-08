@@ -1,3 +1,4 @@
+#pragma once
 #include<bits/stdc++.h>
 #include"RE.hpp"
 #include<action.hpp>
