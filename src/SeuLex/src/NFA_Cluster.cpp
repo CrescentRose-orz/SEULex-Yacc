@@ -1,5 +1,5 @@
 #include"NFA_Cluster.h"
-
+    //todo:[^]
     bool NFA_Cluster::checkBracket(string &bracket,int l,int r){
         int wrong = 0;
         int last = l - 1;
