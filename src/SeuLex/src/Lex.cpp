@@ -13,7 +13,7 @@
 #include"threadpool.hpp"
 #include "graph.h"
 #include "action.hpp"
-#include "RE.hpp"
+#include "RE.h"
 #include "NFA.h"
 using namespace std;
 #define fin lfile 
@@ -65,7 +65,7 @@ private:
     threadpool threadPool;
     NFA _NFA;
 
-
+    void initAll();
     int checkNewLine();
     void scanStatement();    // todo : exception 
     void copyStatement();
@@ -100,7 +100,11 @@ public:
 For initializing SEULex
     constructor && destructor
 */
-
+void Lex::initAll(){
+    RE::init();
+    logger.init();
+    _NFA.logger = logger;
+}
 bool Lex::setInputFile(string lexFileName){
     if (lexReady){
         cerr<<"lex file already opened!"<<endl;
@@ -117,16 +121,16 @@ bool Lex::setInputFile(string lexFileName){
     return 0;
 }
 
-Lex::Lex():logger(),threadPool(8){
+Lex::Lex():logger(),threadPool(8),_NFA(logger){
     lexReady = 0;
 }
 
-Lex::Lex(string lexFileName,string loggerFileName):logger(loggerFileName),threadPool(8){
+Lex::Lex(string lexFileName,string loggerFileName):logger(loggerFileName),threadPool(8),_NFA(logger){
     lexReady = 0;
     setInputFile(lexFileName);
 }
 
-Lex::Lex(string loggerFileName):logger(loggerFileName),threadPool(8){
+Lex::Lex(string loggerFileName):logger(loggerFileName),threadPool(8),_NFA(logger){
     lexReady = 0;
 }
 
@@ -159,9 +163,8 @@ bool Lex::checkFileName(string fileName){
     Scanning lex file
 */
 void Lex::start(){
-    logger.init();
+    initAll();
     logger.start("main");
-    RE::init();
     if (!lexReady){
         logger.error("try to start before input file is ready!","Lex::start()",1);
         return ;
@@ -196,6 +199,11 @@ void Lex::start(){
         return ;
     } 
     catch(exception e){
+        cerr<<"unknow exception occurs"<<endl;
+        system("pause");
+        fstream fout;
+        fout.open("output.dot",ios::out);
+        _NFA.vNFA.print(fout);
         logger.error("Exception occured ","parsing lex file",lineCnt);
         logger.customMSG(e.what());
         logger.close();

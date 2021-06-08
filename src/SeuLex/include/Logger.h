@@ -1,7 +1,6 @@
 #ifndef LOGGER
 #define LOGGER
 #include<bits/stdc++.h>
-#include<unordered_map>
 using namespace std;
 
 
@@ -29,6 +28,7 @@ private:
     unordered_map<string,clock_t> _timeStamp;
     bool printTime();
     FILE *_log;
+    string fileName;
     int flag;
 public:
     Logger(); //default log: 
@@ -43,6 +43,7 @@ public:
     int error(string,string,int );
     int customMSG(string);
     int close();
+    int save();
 };
 
 
