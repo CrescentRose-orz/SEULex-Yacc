@@ -2,9 +2,9 @@
 #define NFA_CLUSTER
 #include<bits/stdc++.h>
 #include"NFA.h"
-#include"RE.hpp"
 #include"action.hpp"
-
+#include"Logger.h"
+#include"CONSTANT.h"
 
 
 
@@ -37,7 +37,8 @@ public:
     static NFA_Cluster createSingle(NFA &buff,NFA_Node node);
     static NFA_Cluster RE2NFA_Cluster(string RE,NFA &buff);
     static NFA_Cluster RE2NFA(string RE,NFA &buff,action _action);
-    static NFA_Cluster cal(NFA &buff,stack<NFA_Cluster> &operandStack,RE_operator op);
+    static void cal(NFA &buff,stack<NFA_Cluster> &operandStack,RE_operator op);
+    static NFA_Cluster getTrans(NFA&buff,char c);
 };
 /*
 . 匹配任何单个字符，除\n.                       
