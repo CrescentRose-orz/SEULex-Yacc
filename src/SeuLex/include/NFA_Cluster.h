@@ -11,7 +11,7 @@
 
 class NFA;
 class NFA_Node;
-
+class RE_operator;
 class NFA_Cluster{
 public:    
     int head;

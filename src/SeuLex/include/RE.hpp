@@ -10,6 +10,33 @@ using namespace std;
 .[] {name} \ "" 
 * $ ^ {}
 */
+
+
+
+
+class RE_operator{
+public:
+    char op;
+    int l,r;
+    RE_operator(char c){
+        op = c;
+        l = 0,r = 0;
+    }
+    RE_operator(char c,int l,int r){
+        op = c;
+        this->l = l;
+        this->r = r;
+    }
+    // operator int(){
+    //     return (int)op;
+    // }
+    operator char(){
+        return op;
+    }
+};
+
+
+
 class RE{
 public:
     static char transChar[256];   
