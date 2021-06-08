@@ -1,14 +1,6 @@
-#ifndef NFA_CLUSTER
-#define NFA_CLUSTER
-#include<bits/stdc++.h>
-#include"NFA.hpp"
-#include"action.hpp"
+#include"NFA_Cluster.h"
 
-class NFA_Cluster{
-public:    
-    int head;
-    int tail;
-    static bool checkBracket(string &bracket,int l,int r){
+    bool NFA_Cluster::checkBracket(string &bracket,int l,int r){
         int last = l - 1;
         if (l>r || bracket[r] =='-'){
             return 0;
@@ -23,16 +15,16 @@ public:
         }
         return true;
     }
-    NFA_Cluster(int head){
+    NFA_Cluster::NFA_Cluster(int head){
         this->head = head;
         this->tail = -1;
     }
-    NFA_Cluster(int head,int tail){
+    NFA_Cluster::NFA_Cluster(int head,int tail){
         this->head = head;
         this->tail = tail;
     }
     //single char,.
-    NFA_Cluster(NFA &buff,char c){
+    NFA_Cluster::NFA_Cluster(NFA &buff,char c){
         tail = buff.add();
         head = buff.add();
         {                    
@@ -45,7 +37,7 @@ public:
         }
     }
     // '|' '^'
-    NFA_Cluster(NFA &buff,char op ,NFA_Cluster a ,NFA_Cluster b ){
+    NFA_Cluster::NFA_Cluster(NFA &buff,char op ,NFA_Cluster a ,NFA_Cluster b ){
         switch(op){
             case '|':{
                 head = buff.add();
@@ -76,7 +68,7 @@ public:
         }
     }
     // multi {}
-    NFA_Cluster(NFA &buff,int l,int r,NFA_Cluster a ){
+    NFA_Cluster::NFA_Cluster(NFA &buff,int l,int r,NFA_Cluster a ){
         throw invalid_argument("multi{} this function is not available");
         if (l < 0 || r < l){
             throw invalid_argument("error, {l,r} must have l >= 0 && r >= l");
@@ -91,7 +83,7 @@ public:
 
     }
     //single op : * ? +
-    NFA_Cluster(NFA &buff,char op ,NFA_Cluster a ){
+    NFA_Cluster::NFA_Cluster(NFA &buff,char op ,NFA_Cluster a ){
         NFA_Node _head(buff.vNFA),_tail(buff.vNFA);
         head = buff.add();
         tail = buff.add();      
@@ -144,7 +136,7 @@ public:
     }
    //quotation 
 
-    NFA_Cluster(NFA &buff ,string &quotation , int l ,int r ){ //[l,r]
+    NFA_Cluster::NFA_Cluster(NFA &buff ,string &quotation , int l ,int r ){ //[l,r]
 
         NFA_Cluster &&rt = NFA_Cluster::createEmpty(buff);
         NFA_Node _head(buff.vNFA),_tail(buff.vNFA);      
@@ -175,7 +167,7 @@ public:
         this -> tail = rt.tail;
     }
     //bracket todo 【】
-    static NFA_Cluster getBracket(NFA &buff,string &bracket,int l,int r){
+    NFA_Cluster NFA_Cluster::getBracket(NFA &buff,string &bracket,int l,int r){
         if (l == r){
             throw invalid_argument("empty bracket is not allowed");
         }
@@ -196,16 +188,16 @@ public:
         }
     }
     //todo{}
-    static NFA_Cluster getBrace(NFA &buff,string &bracket,int l ,int r){
+    NFA_Cluster NFA_Cluster::getBrace(NFA &buff,string &bracket,int l ,int r){
         NFA_Cluster rt(0,0);
         return rt;
     }
-    static NFA_Cluster createEmpty(NFA &buff){
+    NFA_Cluster NFA_Cluster::createEmpty(NFA &buff){
         int && idx = buff.add();
         return NFA_Cluster(idx,idx);
     }
 
-    static NFA_Cluster createSingle(NFA &buff,NFA_Node node){
+    NFA_Cluster NFA_Cluster::createSingle(NFA &buff,NFA_Node node){
         int && idx = buff.add(node);
         return NFA_Cluster(idx,idx);
     }
@@ -214,7 +206,7 @@ public:
 
 
 
-static NFA_Cluster RE2NFA_Cluster(string RE,NFA &buff){
+NFA_Cluster NFA_Cluster::RE2NFA_Cluster(string RE,NFA &buff){
 stack<NFA_Cluster> operandStack;
 stack<RE_operator> operatorStack; 
 RE_operator newOp('.');
@@ -289,7 +281,7 @@ int i = 0,j;
     return operandStack.top();
 }
 
-static NFA_Cluster RE2NFA(string RE,NFA &buff,action _action){
+NFA_Cluster NFA_Cluster::RE2NFA(string RE,NFA &buff,action _action){
     NFA_Cluster &&head = NFA_Cluster::RE2NFA_Cluster(RE[0]=='^'?RE.substr(1,RE.size()-(RE[RE.size()-1]=='$'?2:1)):RE,buff);
     int nhead = buff.add(),ntail = buff.add();
     {
@@ -317,7 +309,7 @@ static NFA_Cluster RE2NFA(string RE,NFA &buff,action _action){
 
 
 
-static NFA_Cluster cal(NFA &buff,stack<NFA_Cluster> &operandStack,RE_operator op){
+NFA_Cluster NFA_Cluster::cal(NFA &buff,stack<NFA_Cluster> &operandStack,RE_operator op){
 NFA_Cluster operand1 = operandStack.top();
     operandStack.pop();
 NFA_Cluster operand2 = operandStack.top();
@@ -367,16 +359,6 @@ $ 作为正则表达式的最后一字符，匹配行的结尾。
 
 
 {} 指示一个模式可能出现的次数
-————————————————
-版权声明：本文为CSDN博主「求术学技」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
-原文链接：https://blog.csdn.net/dinghuican/article/details/24620523
-
-
-
 
 
 */
-
-
-};
-#endif
