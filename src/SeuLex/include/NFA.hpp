@@ -97,9 +97,16 @@ public:
         }
     }
     void addTrans(int target,int c){
-        string s;
-        s += c == eps?'\238':(char)c;
+        auto pr = state.equal_range(c);
+        for (auto iter = pr.first; iter!=pr.second;++iter){
+            if (iter->second == target){
+                return;
+            }
+        }
+        state.insert(c,target);
         #ifdef VISUAL
+        string s;        
+        s += (c == eps)?'\238':(char)c;
         if( idx != -1){
             fa.addEdge(idx , target, s);
         } else {
@@ -121,6 +128,9 @@ public:
     vector<NFA_Node> pool;
     int head = 0;
     int tail = 0;
+    NFA(){
+        add();
+    }
     NFA_Node& operator [](int i){
         return pool[i];
     }
@@ -137,8 +147,18 @@ public:
         pool[tail].update();
         return tail++;
     }
+    int head(){
+        return 0;
+    }
+    void addRE(string &RE,action _action){
+        NFA_Cluster &&rt = RE2NFA(RE,*this,_action);
+        {
+            lock_guard<mutex> lock(Wrlock);
+            pool[0].addTrans(rt.head,eps);
+        }
+    }
+    #ifdef VISUAL       
     visualFA<int> vNFA;
-    #ifdef VISUAL    
     #endif
 };
 
@@ -146,6 +166,21 @@ class NFA_Cluster:public operand{
 public:    
     int head;
     int tail;
+    static bool checkBracket(string &bracket,int l,int r){
+        int last = l - 1;
+        if (l>r || bracket[r] =='-'){
+            return 0;
+        }
+        for (int i = l; i <= r;++i){
+            if (bracket[i] =='-'){
+                if (i - 1 <= last){
+                    return 0;
+                }
+                last = i + 1;
+            }
+        }
+        return true;
+    }
     NFA_Cluster(int head){
         this->head = head;
         this->tail = -1;
@@ -267,7 +302,8 @@ public:
     }
    //quotation 
 
-    NFA_Cluster(NFA &buff ,string &quotation , int l ,int r ){ //[l,r)
+    NFA_Cluster(NFA &buff ,string &quotation , int l ,int r ){ //[l,r]
+
         NFA_Cluster &&rt = NFA_Cluster::createEmpty(buff);
         NFA_Node _head(buff.vNFA),_tail(buff.vNFA);      
         bool trans;
@@ -296,11 +332,28 @@ public:
         this -> head = rt.head;
         this -> tail = rt.tail;
     }
-    //bracket todo
-    NFA_Cluster(NFA &buff,string bracket){
-        
+    //bracket todo 【】
+    static NFA_Cluster getBracket(NFA &buff,string &bracket,int l,int r){
+        if (l == r){
+            throw invalid_argument("empty bracket is not allowed");
+        }
+        NFA_Cluster rt(buff.add(),buff.add());
+        if (!NFA_Cluster::checkBracket(bracket,l,r)){
+            stringstream s;
+            s<<"syntax error in bracket expression "<<bracket.substr(l,r-l+1);
+            throw invalid_argument(s.str());
+        }
+        for (int i = l; i <= r; ++i){
+            if (bracket[i] != '-'){
+                lock_guard<mutex> lock(buff.Wrlock);
+                buff[rt.head].addTrans(rt.tail,bracket[i]);
+            } else {
+                lock_guard<mutex> lock(buff.Wrlock);
+                buff[rt.head].addMultiTrans(rt.tail,bracket[i-1],bracket[i+1]);
+            }
+        }
     }
-    //todo
+    //todo{}
     static NFA_Cluster getBrace(NFA &buff,string &bracket,int l ,int r){
         NFA_Cluster rt(0,0);
         return rt;
@@ -334,7 +387,9 @@ NFA_Cluster operand2 = operandStack.top();
         case '{':
             throw invalid_argument("{ not supported yet");
         default:
-            throw invalid_argument("unknown operator occurs");
+            stringstream s;
+            s << "unknown operator occurs" << op.op<<" founded";
+            throw invalid_argument(s.str());
     };
 }
 
@@ -354,6 +409,7 @@ int i = 0,j;
                     cal(buff,operandStack,operatorStack.top());
                     operatorStack.pop();
                 }
+                operatorStack.pop();
                 ++i;
                 break;
             case '[': //todo
@@ -362,12 +418,17 @@ int i = 0,j;
                     i = j + 1;
                     continue;
                 }
-               // operand* p;
-                //*p = NFA_Cluster::getBracket(buff,)//RE2NFA_Cluster(RE.substr(i+1,j-i-1),buff);
-                //operandStack.push(p);
-                operandStack.push(NFA_Cluster::getBracket(buff,));
+                operandStack.push(NFA_Cluster::getBracket(buff,RE,i+1,j-1));
                 i = j + 1;
-                break;                
+                break;
+            case '\"':
+                for (j = i + 1; RE[j] !='"'&&j < RE.size();++j);
+                if (j == RE.size()){
+                    stringstream s;
+                    s<<"\" didn't match in "<<RE;
+                    throw invalid_argument(s.str());
+                }
+                operandStack.push(NFA_Cluster(buff,RE,i+1,j-1));
                 break;
             case '{': //todo
                 throw invalid_argument("not supported yet");
@@ -399,33 +460,38 @@ int i = 0,j;
                 operandStack.push(NFA_Cluster(RE[i]));
                 break;
         }
-
-
     }
-    NFA_Node nhead;
-    nhead.addTrans(head.tail,'\n');
-    head.head = buff.add(nhead);
-    return head;
-
+    if (operandStack.size() != 1){
+        stringstream s;
+        s <<"expeceted 1 operand left but found"<<operandStack.size()<< "operands";
+        throw invalid_argument(s.str());
+    }
+    return operandStack.top();
 }
 
-NFA_Cluster RE2NFA(string RE,NFA &buff){
+NFA_Cluster RE2NFA(string RE,NFA &buff,action _action){
     NFA_Cluster &&head = RE2NFA_Cluster(RE[0]=='^'?RE.substr(1,RE.size()-(RE[RE.size()-1]=='$'?2:1)):RE,buff);
-    int nhead = buff.add();
-    buff[nhead].addTrans(head.head,'\n');
+    int nhead = buff.add(),ntail = buff.add();
+    {
+        lock_guard<mutex> lock(buff.Wrlock);
+        buff[nhead].addTrans(head.head,'\n');
+    }
     if (RE[0] != '^'){
+        lock_guard<mutex> lock(buff.Wrlock);
         buff[nhead].addTrans(head.head,eps);
     } 
     head.head = nhead;
-    /*
-    todo : $ at  tail;
+    {
+        lock_guard<mutex> lock(buff.Wrlock);
+        buff[ntail].setAction(_action);
+        buff[head.tail].addTrans(ntail,'\n');
+    }
 
-
-
-
-
-
-    */
+    if (RE[RE.size()-1] != '$'){
+        lock_guard<mutex> lock(buff.Wrlock);
+        buff[head.tail].addTrans(ntail,eps);
+    }  
+    head.tail = ntail;  
     return head;
 }
 

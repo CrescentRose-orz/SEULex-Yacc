@@ -14,6 +14,7 @@
 #include "graph.h"
 #include "action.hpp"
 #include "RE.hpp"
+#include "NFA.hpp"
 using namespace std;
 #define fin lfile 
 //#define USE_MULTITHREAD
@@ -62,6 +63,8 @@ private:
     int lexReady;
     lexState _state;
     threadpool threadPool;
+    NFA _NFA;
+
 
     int checkNewLine();
     void scanStatement();    // todo : exception 
@@ -176,11 +179,20 @@ void Lex::start(){
         fin.close();
         cout<<"file close ok"<<endl;
         unfoldAllRE();
+        for (int i = 0; i < targetRE.size()){
+            _NFA.addRE(targetRE[i],Action[i]);
+        }
+        fstream fout;
+        fout.open("output.dot",'w');
+        _NFA.vNFA.print(fout);
     }catch (invalid_argument e){
         logger.customMSG(e.what());
         cerr<<e.what()<<endl;
         logger.error("invalid input, program ended ","parsing lex file",lineCnt);
         logger.close();
+        fstream fout;
+        fout.open("output.dot",'w');
+        _NFA.vNFA.print(fout);
         return ;
     } 
     catch(exception e){

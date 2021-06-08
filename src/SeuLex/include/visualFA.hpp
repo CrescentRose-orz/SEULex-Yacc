@@ -9,9 +9,9 @@ private:
     T from;
     T to;
 public :
-    void print()
+    void print(fstream &fout)
     {
-         cout<<from<<" -> "<<to<<" [label =\" "<<label<<"\" ]"<<endl;
+         fout<<from<<" -> "<<to<<" [label =\" "<<label<<"\" ]"<<endl;
     }
     edge(T from,T to,string label);
     edge();
@@ -36,23 +36,24 @@ public :
         edgePool.push_back(label,from,to);
     }
 
-    void print()
+    void print(fstream &fout)
     {
-        cout<<"digraph finite_state_machine {"<<endl<<"rankdir=LR;"<<endl;
-        cout<<"size = \""<<i+j<<","<<doubleCircle.size()<<"\""<<endl;
+        fout<<"digraph finite_state_machine {"<<endl<<"rankdir=LR;"<<endl;
+        fout<<"size = \""<<i+j<<","<<doubleCircle.size()<<"\""<<endl;
 
-        cout<<"node [shape = doublecircle]; ";
+        fout<<"node [shape = doublecircle]; ";
         for(int i=0;i<doubleCircle.size();i++)
         {
-        cout<<doubleCircle[i]<<" ";
+        fout<<doubleCircle[i]<<" ";
         }
-        cout<<";"<<endl;
+        fout<<";"<<endl;
 
-        cout<<"node [shape = circle];"<<endl;
+        fout<<"node [shape = circle];"<<endl;
         for(int j=0;j<edgePool.size();j++)
         {
-            edgePool[j].print();
+            edgePool[j].print(fout);
         }
+        fout.close();
     }
 };
 
