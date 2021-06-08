@@ -14,7 +14,7 @@
 #include "graph.h"
 #include "action.hpp"
 #include "RE.hpp"
-#include "NFA.hpp"
+#include "NFA.h"
 using namespace std;
 #define fin lfile 
 //#define USE_MULTITHREAD
