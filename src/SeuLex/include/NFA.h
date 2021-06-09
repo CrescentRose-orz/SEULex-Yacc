@@ -7,8 +7,8 @@
 #include"NFA_Cluster.h"
 #include"Logger.h"
 #include"CONSTANT.h"
-
-#define VISUAL
+#include"basicFA.hpp"
+#include"Hash.hpp"
 #define dev
 using namespace std;
 const int NFA_t =258;
@@ -40,6 +40,7 @@ private:
     multimap<int,int> state;
     action act;
     bool hasAction = 0;
+    basicHash _hash;
     #ifdef VISUAL
     visualFA<int> &fa; 
     vector<pair<int,int>> edge;
@@ -56,12 +57,20 @@ public:
         hasAction = 1;
         idx = -1;
     }
+    void update(basicHash _hash){
+        this -> _hash = _hash;        
+        update();
+ 
+    }
     void update(){
         for (auto &p:edge){
             fa.addEdge(idx, p.first, p.second);
         }
         if (aflag){
             fa.addNode(idx);
+        }
+        if (!_hash.isValid()){
+            _hash = basicHash(idx);
         }
     }
     #else
@@ -126,23 +135,19 @@ public:
     }
 };
 
-class NFA{
-private:
-    int tmp;
+class NFA:public basicFA<NFA_Node>{
 public:
-    Logger logger;
-    mutex Wrlock;
     int tail = 0;
     vector<NFA_Node> pool;
     NFA();
     NFA(Logger &log);
-    NFA_Node& operator [](int i);
+    basicHash nowHash;
     int add();
     int add(NFA_Node node);
     int head();
     void addRE(string &RE,action _action);
     #ifdef VISUAL       
-    visualFA<int> vNFA;
+    visualFA<int> vFA;
     #endif
 };
 
