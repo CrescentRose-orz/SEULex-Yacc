@@ -44,7 +44,7 @@ public :
         for (int i = 32; i < min(255,CHARSIZE); ++i){
             trans[i] += (char)i;
         }
-        trans['\n']="\\n";
+        trans['\n']="\\\\n";
         trans[eps] = "ε";
         trans['\\'] ="\\\\";
         trans['\"']="\\\"";
@@ -53,7 +53,6 @@ public :
     void addNode(T label)
     {
         doubleCircle.push_back(label);
-        cout<<"add node ok"<<endl;
     }
 
     void addEdge(T from,T to, string label)

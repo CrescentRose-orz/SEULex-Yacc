@@ -58,7 +58,6 @@ class eclosureHash:public basicHash{
 public:
     eclosureHash(){}
     eclosureHash(basicHash element){add(element);}
-    //void add(NFA_Node);
     void add(basicHash element){
         for (int i = 0 ; i < HASH_CNT; ++i){
             hash[i] += element[i];

@@ -183,10 +183,16 @@
     }
     //bracket todo 【】
     NFA_Cluster NFA_Cluster::getBracket(NFA &buff,string &bracket,int l,int r){
+    bool skip[charSetMAX+1] = {0};
+    bool reverse = 0;
         if (l == r){
             throw invalid_argument("empty bracket is not allowed");
         }
         NFA_Cluster rt(buff.add(),buff.add());
+        if (bracket[l]=='^'){
+            ++l;
+            reverse = 1;
+        }
         if (!NFA_Cluster::checkBracket(bracket,l,r)){
             stringstream s;
             s<<"syntax error in bracket expression "<<bracket.substr(l,r-l+1);
@@ -194,16 +200,37 @@
         }
         for (int i = l; i <= r; ++i){
             if (bracket[i] != '-'){
-                lock_guard<mutex> lock(buff.Wrlock);
-                buff[rt.head].addTrans(rt.tail,bracket[i]);
-            } else {
-                if (i == l||i == r|| bracket[i-1]>=bracket[i+1]){
-                    lock_guard<mutex> lock(buff.Wrlock);
-                    buff[rt.head].addTrans(rt.tail,'-');    
+                if (reverse){
+                    skip[bracket[i]] = 1;
                 } else {
                     lock_guard<mutex> lock(buff.Wrlock);
-                    buff[rt.head].addMultiTrans(rt.tail,bracket[i-1],bracket[i+1]);
+                    buff[rt.head].addTrans(rt.tail,bracket[i]);
                 }
+            } else {
+                if (i == l||i == r|| bracket[i-1]>=bracket[i+1]){
+                    if (reverse){
+                        skip[bracket[i]] = 1;
+                    } else {
+                        lock_guard<mutex> lock(buff.Wrlock);
+                        buff[rt.head].addTrans(rt.tail,'-');    
+                    }
+                } else {
+                    if (reverse){
+                        for (int j = bracket[i-1];j <= bracket[i+1];++j){
+                            skip[j] = 1;
+                        }
+                    } else {
+                        lock_guard<mutex> lock(buff.Wrlock);
+                        buff[rt.head].addMultiTrans(rt.tail,bracket[i-1],bracket[i+1]);
+                    }
+                }
+            }
+        }
+        {
+            lock_guard<mutex> lock(buff.Wrlock);
+            for (int i = 0; i <= charSetMAX; ++i){
+                if (!skip[i])
+                    buff[rt.head].addTrans(rt.tail,i);
             }
         }
         return rt;
@@ -215,7 +242,6 @@
     }
     NFA_Cluster NFA_Cluster::createEmpty(NFA &buff){
         int && idx = buff.add();
-        cout<<"creating empty! "<<idx<<endl;
         return NFA_Cluster(idx,idx);
     }
 
@@ -242,12 +268,11 @@ bool trans = 0;
     //operatorStack.push('`');
     NFA_Cluster &&head = NFA_Cluster::createEmpty(buff);
     while(i<RE.size()){
-        fstream ftmp;
-        ftmp.open("tmp.dot",ios::out);
-        buff.vNFA.print(ftmp);
+        // fstream ftmp;
+        // ftmp.open("tmp.dot",ios::out);
+        // buff.vNFA.print(ftmp);
         stringstream s;
-        s<<"meet "<<RE[i]<<"the size of operandStack is "<<operandStack.size()<<" opstack is "<<operatorStack.size();
-        cout<<"meet "<<RE[i]<<"the size of operandStack is "<<operandStack.size()<<" opstack is "<<operatorStack.size()<<endl;      
+        s<<"meet "<<RE[i]<<"the size of operandStack is "<<operandStack.size()<<" opstack is "<<operatorStack.size();    
         buff.logger.customMSG(s.str());
         buff.logger.save();
         if (trans){
@@ -306,26 +331,18 @@ bool trans = 0;
             case '?':
             case '+': 
             case '^': 
-                cout<<"get single op!"<<endl;
                 newOp = RE_operator(RE[i]);
-                cout<<"wrapped!"<<endl;
                 if (!operatorStack.empty())
-                cout<<RE::newPri[newOp] <<" "<< RE::oldPri[operatorStack.top()]<<endl;
                 while (!operatorStack.empty()&&RE::newPri[newOp] < RE::oldPri[operatorStack.top()]){
                     NFA_Cluster::cal(buff,operandStack,operatorStack.top());
-                    cout<<"cal ok!"<<endl;
                     operatorStack.pop();
                 } 
-                cout<<"juding ok!"<<endl;
                 operatorStack.push(RE[i]);
-                cout<<"store ok!"<<endl;
                 ++i;
                 break;
             case '$':
                 while(!operatorStack.empty()){
-                    cout<<"handling "<<operatorStack.top().op<<"!"<<endl;
                     cal(buff,operandStack,operatorStack.top());
-                    cout<<"ok!"<<endl;
                     operatorStack.pop();
                 }{
                 stringstream s;
@@ -374,7 +391,6 @@ NFA_Cluster NFA_Cluster::RE2NFA(string RE,NFA &buff,action _action){
     head.head = nhead;
     {
         lock_guard<mutex> lock(buff.Wrlock);
-        cout<<"setting action"<<endl;
         buff[ntail].setAction(_action);
         buff[head.tail].addTrans(ntail,'\n');
     }
@@ -403,10 +419,8 @@ stringstream s;
     switch(op.op){
         case '|':
         case '^':
-            cout<<"connecting ok? "<<operandStack.size()<<endl;
             operandStack.pop();      
             {  
-            cout<<"creating!"<<" for ["<<operand2.head<<","<<operand2.tail<<"]"<<op.op<<" ["<<operand1.head<<","<<operand1.tail<<"]"<<endl;
             NFA_Cluster &&tmp = NFA_Cluster(buff,op,operand2,operand1);
             s<<"get "<<tmp.head<<" "<<tmp.tail<<" for ["<<operand2.head<<","<<operand2.tail<<"]"<<op.op<<" ["<<operand1.head<<","<<operand1.tail<<"]"<<endl;
             buff.logger.customMSG(s.str());
@@ -417,9 +431,7 @@ stringstream s;
         case '?':
         case '+':
         case '*':
-            cout<<"single ok? "<<operandStack.size()<<endl;   
             {  
-                cout<<"creating!"<<" for ["<<operand1.head<<","<<operand1.tail<<"]"<<op.op<<endl;
                 NFA_Cluster &&tmp = NFA_Cluster(buff,op,operand1);
                 s<<"get "<<tmp.head<<" "<<tmp.tail<<" for ["<<operand1.head<<","<<operand1.tail<<"]"<<op.op<<endl;
                 buff.logger.customMSG(s.str());

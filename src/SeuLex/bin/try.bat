@@ -1,2 +1,2 @@
-dot tmp.dot -Tbmp -o tmp.bmp
+dot output.dot -Tsvg -o NFA.svg
 pause

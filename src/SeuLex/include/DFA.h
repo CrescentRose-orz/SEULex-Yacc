@@ -1,3 +1,5 @@
+#ifndef DFA_HEADER
+#define DFA_HEADER
 #include"Hash.hpp"
 #include<bits/stdc++.h>
 #include"NFA.h"
@@ -56,3 +58,4 @@ public:
 
     #endif
 };
+#endif
