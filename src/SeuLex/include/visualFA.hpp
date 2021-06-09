@@ -14,7 +14,6 @@ string trans[CHARSIZE];
 template<typename D>
 class edge{
 private:
-
     string label;
     D from;
     D to;

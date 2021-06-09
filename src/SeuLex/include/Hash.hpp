@@ -19,12 +19,17 @@ long long ans = 1;
 class basicHash{
 protected:
     long long hash[HASH_CNT];
+    bool valid = 0;
 public:
-    basicHash(){memset(hash,0,sizeof(hash));}
+    bool isValid(){
+        return valid;
+    }
+    basicHash(){memset(hash,0,sizeof(hash));valid = 0;}
     basicHash(int idx){
         for (int i = 0; i < HASH_CNT;++i){
             hash[i] = qPow(HASH_KEY[i],idx);
         }
+        valid = 1;
     }
     basicHash(vector<long long> lastVal,int diff){
         if (diff < 0){
@@ -36,6 +41,7 @@ public:
         for (int i = 0; i < HASH_CNT;++i){
             hash[i] = lastVal[i] * qPow(HASH_KEY[i],diff);
         }
+        valid = 1;
     }
     vector<long long> getVal(){return vector<long long>(hash,hash+HASH_CNT-1);}
     long long operator[](int i) const {
@@ -45,12 +51,21 @@ public:
         return hash[i];
     }
     bool operator == (basicHash &other){
+        if (!valid){
+            throw invalid_argument("this hashKey has not been initialized!");
+        }
         for (int i = 0 ; i <HASH_CNT; ++i){
             if (hash[i] != other.hash[i]){
                 return 0;
             }
         }
         return 1;
+    }
+    
+    void inc(){
+        for (int i = 0; i < HASH_CNT;++i){
+            hash[i] *= HASH_KEY[i];
+        }
     }
 };
 
