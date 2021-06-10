@@ -16,6 +16,7 @@
 #include "action.hpp"
 #include "RE.h"
 #include "NFA.h"
+#include "DFA.h"
 using namespace std;
 
 
@@ -62,7 +63,7 @@ private:
     lexState _state;
     threadpool threadPool;
     NFA _NFA;
-
+    DFA _DFA;
     void initAll();
     int checkNewLine();
     void scanStatement();    // todo : exception 
@@ -119,16 +120,16 @@ bool Lex::setInputFile(string lexFileName){
     return 0;
 }
 
-Lex::Lex():logger(),threadPool(8),_NFA(logger){
+Lex::Lex():logger(),threadPool(8),_NFA(logger),_DFA(logger){
     lexReady = 0;
 }
 
-Lex::Lex(string lexFileName,string loggerFileName):logger(loggerFileName),threadPool(8),_NFA(logger){
+Lex::Lex(string lexFileName,string loggerFileName):logger(loggerFileName),threadPool(8),_NFA(logger),_DFA(logger){
     lexReady = 0;
     setInputFile(lexFileName);
 }
 
-Lex::Lex(string loggerFileName):logger(loggerFileName),threadPool(8),_NFA(logger){
+Lex::Lex(string loggerFileName):logger(loggerFileName),threadPool(8),_NFA(logger),_DFA(logger){
     lexReady = 0;
 }
 
@@ -186,6 +187,10 @@ void Lex::start(){
         fstream fout;
         fout.open("output.dot",ios::out);
         _NFA.vFA.print(fout);
+        _DFA.NFA2DFA(_NFA);
+        fout.open("DFA.dot",ios::out);
+        _DFA.vFA.print(fout);
+        
     }catch (invalid_argument e){
         logger.customMSG(e.what());
         cerr<<e.what()<<endl;
@@ -194,6 +199,8 @@ void Lex::start(){
         fstream fout;
         fout.open("output.dot",ios::out);
         _NFA.vFA.print(fout);
+            fout.open("DFA.dot",ios::out);
+        _DFA.vFA.print(fout);
         return ;
     } 
     catch(exception e){
