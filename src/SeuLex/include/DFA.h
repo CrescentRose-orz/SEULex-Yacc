@@ -18,6 +18,8 @@ public:
     //NFA_eclosure(int idx);//:hash(basicHash(idx));
     void add(int idx);  
     bool operator == (const NFA_eclosure &other)const;
+    bool has(int idx);
+    void expandEclosure();
 };
 
 class DFA;
@@ -111,12 +113,13 @@ public:
     DFA(Logger &log);
     int add();
     int add(DFA_Node node);
+    int addTrans(int from, int to, int c);
     int head();
     bool exist(NFA_eclosure &_e);
     int idx(NFA_eclosure &_e);
     int insert(NFA_eclosure &_e);
     void NFA2DFA(NFA& _NFA);
-    void expandEclosure(NFA_eclosure _e);
+
 };
 
 

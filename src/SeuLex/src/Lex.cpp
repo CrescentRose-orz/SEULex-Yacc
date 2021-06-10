@@ -5,6 +5,7 @@
     Main class
 
 */
+#include"CONSTANT.h"
 #include<string>
 #include<bits/stdc++.h>
 #include<thread>
@@ -16,10 +17,7 @@
 #include "RE.h"
 #include "NFA.h"
 using namespace std;
-#define fin lfile 
-//#define USE_MULTITHREAD
-#define DEBUG
-// transform NFA DFA miniDFA Logger visualGraph
+
 
 inline bool space(char &c){
     return c==0x20||c==0x09;
