@@ -187,7 +187,7 @@ void Lex::start(){
         }
         fstream fout;
         fout.open("output.dot",ios::out);
-        _NFA.vNFA.print(fout);
+        _NFA.vFA.print(fout);
     }catch (invalid_argument e){
         logger.customMSG(e.what());
         cerr<<e.what()<<endl;
@@ -195,7 +195,7 @@ void Lex::start(){
         logger.close();
         fstream fout;
         fout.open("output.dot",ios::out);
-        _NFA.vNFA.print(fout);
+        _NFA.vFA.print(fout);
         return ;
     } 
     catch(exception e){
@@ -203,7 +203,7 @@ void Lex::start(){
         system("pause");
         fstream fout;
         fout.open("output.dot",ios::out);
-        _NFA.vNFA.print(fout);
+        _NFA.vFA.print(fout);
         logger.error("Exception occured ","parsing lex file",lineCnt);
         logger.customMSG(e.what());
         logger.close();

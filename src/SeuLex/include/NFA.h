@@ -73,6 +73,9 @@ public:
             _hash = basicHash(idx);
         }
     }
+    basicHash hash(){
+        return _hash;
+    }
     #else
     NFA_Node(){
         hasAction = -1;

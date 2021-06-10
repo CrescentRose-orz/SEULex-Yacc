@@ -1,6 +1,9 @@
+#ifndef BASICFA
+#define BASICFA
 #include"CONSTANT.h"
 #include"visualFA.hpp"
 #include<bits/stdc++.h>
+#include<shared_mutex>
 #include"Logger.h"
 using namespace std;
 
@@ -16,10 +19,11 @@ public:
     T& operator [](int i){
         return pool[i];
     }
-    virtual int add();
-    virtual int add(T node);
+    virtual int add()=0;
+    virtual int add(T)=0;
     virtual int head();
     #ifdef VISUAL       
     visualFA<int> vFA;
     #endif
 };
+#endif

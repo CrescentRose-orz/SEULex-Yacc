@@ -3,7 +3,7 @@
 
 using namespace std;
 const int HASH_CNT = 2;
-const int HASH_KEY[HASH_CNT] = {19260817,2281701377};
+const long long HASH_KEY[HASH_CNT] = {19260817,2281701377};
 inline long long qPow(long long x,long long p){
 long long ans = 1;
     while(p){
@@ -44,13 +44,13 @@ public:
         valid = 1;
     }
     vector<long long> getVal(){return vector<long long>(hash,hash+HASH_CNT-1);}
-    long long operator[](int i) const {
+    long long operator[](const int &i) const {
         if (i<0 || i >= HASH_CNT){
             throw invalid_argument("index out of bound in basicHash[]");
         }
         return hash[i];
     }
-    bool operator == (basicHash &other){
+    bool operator == (const basicHash &other)const{
         if (!valid){
             throw invalid_argument("this hashKey has not been initialized!");
         }
@@ -78,7 +78,7 @@ public:
             hash[i] += element[i];
         }
     }
-    bool operator ==(eclosureHash other){
+    bool operator ==(const eclosureHash &other)const{
         for (int i = 0 ; i <HASH_CNT; ++i){
             if (hash[i] != other.hash[i]){
                 return 0;

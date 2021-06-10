@@ -1,7 +1,28 @@
 #include"DFA.h"
-
-
-
+/*
+class NFA_eclosure{
+private:
+    NFA& _NFA;
+public:
+    set<int> NFAs;
+    eclosureHash hash;
+    NFA_eclosure(NFA &_NFA);//:hash(),_NFA(_NFA)
+    //NFA_eclosure(int idx);//:hash(basicHash(idx));
+    void add(int idx){ hash.add(basicHash(idx));}
+    bool operator == (NFA_eclosure &other){
+        return this -> hash == other.hash;
+    }
+};
+*/
+    NFA_eclosure::NFA_eclosure(NFA &_NFA):hash(),_NFA(_NFA){}
+    void NFA_eclosure::add(int idx){
+        //hash.add(basicHash(idx));
+        RdLock(mutex);
+        hash.add(_NFA[idx].hash());
+    }
+    bool NFA_eclosure::operator==(const NFA_eclosure &other)const{
+        return this -> hash == other.hash;
+    }
 
 DFA::DFA(){}
 DFA::DFA(Logger &log):basicFA(log){}
@@ -25,12 +46,12 @@ int DFA::head(){
 }
 
 bool DFA::exist(NFA_eclosure &_e){
-    shared_guard<shared_mutex> lock(mapMutex);
+    shared_lock<shared_mutex> lock(mapMutex);
     return DFAMap.count(_e.hash);
 }
 int DFA::idx(NFA_eclosure &_e){
     if (exist(_e)){
-        shared_guard<shared_mutex> lock(mapMutex);
+        shared_lock<shared_mutex> lock(mapMutex);
         return DFAMap[_e.hash];
     } else {
         throw invalid_argument("not in the DFAMap!");

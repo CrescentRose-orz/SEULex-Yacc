@@ -16,10 +16,8 @@ public:
     eclosureHash hash;
     NFA_eclosure(NFA &_NFA);//:hash(),_NFA(_NFA)
     //NFA_eclosure(int idx);//:hash(basicHash(idx));
-    void add(int idx){ hash.add(basicHash(idx));}
-    bool operator == (NFA_eclosure &other){
-        return this -> hash == other.hash;
-    }
+    void add(int idx);  
+    bool operator == (const NFA_eclosure &other)const;
 };
 
 class DFA;
@@ -119,7 +117,6 @@ public:
     int insert(NFA_eclosure &_e);
     void NFA2DFA(NFA& _NFA);
     void expandEclosure(NFA_eclosure _e);
-    NFA_eclosure g
 };
 
 
