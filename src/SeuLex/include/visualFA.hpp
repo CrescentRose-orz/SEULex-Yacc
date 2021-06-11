@@ -40,7 +40,7 @@ public :
         for (int i = 0; i < 32; ++i){
             trans[i] ="\\\\"+to_string(i);
         }
-        for (int i = 32; i <= min(255,CHARSIZE); ++i){
+        for (int i = 32; i < min(256,CHARSIZE); ++i){
             trans[i] += (char)i;
         }
         trans['\n']="\\\\n";
