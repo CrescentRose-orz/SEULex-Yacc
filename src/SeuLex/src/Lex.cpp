@@ -182,14 +182,18 @@ void Lex::start(){
         fin.close();
         cout<<"file close ok"<<endl;
         unfoldAllRE();
+        logger.start("create NFA with REs");
         for (int i = 0; i < targetRE.size();++i){
             _NFA.addRE(targetRE[i],Action[i]);
         }
-        cout<<"NFA ok!"<<endl;
+        logger.end("create NFA with REs");
+        cout<<"NFA created!"<<endl;
         fstream fout;
         fout.open("output.dot",ios::out);
         _NFA.vFA.print(fout);
+        logger.start("create DFA with NFA");
         _DFA.NFA2DFA(_NFA);
+        logger.end("create DFA with NFA");
         fout.open("DFA.dot",ios::out);
         _DFA.vFA.print(fout);
         
@@ -336,8 +340,6 @@ void Lex::copyStatement(){
                     fin.get(c);
                     tmp+=c;
                 }
-                tmp+=" is wasted";
-                logger.customMSG(tmp);
                 return ;
             } else {
                 codeBuff+='%';
@@ -557,8 +559,10 @@ void Lex::handlePredefinedStatement(){
         string raw = preDefine[s];
         string &&newRE = RE::unfoldRE(raw,preDefine);
         preDefine[s] = newRE;
+        #ifdef DEBUG
         logger.customMSG(raw);
         logger.customMSG(newRE);
+        #endif
     }
 
     return ;
@@ -581,7 +585,9 @@ void Lex::unfoldAllRE(){
         #else
         string &&rt = RE::unfoldRE(s,preDefine);
         targetRE[i] = rt;
+        #ifdef DEBUG
         logger.customMSG("unfold :" + rt);
+        #endif
         #endif
     }
     #ifdef USE_MULTITHREAD
