@@ -184,6 +184,7 @@ void Lex::start(){
         unfoldAllRE();
         cout<<"unfold ok,start with RE2NFA"<<endl;
         logger.start("create NFA with REs");
+        logger.save();
         for (int i = 0; i < targetRE.size();++i){
             _NFA.addRE(targetRE[i],Action[i]);
         }
@@ -211,6 +212,7 @@ void Lex::start(){
         return ;
     } 
     catch(exception e){
+        logger.save();
         cerr<<"unknow exception occurs"<<endl;
         system("pause");
         fstream fout;

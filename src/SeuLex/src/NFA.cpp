@@ -33,6 +33,11 @@ int NFA::head(){
 }
 
 void NFA::addRE(string &RE,action _action){
+        #ifdef DEBUG
+        stringstream s;
+        s<<RE<<" to"<<" NFA";
+        logger.customMSG(s.str());
+        #endif
         NFA_Cluster &&rt = NFA_Cluster::RE2NFA(RE,*this,_action);
         {
             WrLock(Wrlock);
