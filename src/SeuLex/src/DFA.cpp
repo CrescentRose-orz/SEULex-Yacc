@@ -102,7 +102,7 @@ int DFA::insert(NFA_eclosure &_e){
         rt = add();
         WrLock(mapMutex);
         DFAMap[_e.hash] = rt;
-        if (_e.actIdx != -1){
+        if (_e._action.getIdx() != 0){
             pool[rt].setAction(_e._action);
         }
     }
