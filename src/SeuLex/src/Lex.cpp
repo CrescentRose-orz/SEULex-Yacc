@@ -182,6 +182,7 @@ void Lex::start(){
         fin.close();
         cout<<"file close ok"<<endl;
         unfoldAllRE();
+        cout<<"unfold ok,start with RE2NFA"<<endl;
         logger.start("create NFA with REs");
         for (int i = 0; i < targetRE.size();++i){
             _NFA.addRE(targetRE[i],Action[i]);
