@@ -57,9 +57,6 @@ public:
         hasAction = 1;
         idx = -1;
     }
-    void setHash(basicHash _hash){
-        this->_hash = _hash;
-    }
     void update(basicHash _hash){
         this -> _hash = _hash;        
         update();
@@ -88,6 +85,9 @@ public:
         idx = -1;
     }
     #endif
+    void setHash(basicHash _hash){
+        this->_hash = _hash;
+    }
     void setAction(action act){
         this->act = act;
         if (hasAction) return;
