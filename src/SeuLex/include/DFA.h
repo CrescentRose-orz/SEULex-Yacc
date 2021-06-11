@@ -12,6 +12,8 @@ class NFA_eclosure{
 private:
     NFA& _NFA;
 public:
+    int actIdx = -1;
+    action _action;
     set<int> NFAs;
     eclosureHash hash;
     NFA_eclosure(NFA &_NFA);//:hash(),_NFA(_NFA)
@@ -20,6 +22,7 @@ public:
     bool operator == (const NFA_eclosure &other)const;
     bool has(int idx);
     void expandEclosure();
+    friend ostream &operator << (ostream& out,const NFA_eclosure &eNFA);
 };
 
 class DFA;
@@ -104,8 +107,9 @@ public:
 
 
 class DFA:public basicFA<DFA_Node>{
+
 private:
-    shared_mutex mapMutex;
+    _mutex_type mapMutex;
     unordered_map<eclosureHash,int,hashFunction> DFAMap;
 public:
     int tail = 0;

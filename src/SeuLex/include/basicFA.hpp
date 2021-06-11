@@ -11,7 +11,7 @@ template<typename T>
 class basicFA{
 public:
     Logger logger;
-    shared_mutex Wrlock;
+    _mutex_type Wrlock;
     int tail = 0;
     vector<T> pool;
     basicFA(){}
@@ -21,7 +21,7 @@ public:
     }
     virtual int add()=0;
     virtual int add(T)=0;
-    virtual int head();
+    virtual int head()=0;
     #ifdef VISUAL       
     visualFA<int> vFA;
     #endif

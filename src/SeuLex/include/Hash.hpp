@@ -3,7 +3,8 @@
 
 using namespace std;
 const int HASH_CNT = 2;
-const long long HASH_KEY[HASH_CNT] = {19260817,2281701377};
+const int MAX_HASH_CNT = 2;
+const long long HASH_KEY[MAX_HASH_CNT] = {19260817,2281701377};
 inline long long qPow(long long x,long long p){
 long long ans = 1;
     while(p){

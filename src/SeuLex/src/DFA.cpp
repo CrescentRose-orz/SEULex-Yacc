@@ -3,9 +3,18 @@
 NFA_eclosure::NFA_eclosure(NFA &_NFA):hash(),_NFA(_NFA){}
     //NFA_eclosure(int idx);//:hash(basicHash(idx));
 void NFA_eclosure::add(int idx){
-    RdLock(_NFA.Wrlock);
     NFAs.insert(idx);
     hash.add(_NFA[idx].hash());
+    RdLock(_NFA.Wrlock);
+    if (_NFA[idx].valid()){
+        if (actIdx == -1){
+            actIdx = idx;
+            _action = _NFA[idx].getAction();
+        } else if (idx < actIdx){
+            actIdx = idx;
+            _action = _NFA[idx].getAction();
+        }
+    }
 }
 bool NFA_eclosure::operator == (const NFA_eclosure &other)const{
     return hash == other.hash;
@@ -34,20 +43,28 @@ int now;
 bool NFA_eclosure::has(int x){
     return NFAs.find(x) != NFAs.end();
 }
+ostream& operator << (ostream& out,NFA_eclosure& eNFA){
+    out<<"{";
+    for(auto iter = eNFA.NFAs.begin();iter!=eNFA.NFAs.end();++iter){
+        out<<*iter<<" ";
+    }
+    out<<"}";
+    return out;
+}
 
 
 DFA::DFA(){}
 DFA::DFA(Logger &log):basicFA(log){}
 
 int DFA::add(){
-    unique_lock<shared_mutex> lock(Wrlock);
+    WrLock(Wrlock);
     pool.emplace_back(DFA_Node(vFA));
     pool[tail].idx = tail;
     return tail++;       
 }
 
 int DFA::add(DFA_Node node){
-    unique_lock<shared_mutex> lock(Wrlock);
+    WrLock(Wrlock);
     pool.emplace_back(node);
     pool[tail].idx = tail;
     pool[tail].update();
@@ -59,9 +76,11 @@ int DFA::head(){
 int DFA::addTrans(int from, int to, int c){
     WrLock(Wrlock);
     pool[from].addTrans(to,c);
+    return 0;
 }
 bool DFA::exist(NFA_eclosure &_e){
-    shared_guard<shared_mutex> lock(mapMutex);
+    RdLock(mapMutex);
+   // shared_guard<shared_mutex> lock(mapMutex);
     return DFAMap.count(_e.hash);
 }
 int DFA::idx(NFA_eclosure &_e){
@@ -69,17 +88,25 @@ int DFA::idx(NFA_eclosure &_e){
         RdLock(mapMutex);
         return DFAMap[_e.hash];
     } else {
-        throw invalid_argument("not in the DFAMap!");
+        stringstream s;
+        s<<_e<<"is not in the DFAMap!";
+        throw invalid_argument(s.str());
     }
 }
 int DFA::insert(NFA_eclosure &_e){
     if (exist(_e)){
-        throw invalid_argument("already in the DFAMap!");          
+        stringstream s;
+        s<<_e<<"already in the DFAMap!";
+        throw invalid_argument(s.str());       
     }
     int rt;
     {
-        lock_guard<shared_mutex> lock(mapMutex);
         rt = add();
+        WrLock(mapMutex);
+        DFAMap[_e.hash] = rt;
+        if (_e.actIdx != -1){
+            pool[rt].setAction(_e._action);
+        }
     }
     return rt;
 }
@@ -104,10 +131,15 @@ threadpool tp(THREADCNT);
 #else
 queue<NFA_eclosure> q;
 NFA_eclosure startPoint(_NFA);
+unordered_set<eclosureHash,hashFunction> vis;
     startPoint.add(_NFA.head());
     startPoint.expandEclosure();    
     insert(startPoint);
     q.push(startPoint);
+    stringstream s;
+    s<<"begin with" << startPoint;
+    logger.customMSG(s.str());
+    vis.insert(startPoint.hash);
     while (!q.empty()){
         NFA_eclosure & now = q.front();
         for (int i = 0; i <= charSetMAX; ++i){
@@ -121,10 +153,24 @@ NFA_eclosure startPoint(_NFA);
                     }
                 }
             }
-            addTrans(idx(now),insert(newE),i);
-            q.push(newE);
+            if (vis.count(newE.hash)){
+                continue;
+            }
+            vis.insert(newE.hash);
+            stringstream s;
+            newE.expandEclosure();
+            s<<now<<" to " <<newE<<" with "<<i;
+            logger.customMSG(s.str());
+            if (exist(newE)){
+                addTrans(idx(now),idx(newE),i);
+            } else {
+                int &&to = insert(newE);
+                addTrans(idx(now),to,i);
+                q.push(newE);
+            }
         }
         q.pop();
     }
+    cout<<"total "<<pool.size()<<"nodes"<<endl;
 #endif
 }

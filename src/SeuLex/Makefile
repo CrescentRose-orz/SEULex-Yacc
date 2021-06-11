@@ -1,5 +1,5 @@
 CXX		  := g++
-CXXFLAGS = -std=c++11 -stdlib=libstdc++ -Wall -Werror -Wextra -pedantic  -g -fsanitize=address
+CXXFLAGS = -std=c++17 -stdlib=libstdc++ -Wall -Werror -Wextra -pedantic  -g -fsanitize=address
 LDFLAGS =  -fsanitize=address
 
 BIN		:= bin

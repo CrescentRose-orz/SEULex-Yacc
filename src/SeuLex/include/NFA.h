@@ -57,10 +57,12 @@ public:
         hasAction = 1;
         idx = -1;
     }
+    void setHash(basicHash _hash){
+        this->_hash = _hash;
+    }
     void update(basicHash _hash){
         this -> _hash = _hash;        
         update();
- 
     }
     void update(){
         for (auto &p:edge){
@@ -91,17 +93,16 @@ public:
         if (hasAction) return;
         hasAction = 1;        
         #ifdef VISUAL
-        cout<<"try to add double node"<<endl;
         if (idx!=-1){
-            cout<<"add ok"<<endl;
             fa.addNode(idx);
         } else {
-            cout<<"not finished yet";
-
             aflag = 1;
         }
         #endif
 
+    }
+    action getAction(){
+        return act;
     }
     void addMultiTrans(int target,int l,int r){
         for (int i = l; i <= r; ++i){
@@ -109,11 +110,17 @@ public:
         }
     }
     void addTrans(int target,int c){
-        auto pr = state.equal_range(c);
-        for (auto iter = pr.first; iter!=pr.second;++iter){
-            if (iter->second == target){
-                return;
+        try{
+        if (state.find(c)!=state.end()){
+            auto pr = state.equal_range(c);
+            for (auto iter = pr.first; pr.first!=state.end()&&iter!=pr.second;++iter){
+                if (iter->second == target){
+                    return;
+                }
             }
+        }}
+        catch(exception e){
+            cerr<<"ERROR!"<<endl;
         }
         state.insert({c,target});
         #ifdef VISUAL
@@ -141,7 +148,6 @@ public:
 class NFA:public basicFA<NFA_Node>{
 public:
     int tail = 0;
-    vector<NFA_Node> pool;
     NFA();
     NFA(Logger &log);
     basicHash nowHash;

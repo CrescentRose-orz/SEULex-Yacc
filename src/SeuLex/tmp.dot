@@ -1,0 +1,7 @@
+digraph finite_state_machine {
+rankdir=LR;
+node [shape = doublecircle]; ;
+node [shape = circle];
+2 -> 3 [label =" /" ]
+3 -> 4 [label =" *" ]
+}

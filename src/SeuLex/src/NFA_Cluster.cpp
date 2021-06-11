@@ -33,7 +33,7 @@
         tail = buff.add();
         head = buff.add();
         {                    
-            RdLock(mutex);
+            WrLock(buff.Wrlock);
             if (c!='.'){
                 buff[head].addTrans(tail,c);
             } else {
@@ -45,7 +45,7 @@
         int tail = buff.add();
         int head = buff.add();
         {                    
-            RdLock(mutex);
+            WrLock(buff.Wrlock);
             buff[head].addTrans(tail,RE::trans(c));
         }        
         return NFA_Cluster(head,tail);
@@ -57,7 +57,7 @@
                 head = buff.add();
                 tail = buff.add();
                 {
-                    RdLock(mutex);
+                    WrLock(buff.Wrlock);
                     buff[head].addTrans(a.head,eps);
                     buff[head].addTrans(b.head,eps);  
                     buff[a.tail].addTrans(tail,eps);
@@ -70,7 +70,7 @@
                 head = a.head;
                 tail = b.tail;
                 {                
-                    RdLock(mutex);
+                    WrLock(buff.Wrlock);
                     buff[a.tail].addTrans(b.head,eps);
                 }
                 return;
@@ -108,7 +108,7 @@
                 _head.addTrans(tail,eps);
                 head = buff.add(_head);
                 {
-                    RdLock(mutex);
+                    WrLock(buff.Wrlock);
                     buff.pool[a.tail].addTrans(tail,eps);
                     buff.pool[a.tail].addTrans(a.head,eps);
                 }                
@@ -121,14 +121,14 @@
                 head = buff.add(_head);
                 _tail.addTrans(head,eps);
                 {
-                    RdLock(mutex);
+                    WrLock(buff.Wrlock);
                     buff.pool[a.tail].addTrans(tail,eps);
                 }             
                 #else
                 tail  = a.tail;
                 head = a.head;
                 {
-                    RdLock(mutex);
+                    WrLock(buff.Wrlock);
                     buff[head].addTrans(tail,eps);
                 }            
                 #endif        
@@ -140,7 +140,7 @@
                 head = a.head;
                 tail = a.tail;
                 {
-                    RdLock(mutex);
+                    WrLock(buff.Wrlock);
                     //buff.pool[a.tail].addTrans(tail,eps);
                     buff.pool[a.tail].addTrans(a.head,eps);
                 }       
@@ -160,7 +160,7 @@
             if (trans){
                 int tailIdx = buff.add();
                 {
-                    RdLock(mutex);
+                    WrLock(buff.Wrlock);
                     buff[rt.tail].addTrans(tailIdx,RE::trans(quotation[i]));
                 }
                 rt.tail = tailIdx;
@@ -173,7 +173,7 @@
             }
             int tailIdx = buff.add();
             {
-                RdLock(mutex);
+                WrLock(buff.Wrlock);
                 buff.pool[rt.tail].addTrans(tailIdx,quotation[i]);            
             }
             rt.tail = tailIdx;
@@ -204,7 +204,7 @@
                 if (reverse){
                     skip[bracket[i]] = 1;
                 } else {
-                    RdLock(mutex);
+                    WrLock(buff.Wrlock);
                     buff[rt.head].addTrans(rt.tail,bracket[i]);
                 }
             } else {
@@ -212,7 +212,7 @@
                     if (reverse){
                         skip[bracket[i]] = 1;
                     } else {
-                        RdLock(mutex);
+                        WrLock(buff.Wrlock);
                         buff[rt.head].addTrans(rt.tail,'-');    
                     }
                 } else {
@@ -221,14 +221,14 @@
                             skip[j] = 1;
                         }
                     } else {
-                        RdLock(mutex);
+                        WrLock(buff.Wrlock);
                         buff[rt.head].addMultiTrans(rt.tail,bracket[i-1],bracket[i+1]);
                     }
                 }
             }
         }
         {
-            RdLock(mutex);
+            WrLock(buff.Wrlock);
             for (int i = 0; i <= charSetMAX; ++i){
                 if (!skip[i])
                     buff[rt.head].addTrans(rt.tail,i);
@@ -264,25 +264,19 @@ bool trans = 0;
     RE += '$';
     stringstream s;
     s<<RE<<" started 2 NFA";
-    cout<<RE<<" started 2 NFA"<<endl;
     buff.logger.customMSG(s.str());
     //operatorStack.push('`');
     NFA_Cluster &&head = NFA_Cluster::createEmpty(buff);
     while(i<RE.size()){
-        // fstream ftmp;
-        // ftmp.open("tmp.dot",ios::out);
-        // buff.vFA.print(ftmp);
+        fstream ftmp;
+        ftmp.open("tmp.dot",ios::out);
+        buff.vFA.print(ftmp);
         stringstream s;
         s<<"meet "<<RE[i]<<"the size of operandStack is "<<operandStack.size()<<" opstack is "<<operatorStack.size();    
         buff.logger.customMSG(s.str());
         buff.logger.save();
         if (trans){
                 operandStack.push(NFA_Cluster::getTrans(buff,RE[i]));
-                {
-                stringstream s;
-                s<<"add "<<RE[i]<<endl;
-                buff.logger.customMSG(s.str());
-                }
                 trans = 0;
                 ++i;
                 continue;
@@ -343,12 +337,12 @@ bool trans = 0;
                 break;
             case '$':
                 while(!operatorStack.empty()){
+                    stringstream s;
+                    s<<"ready to cal ";//<<operatorStack.top().op<<endl;
+                    buff.logger.customMSG(s.str());
+                    buff.logger.save();
                     cal(buff,operandStack,operatorStack.top());
                     operatorStack.pop();
-                }{
-                stringstream s;
-                s<<"find end of RE "<<RE[i]<<endl;
-                buff.logger.customMSG(s.str());
                 }
                 ++i;
                 break;
@@ -375,29 +369,29 @@ bool trans = 0;
         s <<endl<<" the top is "<<operandStack.top().head<<" "<<operandStack.top().head<<endl;
         throw invalid_argument(s.str());
     }
-    return operandStack.top();
+    NFA_Cluster rt = operandStack.top();
+    return rt;
 }
 
 NFA_Cluster NFA_Cluster::RE2NFA(string RE,NFA &buff,action _action){
     NFA_Cluster &&head = NFA_Cluster::RE2NFA_Cluster(RE[0]=='^'?RE.substr(1,RE.size()-(RE[RE.size()-1]=='$'?2:1)):RE,buff);
     int nhead = buff.add(),ntail = buff.add();
     {
-        RdLock(mutex);
+        WrLock(buff.Wrlock);
         buff[nhead].addTrans(head.head,'\n');
     }
     if (RE[0] != '^'){
-        RdLock(mutex);
+        WrLock(buff.Wrlock);
         buff[nhead].addTrans(head.head,eps);
     } 
     head.head = nhead;
     {
-        RdLock(mutex);
+        WrLock(buff.Wrlock);
         buff[ntail].setAction(_action);
         buff[head.tail].addTrans(ntail,'\n');
     }
-
     if (RE[RE.size()-1] != '$'){
-        RdLock(mutex);
+        WrLock(buff.Wrlock);
         buff[head.tail].addTrans(ntail,eps);
     }  
     head.tail = ntail;  
@@ -415,6 +409,11 @@ operandStack.pop();
 NFA_Cluster operand2(0,0);
 if (!operandStack.empty()){
     operand2 = operandStack.top();
+}{
+stringstream s;
+    s<<"in cal"<<" "<<op.op;
+    buff.logger.customMSG(s.str());
+    buff.logger.save();
 }
 stringstream s;
     switch(op.op){

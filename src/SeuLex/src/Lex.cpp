@@ -103,6 +103,7 @@ void Lex::initAll(){
     RE::init();
     logger.init();
     _NFA.logger = logger;
+    _DFA.logger = logger;
 }
 bool Lex::setInputFile(string lexFileName){
     if (lexReady){
@@ -151,7 +152,7 @@ bool Lex::checkFileName(string fileName){
     fclose(tmp);
     return 1;
 }
-
+//shared_timed_mutex a;
 /*
     Initialization ended
 
@@ -184,6 +185,7 @@ void Lex::start(){
         for (int i = 0; i < targetRE.size();++i){
             _NFA.addRE(targetRE[i],Action[i]);
         }
+        cout<<"NFA ok!"<<endl;
         fstream fout;
         fout.open("output.dot",ios::out);
         _NFA.vFA.print(fout);
