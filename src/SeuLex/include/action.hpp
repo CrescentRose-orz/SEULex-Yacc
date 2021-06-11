@@ -15,16 +15,16 @@ public:
         this->index = index;
         this->code = code;
     }
-    bool operator < (action &other) const {
+    bool operator < (const action &other) const {
         return this->index < other.index;
     }
-    bool operator > (action &other) const {
+    bool operator > (const action &other) const {
         return this->index > other.index;
     }
-    bool operator == (action &other) const {
+    bool operator == (const action &other) const {
         return this->index == other.index;
     }
-    bool operator != (action &other) const {
+    bool operator != (const action &other) const {
         return this->index != other.index;
     }
     string getCode(){

@@ -262,12 +262,15 @@ RE_operator newOp('.');
 int i = 0,j;
 bool trans = 0;
     RE += '$';
+    #ifdef DEBUG
     stringstream s;
     s<<RE<<" started 2 NFA";
     buff.logger.customMSG(s.str());
+    #endif
     //operatorStack.push('`');
     NFA_Cluster &&head = NFA_Cluster::createEmpty(buff);
     while(i<RE.size()){
+        #ifdef DEBUG
         fstream ftmp;
         ftmp.open("tmp.dot",ios::out);
         buff.vFA.print(ftmp);
@@ -275,6 +278,7 @@ bool trans = 0;
         s<<"meet "<<RE[i]<<"the size of operandStack is "<<operandStack.size()<<" opstack is "<<operatorStack.size();    
         buff.logger.customMSG(s.str());
         buff.logger.save();
+        #endif
         if (trans){
                 operandStack.push(NFA_Cluster::getTrans(buff,RE[i]));
                 trans = 0;
@@ -337,10 +341,12 @@ bool trans = 0;
                 break;
             case '$':
                 while(!operatorStack.empty()){
+                    #ifdef DEBUG
                     stringstream s;
                     s<<"ready to cal ";//<<operatorStack.top().op<<endl;
                     buff.logger.customMSG(s.str());
                     buff.logger.save();
+                    #endif
                     cal(buff,operandStack,operatorStack.top());
                     operatorStack.pop();
                 }
@@ -354,11 +360,13 @@ bool trans = 0;
                 //operand* p = new NFA_Cluster(RE[i]);
                 //operandStack.push(p);
                 operandStack.push(NFA_Cluster(buff,RE[i]));
+                #ifdef DEBUG
                 {
                 stringstream s;
                 s<<"add "<<RE[i]<<endl;
                 buff.logger.customMSG(s.str());
                 }
+                #endif
                 ++i;
                 break;
         }
@@ -395,10 +403,12 @@ NFA_Cluster NFA_Cluster::RE2NFA(string RE,NFA &buff,action _action){
         buff[head.tail].addTrans(ntail,eps);
     }  
     head.tail = ntail;  
+    #ifdef DEBUG
     stringstream s;
     s<<"finish with head: "<<head.head<<" and tail: "<<head.tail<<endl;
     buff.logger.customMSG(s.str());
        // system("pause");
+    #endif
     return head;
 }
 
@@ -411,9 +421,11 @@ if (!operandStack.empty()){
     operand2 = operandStack.top();
 }{
 stringstream s;
+#ifdef DEBUG
     s<<"in cal"<<" "<<op.op;
     buff.logger.customMSG(s.str());
     buff.logger.save();
+#endif
 }
 stringstream s;
     switch(op.op){
@@ -422,9 +434,11 @@ stringstream s;
             operandStack.pop();      
             {  
             NFA_Cluster &&tmp = NFA_Cluster(buff,op,operand2,operand1);
+            #ifdef DEBUG
             s<<"get "<<tmp.head<<" "<<tmp.tail<<" for ["<<operand2.head<<","<<operand2.tail<<"]"<<op.op<<" ["<<operand1.head<<","<<operand1.tail<<"]"<<endl;
             buff.logger.customMSG(s.str());
             buff.logger.save();
+            #endif
             operandStack.push(tmp);
             }
             break;

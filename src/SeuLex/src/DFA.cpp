@@ -7,11 +7,9 @@ void NFA_eclosure::add(int idx){
     hash.add(_NFA[idx].hash());
     RdLock(_NFA.Wrlock);
     if (_NFA[idx].valid()){
-        if (actIdx == -1){
-            actIdx = idx;
+        if (_action.getIdx() == 0){
             _action = _NFA[idx].getAction();
-        } else if (idx < actIdx){
-            actIdx = idx;
+        } else if (_action < _NFA[idx].getAction()){
             _action = _NFA[idx].getAction();
         }
     }
@@ -131,15 +129,15 @@ threadpool tp(THREADCNT);
 #else
 queue<NFA_eclosure> q;
 NFA_eclosure startPoint(_NFA);
-unordered_set<eclosureHash,hashFunction> vis;
+unordered_map<eclosureHash,int,hashFunction> vis;
     startPoint.add(_NFA.head());
     startPoint.expandEclosure();    
-    insert(startPoint);
+    int st = insert(startPoint);
     q.push(startPoint);
     stringstream s;
     s<<"begin with" << startPoint;
     logger.customMSG(s.str());
-    vis.insert(startPoint.hash);
+    vis.insert({startPoint.hash,st});
     while (!q.empty()){
         NFA_eclosure & now = q.front();
         for (int i = 0; i <= charSetMAX; ++i){
@@ -153,21 +151,25 @@ unordered_set<eclosureHash,hashFunction> vis;
                     }
                 }
             }
-            if (vis.count(newE.hash)){
-                continue;
+            int to;
+            if (!vis.count(newE.hash)){
+                eclosureHash tmp = newE.hash;
+                newE.expandEclosure();
+                if (!exist(newE)){
+                    to = insert(newE);
+                    q.push(newE);
+                    vis[tmp] = to;
+                }
+            } else {
+                to = vis[newE.hash];
             }
-            vis.insert(newE.hash);
+            addTrans(idx(now),to,i);            
+            #ifdef DEBUG
             stringstream s;
-            newE.expandEclosure();
             s<<now<<" to " <<newE<<" with "<<i;
             logger.customMSG(s.str());
-            if (exist(newE)){
-                addTrans(idx(now),idx(newE),i);
-            } else {
-                int &&to = insert(newE);
-                addTrans(idx(now),to,i);
-                q.push(newE);
-            }
+            #endif
+
         }
         q.pop();
     }
