@@ -34,7 +34,7 @@ public :
     graph(){
         //head.push_back(0);
         _edge.push_back(edge());
-        head.resize(10000);    //resize will set all empty head to 0
+        head.resize(1000);    //resize will set all empty head to 0
     }
     int add_edge(int from,int to){
         while (max(from,to) >= head.size()){
@@ -78,7 +78,6 @@ public :
                 }
             }  
         }
-        cout<<"basic topsort done"<<endl;
         if (rt.size()!=n){
             hasCircle = true;
             cerr<<n<<" node but with rt"<<rt.size()<<endl;
@@ -88,11 +87,6 @@ public :
                 }
             }
         }
-        cout<<"top sort ended"<<endl;
-        for (auto &t:rt){
-            cout<<t<<" ";
-        }
-        cout<<endl;
         return rt;
     }
 };
@@ -124,18 +118,12 @@ public :
         checkExist(name);
     }
     vector<T> topSort(bool &hasCircle){
-        cout<<"has tot "<<tot<<" node"<<endl;
         vector<int> &&tmp = _graph.topSort(tot,hasCircle);
         vector<T> rt;
         rt.resize(tot);
         for (int i = 0 ; i < rt.size(); ++i){
             rt[i] = reverseMp[tmp[i]];
         }
-        cout<<"top sort ended"<<endl;
-        for (auto &t:rt){
-            cout<<t<<" ";
-        }
-        cout<<endl;
         return rt;
     }
 };

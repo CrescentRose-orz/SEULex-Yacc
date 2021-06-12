@@ -61,7 +61,7 @@ private:
     ifstream lfile;
     int lexReady;
     lexState _state;
-    threadpool threadPool;
+
     NFA _NFA;
     DFA _DFA;
     void initAll();
@@ -121,16 +121,16 @@ bool Lex::setInputFile(string lexFileName){
     return 0;
 }
 
-Lex::Lex():logger(),threadPool(8),_NFA(logger),_DFA(logger){
+Lex::Lex():logger(),_NFA(logger),_DFA(logger){
     lexReady = 0;
 }
 
-Lex::Lex(string lexFileName,string loggerFileName):logger(loggerFileName),threadPool(8),_NFA(logger),_DFA(logger){
+Lex::Lex(string lexFileName,string loggerFileName):logger(loggerFileName),_NFA(logger),_DFA(logger){
     lexReady = 0;
     setInputFile(lexFileName);
 }
 
-Lex::Lex(string loggerFileName):logger(loggerFileName),threadPool(8),_NFA(logger),_DFA(logger){
+Lex::Lex(string loggerFileName):logger(loggerFileName),_NFA(logger),_DFA(logger){
     lexReady = 0;
 }
 
@@ -163,6 +163,7 @@ bool Lex::checkFileName(string fileName){
     Scanning lex file
 */
 void Lex::start(){
+    threadpool threadPool;    
     initAll();
     logger.start("main");
     if (!lexReady){
@@ -171,9 +172,11 @@ void Lex::start(){
     }
     logger.start("Scanning lex file");
     try{
+        logger.start("readin&prepare");
         scanStatement();
         #ifdef USE_MULTITHREAD
-            threadPool.commit(std::bind(&Lex::handlePredefinedStatement,this));
+            handlePredefinedStatement();
+        //    threadPool.commit(std::bind(&Lex::handlePredefinedStatement,this));
         #else
             handlePredefinedStatement();
         #endif
@@ -183,6 +186,7 @@ void Lex::start(){
         cout<<"file close ok"<<endl;
         unfoldAllRE();
         cout<<"unfold ok,start with RE2NFA"<<endl;
+        logger.end("readin&prepare");
         logger.start("create NFA with REs");
         logger.save();
         for (int i = 0; i < targetRE.size();++i){
@@ -224,14 +228,14 @@ void Lex::start(){
         return ;
     }
     #ifdef USE_MULTITHREAD
-        threadPool.join();
+
     #endif
     logger.end("main");
     logger.close();
 
     cout<<"got code:";
     cout<<codeBuff<<endl;
-
+    system("pause");
     return;
 }
 
@@ -265,7 +269,9 @@ streampos _pos = fin.tellg();
         } else if (c == '/'){
             fin.get(c);
             if (c=='*'){
+                #ifdef DEBUG
                 logger.customMSG("comments detected");
+                #endif
                 eraseComments();
                 return checkNewLine();
             } else {
@@ -302,7 +308,9 @@ void Lex::eraseComments(){                     // lineCnt ok;
                     tmp+=c;
                 }
                 ++lineCnt;
+                #ifdef DEBUG
                 logger.customMSG(tmp);
+                #endif
                 break;
             } 
         } else {
@@ -313,7 +321,9 @@ void Lex::eraseComments(){                     // lineCnt ok;
             tmp+=c;
         }
     }
+    #ifdef DEBUG
     logger.customMSG(tmp);
+    #endif
 }
 
 void Lex::scanStatement(){    
@@ -369,13 +379,11 @@ string name;
     }
     while (!space(c) &&c!='\r'&&c!='\n'){
         name += c;
-        //cout<<"appending "<<c<<" ascll "<<(short)c<<endl;
         c = fin.get();
     }
     rawRE.emplace_back(name);
     string &&RE = readRE();
     preDefine[name] = RE;
-    //cout<<"get "<<preDefine[name]<<" "<<"for "<<name<<endl;
     while (c !='\n'){
         c = fin.get();
     }
@@ -495,7 +503,6 @@ int cnt = 0;
         c = fin.get();
     }
     Action.emplace_back(Action.size(),act);
-    //cout<<"get "<<RE<<" "<<"for "<<act<<endl;
     while (c !='\n'){
         c = fin.get();
     }    
@@ -518,46 +525,35 @@ char buff[1000];
 */
 
 void Lex::handlePredefinedStatement(){
-    // map<string,string>::iterator iter = preDefine.begin();
-    // for (;iter!=preDefine.end();++iter){
-
-    // }
+    logger.start("handlePredefinedStatement");
     mappingGraph<string> g;
+    logger.start("build graph");
     for (auto &s:rawRE){
         g.add_node(s);
         for (auto &target:rawRE){
             if (s == target){
                 continue;
             }
-            //cout<<s<<" "<<target<<" processing"<<endl;
-            //cout<<preDefine[s]<<" "<<preDefine[target]<<endl;
             int idx = preDefine[s].find(target);
             while(idx != string::npos){
-                //cout<<"possible match!"<<endl;
                 if (idx == 0 || preDefine[s][idx-1]!='{' || preDefine[s][idx+target.length()] !='}'){ // todo: may be fooled when meet {{}} ( illegal )
                     idx = preDefine[s].find(target, idx + 1 );
                     continue;
                 }
                 g.add_edge(target,s);
-                //cout<<s<<" need "<<target<<" to be done first!"<<endl;
                 idx = s.find(target, idx + 1) ;
             }
-            //cout<<s<<" "<<target<<" ok!"<<endl;
         }
     }
+    logger.end("build graph");
+    logger.start("topsort");
     bool hasCircle;
     vector<string> &&order = g.topSort(hasCircle);
-    //cout<<"topSort ok"<<endl;
     if (hasCircle){
         cerr<<" circle found!"<<endl;
         logger.error("self define problem found","statement processing",lineCnt);       //todo: lineCnt is not correct
         throw invalid_argument("self define problem found");
     }
-    // cout<<"prefered order"<<": ";
-    // for (auto &s:order){
-    //     cout<<s<<" "<<endl;
-    // }
-    cout<<endl;
     for (auto &s:order){
         string raw = preDefine[s];
         string &&newRE = RE::unfoldRE(raw,preDefine);
@@ -567,15 +563,19 @@ void Lex::handlePredefinedStatement(){
         logger.customMSG(newRE);
         #endif
     }
-
+    logger.end("topsort");
+    logger.end("handlePredefinedStatement");
     return ;
 }
 
 void Lex::unfoldAllRE(){
-#ifdef USE_MULTITHREAD
-    threadpool tp(threadCnt);
-#endif
+
     logger.start("unfold all RE");
+    #ifdef USE_MULTITHREAD
+
+    {
+    threadpool tp(threadCnt);
+    #endif
     for (int i = 0; i < targetRE.size(); ++i){
         string s = targetRE[i];
         #ifdef USE_MULTITHREAD
@@ -594,11 +594,13 @@ void Lex::unfoldAllRE(){
         #endif
     }
     #ifdef USE_MULTITHREAD
-    tp.join();
+    }
     #endif
+    #ifdef DEBUG
     for (auto &s:targetRE){
         logger.customMSG(s);
     }
+    #endif
     logger.end("unfold all RE");
 }
 
@@ -609,7 +611,8 @@ FILE *input = NULL;
     while (input == NULL){
         cout<<"Please enter fileName(end with .l) , or exit with EXIT"<<endl;
         #ifndef DEBUG
-        cin>>fileName;
+      //  cin>>fileName;
+              fileName="lex.l";
         #else
         fileName="lex.l";
         #endif

@@ -42,7 +42,6 @@
     }
     int RE::skipFirst(string & newRE,const string &raw,int &idx,map<string,string> &preDefine){
         int rt = 0;
-        cout<<"skipping first start at"<< idx<<raw[idx]<<endl;
         if (raw[idx] == '^'){
             if (idx){
                 string tmp = "'^' should be at the begin of  a line in" + raw;
@@ -86,13 +85,11 @@
                 }
                 break;
             case '\"':{
-                    cout<<"\""<<" detected"<<endl;
                     int tail = idx + 1;
                     while (tail < raw.size()&&raw[tail] != '\"'){
                         ++tail;
                     }
                     if (tail == raw.size() && raw[raw.size()-1] != '\"'){
-                        cout<<raw.size()<<" "<<tail<<endl;
                         throw invalid_argument(" missing '\"' expected in " + raw);
                     }
                     newRE += raw.substr(idx,tail - idx + 1);
@@ -117,7 +114,6 @@
                 throw invalid_argument("char expected before operator" + raw[idx]);
                 break;
             default:
-                cout<<"get default"<<endl;
                 if (raw[idx] =='\\'){
                     newRE +='\\';
                     newRE += raw[++idx];
@@ -127,7 +123,6 @@
                     newRE+=raw[idx++];
                 }
         }
-        cout<<"ended at "<< idx<<raw[idx]<<endl;
             return rt;
     }
     string RE::unfoldRE(const string &raw,map<string,string> &preDefine){
@@ -137,7 +132,6 @@
         bool trans = false;
         bool brace = false, bracket = false;
         int  parenthese = skipFirst(newRE,raw,idx,preDefine);
-        cout<<"now idx "<<idx<<" "<<raw.size()<<endl;
         while (idx < raw.size()){
             if (trans){
                 newRE += raw[idx++];
@@ -231,7 +225,6 @@
                     newRE +=')';
                     ++idx;
                     --parenthese ;
-                    cout<<") detected "<<endl;
                     break;
                 case '|':
                     newRE +='|';
@@ -243,7 +236,6 @@
                     ++idx;
                     break;
                 default:
-                    cout<<"ex default at "<<idx<<raw[idx]<<endl;
                     newRE += '^';
                     newRE += raw[idx++];
             }

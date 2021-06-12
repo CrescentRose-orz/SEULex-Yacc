@@ -6,8 +6,9 @@
 #include"basicFA.hpp"
 #include"CONSTANT.h"
 #include"threadpool.hpp"
+#include"semaphore.h"
 using namespace std;
-
+class DFA;
 class NFA_eclosure{
 private:
     NFA& _NFA;
@@ -16,6 +17,7 @@ public:
     action _action;
     set<int> NFAs;
     eclosureHash hash;
+    NFA_eclosure(const NFA_eclosure & other);
     NFA_eclosure(NFA &_NFA);//:hash(),_NFA(_NFA)
     //NFA_eclosure(int idx);//:hash(basicHash(idx));
     void add(int idx);  
@@ -23,9 +25,10 @@ public:
     bool has(int idx);
     void expandEclosure();
     friend ostream &operator << (ostream& out,const NFA_eclosure &eNFA);
+    NFA_eclosure move(int &c);
 };
 
-class DFA;
+
 class DFA_Node{
 private:
     map<int,int> state;
@@ -109,8 +112,24 @@ public:
 class DFA:public basicFA<DFA_Node>{
 
 private:
+#ifdef USE_MULTITHREAD
+    shared_timed_mutex taskM;
+    atomic_int taskCnt;
+    threadpool tp;
+    _mutex_type tpMutex;
+    _mutex_type visMutex;
+    _mutex_type qMutex;
+    my::semaphore task{1};
+    atomic_int idleCnt;
+    //void IncTask();
+    //void DecTask();
+    void MULTITHREAD_expandEclosure(NFA_eclosure nowE);
+    void process();
+#endif
     _mutex_type mapMutex;
+    queue<NFA_eclosure> q;
     unordered_map<eclosureHash,int,hashFunction> DFAMap;
+    unordered_map<eclosureHash,int,hashFunction> vis;
 public:
     int tail = 0;
     DFA();
@@ -123,6 +142,7 @@ public:
     int idx(NFA_eclosure &_e);
     int insert(NFA_eclosure &_e);
     void NFA2DFA(NFA& _NFA);
+    void expandEclosure(NFA_eclosure &nowE);
 
 };
 

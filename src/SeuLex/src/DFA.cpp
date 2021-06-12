@@ -1,5 +1,10 @@
 #include"DFA.h"
 
+NFA_eclosure::NFA_eclosure(const NFA_eclosure & other):_NFA(other._NFA){
+    NFAs= other.NFAs;
+    hash = other.hash;                     
+}
+
 NFA_eclosure::NFA_eclosure(NFA &_NFA):hash(),_NFA(_NFA){}
     //NFA_eclosure(int idx);//:hash(basicHash(idx));
 void NFA_eclosure::add(int idx){
@@ -88,6 +93,7 @@ int DFA::idx(NFA_eclosure &_e){
     } else {
         stringstream s;
         s<<_e<<"is not in the DFAMap!";
+        system("pause");
         throw invalid_argument(s.str());
     }
 }
@@ -109,70 +115,210 @@ int DFA::insert(NFA_eclosure &_e){
     return rt;
 }
 
-
-
-
-
-void DFA::NFA2DFA(NFA& _NFA){
-#ifdef MULTI
-queue<int> q;
-threadpool tp(THREADCNT);
-    while (!q.empty()){
-        if (q.empty()){
-            if (tp.idlCount() == THREADCNT){
-                break;
+NFA_eclosure NFA_eclosure::move(int &c){
+NFA_eclosure newE(_NFA);
+    for (auto &t:NFAs){
+        RdLock(_NFA.Wrlock);
+        vector<int> &&rt = _NFA[t].getTrans(c);
+        for (auto &newt:rt){
+            if (!newE.has(newt)){
+                newE.add(newt);
             }
-            continue;
         }
-
     }
-#else
-queue<NFA_eclosure> q;
+    return newE;
+}
+
+void DFA::expandEclosure(NFA_eclosure &nowE){
+    for (int i = 0; i <= charSetMAX; ++i){
+        NFA_eclosure &&newE = nowE.move(i);
+        int to;
+        bool flag;
+        {
+            #ifdef USE_MULTITHREAD
+            RdLock(visMutex);
+            #endif
+            flag = !vis.count(newE.hash);
+        }
+        if (flag){
+            eclosureHash tmp = newE.hash;
+            newE.expandEclosure();
+            if (newE.NFAs.empty()){
+                continue;
+            }
+            if (!exist(newE)){
+                to = insert(newE);
+                #ifdef USE_MULTITHREAD
+                ++taskCnt;
+                //cout<<"add task!"<<endl;
+                #endif
+                {
+                    #ifdef USE_MULTITHREAD    
+                    WrLock(qMutex);
+                    #endif
+                    q.push(newE);
+                    task.signal();
+                }
+                {
+                    #ifdef USE_MULTITHREAD
+                    WrLock(visMutex);
+                    #endif
+                    vis[tmp] = to;
+                }
+            }
+        } else {
+            to = vis[newE.hash];
+        }
+        addTrans(idx(nowE),to,i);            
+        #ifdef DEBUG
+        stringstream s;
+        s<<now<<" to " <<newE<<" with "<<i;
+        logger.customMSG(s.str());
+        #endif
+    }
+    #ifdef USE_MULTITHREAD
+    --taskCnt;
+    #endif
+}
+#ifdef USE_MULTITHREAD
+
+
+
+void DFA::process(){
+    while (taskCnt){
+        task.wait();
+        if (taskCnt == 0){
+            break;
+        }
+        qMutex.lock();
+        if (!q.empty()){
+            --idleCnt;
+            NFA_eclosure now = q.front();
+            q.pop();
+            qMutex.unlock();
+            expandEclosure(now);
+            ++idleCnt;
+        } else {
+            qMutex.unlock();
+        }
+    }    
+    return;
+}
+
+
+
+// void DFA::IncTask(){
+//     RdLock(taskM);
+//     ++taskCnt;
+// }
+// void DFA::DecTask(){
+//     WrLock(taskM);
+//     --taskCnt;
+// }
+
+void DFA::MULTITHREAD_expandEclosure(NFA_eclosure nowE){
+    for (int i = 0; i <= charSetMAX; ++i){
+        NFA_eclosure &&newE = nowE.move(i);
+        int to;
+        bool flag;
+        {
+            RdLock(visMutex);
+            flag = !vis.count(newE.hash);
+        }
+        if (flag){
+            eclosureHash tmp = newE.hash;
+            newE.expandEclosure();
+            if (newE.NFAs.empty()){
+                continue;
+            }
+            if (!exist(newE)){
+                to = insert(newE);
+                //IncTask();
+                {
+                    WrLock(visMutex);
+                    vis[tmp] = to;                
+                }
+                {
+                    WrLock(tpMutex);
+                    tp.commit(bind(&DFA::MULTITHREAD_expandEclosure,this,newE));
+                }
+            }
+        } else {
+            RdLock(visMutex);
+            to = vis[newE.hash];
+        }
+        addTrans(idx(nowE),to,i);            
+        #ifdef DEBUG
+        stringstream s;
+        s<<now<<" to " <<newE<<" with "<<i;
+        logger.customMSG(s.str());
+        #endif
+    }
+    //DecTask();
+}
+
+#endif
+void DFA::NFA2DFA(NFA& _NFA){
 NFA_eclosure startPoint(_NFA);
-unordered_map<eclosureHash,int,hashFunction> vis;
     startPoint.add(_NFA.head());
     startPoint.expandEclosure();    
-    int st = insert(startPoint);
     q.push(startPoint);
+    int st = insert(startPoint);
+    #ifdef DEBUG
     stringstream s;
     s<<"begin with" << startPoint;
     logger.customMSG(s.str());
+    #endif
     vis.insert({startPoint.hash,st});
-    while (!q.empty()){
-        NFA_eclosure & now = q.front();
-        for (int i = 0; i <= charSetMAX; ++i){
-            NFA_eclosure newE(_NFA);            
-            for (auto &t:now.NFAs){
-                RdLock(Wrlock);
-                vector<int> &&rt = _NFA[t].getTrans(i);
-                for (auto &newt:rt){
-                    if (!newE.has(newt)){
-                        newE.add(newt);
-                    }
-                }
-            }
-            int to;
-            if (!vis.count(newE.hash)){
-                eclosureHash tmp = newE.hash;
-                newE.expandEclosure();
-                if (!exist(newE)){
-                    to = insert(newE);
-                    q.push(newE);
-                    vis[tmp] = to;
-                }
-            } else {
-                to = vis[newE.hash];
-            }
-            addTrans(idx(now),to,i);            
-            #ifdef DEBUG
-            stringstream s;
-            s<<now<<" to " <<newE<<" with "<<i;
-            logger.customMSG(s.str());
-            #endif
+    #ifdef USE_MULTITHREAD
+    // int tmpp = 0;
+    // taskCnt = 1;
+    // tp.commit(bind(&DFA::MULTITHREAD_expandEclosure,this,startPoint));
+    // for (int i = 1 ; i < 10000000;++i);
+
+    // while(1){
+    //     #ifdef DEBUG
+    //     ++tmpp;
+    //     if (tmpp == 1000000){
+    //         RdLock(taskM);
+    //         cout<<taskCnt<<" "<<tp.idlCount()<<endl;
+    //         tmpp = 0;
+    //     } 
+    //     #endif
+    //     if (tmpp == 10000000){
+    //         cout<<taskCnt<<" "<<tp.idlCount()<<endl;
+    //         tmpp = 0;
+    //     }
+    //     ++tmpp;
+    // }
+    // tp.close();
+    thread th[THREADCNT];
+    taskCnt = 1;
+    idleCnt = THREADCNT;
+    for (int i = 0; i < THREADCNT; ++i){
+        th[i] = thread(bind(process,this));
+    }
+    while(1){
+        for(int i = 0 ; i < 10000000;++i){
 
         }
+        if (idleCnt == THREADCNT&&taskCnt == 0){
+            break;
+        }
+    }
+    cout<<"all task is done! "<<taskCnt<<" "<<idleCnt<<" "<<q.size()<<endl;
+    task.signalAll();
+    for (int i = 0; i < THREADCNT; ++i){//join failed why?
+        cout<<"try to join "<<i<<" "<<idleCnt<<endl;
+        th[i].detach();
+        cout<<"join "<<i<<"ok"<<endl;
+    }
+    #else
+    while (!q.empty()){
+        NFA_eclosure & now = q.front();
+        expandEclosure(now);
         q.pop();
     }
+    #endif
     cout<<"total "<<pool.size()<<"nodes"<<endl;
-#endif
 }

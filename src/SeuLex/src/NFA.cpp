@@ -37,6 +37,8 @@ void NFA::addRE(string &RE,action _action){
         stringstream s;
         s<<RE<<" to"<<" NFA";
         logger.customMSG(s.str());
+        logger.save();
+        cout<<RE<<"processing"<<endl;
         #endif
         NFA_Cluster &&rt = NFA_Cluster::RE2NFA(RE,*this,_action);
         {

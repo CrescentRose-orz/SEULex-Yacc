@@ -10,7 +10,7 @@
 #include <future>
 #include <functional>
 #include <stdexcept>
-
+#include "CONSTANT.h"
 namespace std
 {
 #define  MAX_THREAD_NUM 256
@@ -44,7 +44,7 @@ class threadpool
     int size;
 
 public:
-    inline threadpool(unsigned short size = 4) :stoped{ false },closeCommit{ false }
+    inline threadpool(unsigned short size = THREADCNT) :stoped{ false },closeCommit{ false }
     {
         this->size = size < 1 ? 1 : size;
         idlThrNum = this -> size;
@@ -120,9 +120,33 @@ public:
     //空闲线程数量
     int idlCount() { return idlThrNum; }
 
+    int close(){
+        int cnt = 0;
+        while(1){
+            for (int i = 0 ; i < 10000000;++i){}
+            lock_guard<mutex> lock(m_lock);
+            if (tasks.empty()&&idlThrNum == size){
+                break;
+            } else {
+                ++cnt;
+                if (cnt == 10){
+                    cnt = 0;
+                    cout<<tasks.size()<<" "<<idlThrNum<<endl;
+                }
+            }
+        }
+        cv_task.notify_all(); // 唤醒所有线程执行
+        for (std::thread& thread : pool) {
+            //thread.detach(); // 让线程“自生自灭”
+            if(thread.joinable())
+                thread.join(); // 等待任务结束， 前提：线程一定会执行完
+        }
+        return 0;
+    }
     int join(){
         closeCommit.store(true);
-        while(!tasks.empty());
+        while(!tasks.empty()||idlThrNum != size);
+        while(tasks.empty());
         while(idlThrNum != size);
         closeCommit.store(false);
         return 0;

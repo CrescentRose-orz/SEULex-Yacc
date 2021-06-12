@@ -4,7 +4,7 @@
 #include"CONSTANT.h"
 using namespace std;
 
-const int CHARSIZE = charSetMAX;
+const int CHARSIZE = charSetMAX+5;
 
 
 template<typename T>
@@ -47,6 +47,8 @@ public :
         trans[eps] = "ε";
         trans['\\'] ="\\\\";
         trans['\"']="\\\"";
+        doubleCircle.clear();
+        edgePool.clear();
     }
 
     void addNode(T label)
@@ -56,10 +58,15 @@ public :
 
     void addEdge(T from,T to, string label)
     {
+
         edgePool.push_back(edge<T>(from,to,label));
     }
     void addEdge(T from,T to, int label)
     {
+        if (label >= CHARSIZE){
+            cerr<<"label int "<<label<<" exceeded CHARSIZE"<<CHARSIZE<<endl;
+            throw invalid_argument("overflow");
+        }
         edgePool.push_back(edge<T>(from,to,trans[label]));
     }
     void print(fstream &fout)

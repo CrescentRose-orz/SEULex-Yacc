@@ -155,9 +155,6 @@ public:
     int add(NFA_Node node);
     int head();
     void addRE(string &RE,action _action);
-    #ifdef VISUAL       
-    visualFA<int> vFA;
-    #endif
 };
 
 class NFA_Iterator{

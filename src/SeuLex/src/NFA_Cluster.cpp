@@ -266,18 +266,19 @@ bool trans = 0;
     stringstream s;
     s<<RE<<" started 2 NFA";
     buff.logger.customMSG(s.str());
+    buff.logger.save();
     #endif
     //operatorStack.push('`');
     NFA_Cluster &&head = NFA_Cluster::createEmpty(buff);
     while(i<RE.size()){
         #ifdef DEBUG
-        fstream ftmp;
-        ftmp.open("tmp.dot",ios::out);
-        buff.vFA.print(ftmp);
         stringstream s;
         s<<"meet "<<RE[i]<<"the size of operandStack is "<<operandStack.size()<<" opstack is "<<operatorStack.size();    
         buff.logger.customMSG(s.str());
         buff.logger.save();
+        fstream ftmp;
+        ftmp.open("tmp.dot",ios::out);
+        buff.vFA.print(ftmp);
         #endif
         if (trans){
                 operandStack.push(NFA_Cluster::getTrans(buff,RE[i]));
@@ -318,11 +319,8 @@ bool trans = 0;
                 break;
             case '{': //todo
                 throw invalid_argument("not supported yet");
-                // if (RE::newPri[RE[i]] > RE::oldPri[operatorStack.top()]){
-                //     operatorStack.push(RE[i]);
-                //     break;
-                // }
-                // break;
+
+
                 newOp = RE_operator('{',0,0);
             case '(':
             case '|': 
@@ -357,8 +355,6 @@ bool trans = 0;
                 trans = 1;
                 break;
             default: 
-                //operand* p = new NFA_Cluster(RE[i]);
-                //operandStack.push(p);
                 operandStack.push(NFA_Cluster(buff,RE[i]));
                 #ifdef DEBUG
                 {
@@ -391,7 +387,7 @@ NFA_Cluster NFA_Cluster::RE2NFA(string RE,NFA &buff,action _action){
     if (RE[0] != '^'){
         WrLock(buff.Wrlock);
         buff[nhead].addTrans(head.head,eps);
-    } 
+    }            
     head.head = nhead;
     {
         WrLock(buff.Wrlock);
@@ -445,13 +441,17 @@ stringstream s;
         case '?':
         case '+':
         case '*':
+
             {  
                 NFA_Cluster &&tmp = NFA_Cluster(buff,op,operand1);
+                operandStack.push(tmp);
+                #ifdef DEBUG
                 s<<"get "<<tmp.head<<" "<<tmp.tail<<" for ["<<operand1.head<<","<<operand1.tail<<"]"<<op.op<<endl;
                 buff.logger.customMSG(s.str());
                 buff.logger.save();
-                operandStack.push(tmp);
+                #endif
             }
+
             break;
         case '{':
             throw invalid_argument("{ not supported yet");
