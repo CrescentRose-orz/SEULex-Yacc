@@ -26,13 +26,16 @@ public:
     void expandEclosure();
     friend ostream &operator << (ostream& out,const NFA_eclosure &eNFA);
     NFA_eclosure move(int &c);
+    #ifdef DEBUG2
+    int check();
+    #endif
 };
 
 
 class DFA_Node{
 private:
 #define _state_type map<int,int>
-    _state_type state;
+     _state_type state;
     bool hasAction = 0;
     #ifdef VISUAL
     visualFA<int> &fa; 
@@ -41,7 +44,8 @@ private:
     #endif
 public:
     int idx;
-    action act;    
+    action act;  
+
     #ifdef VISUAL
     _state_type::const_iterator stateBegin(){
         return state.cbegin();
@@ -52,10 +56,12 @@ public:
     DFA_Node(visualFA<int> &_fa):fa(_fa){
         hasAction = 0;
         idx = -1;
+        state.clear();
     }
     DFA_Node(action act,visualFA<int> &_fa):act(act),fa(_fa){
         hasAction = 1;
         idx = -1;
+        state.clear();
     }
     void update(){
         for (auto &p:edge){
@@ -97,7 +103,12 @@ public:
         if (state.count(c)){
             throw invalid_argument("add multi trans in NFA");
         }
-        state.insert({c,target});
+        #ifdef DEBUG2
+        if(target<0||target>1000){
+            cout<<"ERROR try to add trans to "<<target<<endl;
+        }
+        #endif
+        state.insert(pair<int,int>(c,target));
         #ifdef VISUAL
         if( idx != -1){
             fa.addEdge(idx , target, c);

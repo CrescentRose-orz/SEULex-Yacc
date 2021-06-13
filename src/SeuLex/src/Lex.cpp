@@ -5,94 +5,7 @@
     Main class
 
 */
-#include"CONSTANT.h"
-#include<string>
-#include<bits/stdc++.h>
-#include<thread>
-#include<unordered_map>
-#include"Logger.h"
-#include"threadpool.hpp"
-#include "graph.h"
-#include "action.hpp"
-#include "RE.h"
-#include "NFA.h"
-#include "DFA.h"
-using namespace std;
-
-
-inline bool space(char &c){
-    return c==0x20||c==0x09;
-}
-
-inline bool enter(char &c){
-    return c=='\r';
-}
-
-inline void trim(string &s) 
-{
-    if (s.empty()) {
-        return ;
-    }
-    s.erase(0,s.find_first_not_of(" ""\x20""\x09""\n""\r"));
-    s.erase(s.find_last_not_of(" ""\x20""\x09""\n""\r") + 1);
-}
-
-const string partName[5] = {"unknow","statement part","rule part","function part",""};
-enum lexState{
-    STATEMENT = 1,RULE,FUNCTIONS
-};
-
-
-
-class Lex{
-private:
-    int threadCnt = 8;
-    int lineCnt = 1; //line count, for logging the place where error occurs.
-    int state = 0;
-    vector<string> rawRE;   //store the name of the preDefined RE
-    vector<string> targetRE;   //store the RE that we need
-    mutex REwr;
-    vector<action> Action;
-    map<string,string> preDefine;
-    string codeBuff;
-    string funCodeBuff;
-    Logger logger;
-    FILE *lexFile;
-    ifstream lfile;
-    int lexReady;
-    lexState _state;
-
-    NFA _NFA;
-    DFA _DFA;
-    void initAll();
-    int checkNewLine();
-    void scanStatement();    // todo : exception 
-    void copyStatement();
-    void eraseComments();
-    string readRE();
-    void readName_RE();
-
-    void scanRules();
-    void readRE_action();
-    string readAction();
-
-    void scanAuxiliaryFunction();
-
-    void handlePredefinedStatement();
-
-    void unfoldAllRE();
-
-public:
-    //USE DEFAULT CONSTRUCTOR IS NOT PREFFERED
-    Lex(); 
-    Lex(string);
-    Lex(string,string);
-    ~Lex();    
-    bool setInputFile(string);
-    void start();
-    void print();
-    static bool checkFileName(string fileName);
-};
+#include"Lex.h"
 
 /*
 
@@ -162,83 +75,6 @@ bool Lex::checkFileName(string fileName){
 /*
     Scanning lex file
 */
-void Lex::start(){
-    threadpool threadPool;    
-    initAll();
-    logger.start("main");
-    if (!lexReady){
-        logger.error("try to start before input file is ready!","Lex::start()",1);
-        return ;
-    }
-    logger.start("Scanning lex file");
-    try{
-        logger.start("readin&prepare");
-        scanStatement();
-        #ifdef USE_MULTITHREAD
-            handlePredefinedStatement();
-        //    threadPool.commit(std::bind(&Lex::handlePredefinedStatement,this));
-        #else
-            handlePredefinedStatement();
-        #endif
-        scanRules();
-        scanAuxiliaryFunction();
-        fin.close();
-        cout<<"file close ok"<<endl;
-        unfoldAllRE();
-        cout<<"unfold ok,start with RE2NFA"<<endl;
-        logger.end("readin&prepare");
-        logger.start("create NFA with REs");
-        logger.save();
-        for (int i = 0; i < targetRE.size();++i){
-            _NFA.addRE(targetRE[i],Action[i]);
-        }
-        logger.end("create NFA with REs");
-        cout<<"NFA created!"<<endl;
-        fstream fout;
-        fout.open("output.dot",ios::out);
-        _NFA.vFA.print(fout);
-        logger.start("create DFA with NFA");
-        _DFA.NFA2DFA(_NFA);
-        logger.end("create DFA with NFA");
-        fout.open("DFA.dot",ios::out);
-        _DFA.vFA.print(fout);
-        
-    }catch (invalid_argument e){
-        logger.customMSG(e.what());
-        cerr<<e.what()<<endl;
-        logger.error("invalid input, program ended ","parsing lex file",lineCnt);
-        logger.close();
-        fstream fout;
-        fout.open("output.dot",ios::out);
-        _NFA.vFA.print(fout);
-            fout.open("DFA.dot",ios::out);
-        _DFA.vFA.print(fout);
-        return ;
-    } 
-    catch(exception e){
-        logger.save();
-        cerr<<"unknow exception occurs"<<endl;
-        system("pause");
-        fstream fout;
-        fout.open("output.dot",ios::out);
-        _NFA.vFA.print(fout);
-        logger.error("Exception occured ","parsing lex file",lineCnt);
-        logger.customMSG(e.what());
-        logger.close();
-        return ;
-    }
-    #ifdef USE_MULTITHREAD
-
-    #endif
-    logger.end("main");
-    logger.close();
-
-    cout<<"got code:";
-    cout<<codeBuff<<endl;
-    system("pause");
-    return;
-}
-
 
 int Lex::checkNewLine(){       
 char c;
@@ -468,13 +304,14 @@ int lineStatus;
 
 void Lex::readRE_action(){
 string &&RE = readRE(),act;
-char c;
-int cnt = 0;    
+char c,lastc;
+int qcnt = 0,ccnt = 0;    
     targetRE.emplace_back(RE);
     c = fin.get();
     while (space(c)){
         c = fin.get();
     }
+    lastc= 0;
     if (c == '\n' || c == '\r'){
         throw invalid_argument("Error : get end of line when scaning actions\n");
     }
@@ -483,41 +320,47 @@ int cnt = 0;
         string s ="Error : '{' not found when scaning actions\n instead get ";
         s += c;
         s += '\n';
-        throw invalid_argument(s);        
-    }
-    cnt = 0;
+        throw invalid_argument(s);         
+    } 
+    qcnt = ccnt = 0;
     c = fin.get();
-    while (c!='}'||cnt){
+    while ((c!='}')||qcnt||ccnt){
         if (!space(c)){
            if (c!='\n'){
                if (c!='\r'){
                     act += c;
                     if (c == '"'){
-                        cnt ^= 1;
+                        qcnt ^= 1;
+                    }
+                    if (c == '\''){
+                        ccnt ^= 1;
                     }
                }               
            } else{
                ++lineCnt;
            }
         }
+        lastc = c;
         c = fin.get();
     }
-    Action.emplace_back(Action.size(),act);
+    trim(act);
+    Action.emplace_back(Action.size() + 1,act);
     while (c !='\n'){
         c = fin.get();
     }    
 }
 
 void Lex::scanAuxiliaryFunction(){
-string tmp;
 char buff[1000];
     logger.start("Scanning AuxiliaryFunctions");
     state = FUNCTIONS;
     fin.getline(buff,1000);
     while (!fin.eof()){
-        funCodeBuff += tmp;
+        funCodeBuff += buff;
         fin.getline(buff,1000);
+        cout<<"get "<<buff<<endl;
     }
+    funCodeBuff += buff;
     logger.end("Scanning AuxiliaryFunctions");    
 }
 /*
@@ -604,31 +447,125 @@ void Lex::unfoldAllRE(){
     logger.end("unfold all RE");
 }
 
-
-int main(){
-string fileName;
-FILE *input = NULL;
-    while (input == NULL){
-        cout<<"Please enter fileName(end with .l) , or exit with EXIT"<<endl;
-        #ifndef DEBUG
-      //  cin>>fileName;
-              fileName="lex.l";
-        #else
-        fileName="lex.l";
-        #endif
-        if (fileName == "exit"){
-            return 0;
-        }
-        input = fopen(fileName.c_str(),"r");
-        if (input == NULL){
-            cout<<"file \""<<fileName <<"\"error"<<endl;
-        }
+void Lex::generateAction(fstream &fout){
+    fout<<endl;
+    fout<<R"(
+        int doAction(int idx){
+            switch(idx){)"<<'\n';
+    for (int i = 0; i <Action.size();++i){
+        fout<<R"(
+            case )"<<i + 1<<":\n";
+        fout<<"                 {"<<Action[i].getCode()<<"}\n";
+        fout<<"                 break;";
     }
-    fclose(input);
-    Lex lextest(fileName,"testLogger.txt");
-    lextest.start();
-    #ifdef DEBUG
-    system("pause");
-    #endif
+    fout<<"\n        }";
+    fout<<"\n     }";
+}
+
+void Lex::start(){
+    threadpool threadPool;    
+    initAll();
+    logger.start("main");
+    if (!lexReady){
+        logger.error("try to start before input file is ready!","Lex::start()",1);
+        return ;
+    }
+    logger.start("Scanning lex file");
+    try{
+        logger.start("readin&prepare");
+        scanStatement();
+        #ifdef USE_MULTITHREAD
+            handlePredefinedStatement();
+        //    threadPool.commit(std::bind(&Lex::handlePredefinedStatement,this));
+        #else
+            handlePredefinedStatement();
+        #endif
+        scanRules();
+        scanAuxiliaryFunction();
+        fin.close();
+        cout<<"file close ok"<<endl;
+        unfoldAllRE();
+        cout<<"unfold ok,start with RE2NFA"<<endl;
+        logger.end("readin&prepare");
+        logger.start("create NFA with REs");
+        logger.save();
+        for (int i = 0; i < targetRE.size();++i){
+            _NFA.addRE(targetRE[i],Action[i]);
+        }
+        logger.end("create NFA with REs");
+        cout<<"NFA created!"<<endl;
+        fstream fout;
+        fout.open("NFA.dot",ios::out);
+        _NFA.vFA.print(fout);
+        logger.start("create DFA with NFA");
+        _DFA.NFA2DFA(_NFA);
+        logger.end("create DFA with NFA");
+        fout.open("DFA.dot",ios::out);
+        _DFA.vFA.print(fout);
+        logger.start("Generating code");
+        fout.open("lex.yy.c",ios::out);
+        fout<<R"(
+#include <string.h>
+#define return(x) printf(#x)
+#define ECHO(x) printf(#x)
+)"<<endl;
+        fout<<codeBuff;
+        generateAction(fout);
+        fout<<funCodeBuff<<endl;
+        _DFA.generateCode(fout);
+        fout<<R"(
+int main(){
+    int i;
+    char name[1000];
+    printf("input file name:\n");
+    scanf("%s",name); 
+    yyin = fopen(name,"r");
+    while (yyEOF != 1){
+        yyLex();
+        printf(" get: %s\n",yytext); 
+        system("pause");                    
+    }
+
     return 0;
 }
+        )"<<endl;
+        fout.close();
+
+        logger.end("Genenating code");        
+    }catch (invalid_argument e){
+        logger.customMSG(e.what());
+        cerr<<e.what()<<endl;
+        logger.error("invalid input, program ended ","parsing lex file",lineCnt);
+        logger.close();
+        fstream fout;
+        fout.open("NFA.dot",ios::out);
+        _NFA.vFA.print(fout);
+            fout.open("DFA.dot",ios::out);
+        _DFA.vFA.print(fout);
+        return ;
+    } 
+    catch(exception e){
+        logger.save();
+        cerr<<"unknow exception occurs"<<endl;
+        system("pause");
+        fstream fout;
+        fout.open("output.dot",ios::out);
+        _NFA.vFA.print(fout);
+        logger.error("Exception occured ","parsing lex file",lineCnt);
+        logger.customMSG(e.what());
+        logger.close();
+        return ;
+    }
+    #ifdef USE_MULTITHREAD
+
+    #endif
+    logger.end("main");
+    logger.close();
+
+    cout<<"got code:";
+    cout<<codeBuff<<endl;
+    system("pause");
+    return;
+}
+
+

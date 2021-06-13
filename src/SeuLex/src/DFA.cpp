@@ -10,12 +10,15 @@ NFA_eclosure::NFA_eclosure(NFA &_NFA):hash(),_NFA(_NFA){}
 void NFA_eclosure::add(int idx){
     NFAs.insert(idx);
     hash.add(_NFA[idx].hash());
+    #ifdef USE_MULTITHREAD
     RdLock(_NFA.Wrlock);
+    #endif
     if (_NFA[idx].valid()){
-        if (_action.getIdx() == 0){
-            _action = _NFA[idx].getAction();
-        } else if (_action < _NFA[idx].getAction()){
-            _action = _NFA[idx].getAction();
+        action &&other = _NFA[idx].getAction();
+        if (_action.getIdx() == -1){
+            _action = other;
+        } else if (_action > other){
+            _action = other;
         }
     }
 }
@@ -32,7 +35,9 @@ int now;
         now = q.front();
         q.pop();
         {
+            #ifdef USE_MULTITHREAD
             RdLock(_NFA.Wrlock);
+            #endif
             vector<int> &&rt =_NFA[now].getTrans(eps);
             for (auto &t:rt){
                 if (!has(t)){
@@ -77,7 +82,12 @@ int DFA::head(){
     return 0;
 }
 int DFA::addTrans(int from, int to, int c){
+    #ifdef USE_MULTITHREAD
     WrLock(Wrlock);
+    #endif
+    if (to<0||to>1000){
+        cout<<"ERROR! try to add"<<from<<" to "<<to<<" with "<<c<<"!"<<endl;
+    }
     pool[from].addTrans(to,c);
     return 0;
 }
@@ -88,7 +98,12 @@ bool DFA::exist(NFA_eclosure &_e){
 }
 int DFA::idx(NFA_eclosure &_e){
     if (exist(_e)){
+        #ifdef USE_MULTITHREAD
         RdLock(mapMutex);
+        #endif
+        if (DFAMap[_e.hash]<0||DFAMap[_e.hash]>1000){
+            cout<<"ERROR! try to return idx with"<<DFAMap[_e.hash]<<endl;
+    }
         return DFAMap[_e.hash];
     } else {
         stringstream s;
@@ -97,6 +112,22 @@ int DFA::idx(NFA_eclosure &_e){
         throw invalid_argument(s.str());
     }
 }
+
+    #ifdef DEBUG2
+    int NFA_eclosure::check(){
+        int idx = 0x7fff;
+        for (auto &t:NFAs){
+            if (_NFA[t].getAction().getIdx()!= -1){
+                idx =min(idx, _NFA[t].getAction().getIdx());
+            }
+        }
+        if (idx == 0x7fff){
+            idx = -1;
+        }
+        return idx;
+    }
+    #endif
+
 int DFA::insert(NFA_eclosure &_e){
     if (exist(_e)){
         stringstream s;
@@ -104,6 +135,12 @@ int DFA::insert(NFA_eclosure &_e){
         throw invalid_argument(s.str());       
     }
     int rt;
+    #ifdef DEBUG2
+    if (!(_e.check()==_e._action.getIdx() )){
+        cout<<"ERROR! not equal!"<<endl;
+        cout<<_e.check()<<"expected but "<<_e._action.getIdx()<<"found! "<<endl;
+    }
+    #endif
     {
         rt = add();
         WrLock(mapMutex);
@@ -118,7 +155,9 @@ int DFA::insert(NFA_eclosure &_e){
 NFA_eclosure NFA_eclosure::move(int &c){
 NFA_eclosure newE(_NFA);
     for (auto &t:NFAs){
+        #ifdef USE_MULTITHREAD
         RdLock(_NFA.Wrlock);
+        #endif
         vector<int> &&rt = _NFA[t].getTrans(c);
         for (auto &newt:rt){
             if (!newE.has(newt)){
@@ -157,7 +196,9 @@ void DFA::expandEclosure(NFA_eclosure &nowE){
                     WrLock(qMutex);
                     #endif
                     q.push(newE);
+                    #ifdef USE_MULTITHREAD
                     task.signal();
+                    #endif
                 }
                 {
                     #ifdef USE_MULTITHREAD
@@ -169,7 +210,7 @@ void DFA::expandEclosure(NFA_eclosure &nowE){
         } else {
             to = vis[newE.hash];
         }
-        addTrans(idx(nowE),to,i);            
+        addTrans(idx(nowE),to,i);       
         #ifdef DEBUG
         stringstream s;
         s<<now<<" to " <<newE<<" with "<<i;
@@ -204,17 +245,6 @@ void DFA::process(){
     }    
     return;
 }
-
-
-
-// void DFA::IncTask(){
-//     RdLock(taskM);
-//     ++taskCnt;
-// }
-// void DFA::DecTask(){
-//     WrLock(taskM);
-//     --taskCnt;
-// }
 
 void DFA::MULTITHREAD_expandEclosure(NFA_eclosure nowE){
     for (int i = 0; i <= charSetMAX; ++i){
@@ -262,6 +292,7 @@ void DFA::NFA2DFA(NFA& _NFA){
 NFA_eclosure startPoint(_NFA);
     startPoint.add(_NFA.head());
     startPoint.expandEclosure();    
+    q = queue<NFA_eclosure>();
     q.push(startPoint);
     int st = insert(startPoint);
     #ifdef DEBUG
@@ -315,7 +346,7 @@ NFA_eclosure startPoint(_NFA);
     }
     #else
     while (!q.empty()){
-        NFA_eclosure & now = q.front();
+        NFA_eclosure  now = q.front();
         expandEclosure(now);
         q.pop();
     }
@@ -328,18 +359,22 @@ NFA_eclosure startPoint(_NFA);
         file<<"int next["<<pool.size()<<"]["<<charSetMAX + 1<<"] = {";
         for (int i = 0; i < pool.size(); ++i){
             memset(buff,-1,sizeof(buff));
-            for (auto iter = pool[i].stateBegin(); iter != pool[i].stateEnd(); ++iter){
+            for (auto iter = pool[i].stateBegin();iter != pool[i].stateEnd(); ++iter){ 
+                #ifdef DEBUG
+                stringstream s;
+                s<<"get node "<<i<<"char  "<<iter->first<<" to state"<<iter->second<<endl;
+                logger.customMSG(s.str());
+                #endif
                 buff[iter->first] = iter->second;
             }
             file<<buff[0];
             for (int j = 1; j <= charSetMAX; ++j){
-                file<<","<<buff[i];
+                file<<","<<buff[j];
             }
-            file<<';';
             if (i != pool.size()-1){
-                file<<"\n";
+                file<<",\n";
             } else {
-                file<<"}\n";
+                file<<"};\n";
             }
         }
         file<<"int act["<<pool.size()<<"]= {";
@@ -347,14 +382,23 @@ NFA_eclosure startPoint(_NFA);
         for (int i = 1; i < pool.size(); ++i){
          file<<","<<pool[i].act.getIdx();   
         }
-        file<<"}\n";
-        file<<R"(
-        #define INF 0x7fff;
+        file<<"};\n";
+        file<<R"(#define INF 0x7fff;
         int yyleng;
         char yytext[1024];
         FILE* yyin;
         FILE* yyout;
         long yypos;
+        int yyEOF;
+
+        int input(){
+            int c = fgetc(yyin);
+            ++yypos;
+            if (c == -1)
+                return 0;
+            return c;
+        }
+
 
         int yyLex(){
             int nowState = 0 , c;
@@ -367,28 +411,37 @@ NFA_eclosure startPoint(_NFA);
             yyleng = 0;
             c = fgetc(yyin);
             buff[_leng++] = c;
-            while (next[nowState][c] != -1){
+            while (c != -1 &&next[nowState][c] != -1){
                 nowState = next[nowState][c];
                 if (act[nowState] != -1){
-                    if (act[nowState] <= actIdx){
+                    {
                         actIdx = act[nowState];
-                        yypos = c == '\n'?ftell(yyin-1):ftell(yyin);
+                        yypos = c == '\n'?ftell(yyin)-1:ftell(yyin);
                         yyleng = _leng;
                     }
-                }
-                buff[_leng++] = c;
+                } else {
+                	buff[_leng]='\0';
+                	printf("unfortunate that %s didn't have action\n",buff);
+				}
+                c = fgetc(yyin);
+                if (c != EOF)
+                    buff[_leng++] = c;
+            }
+            if (c == -1){
+                yyEOF = 1;
             }
             if (nowState == -1){
                 fprintf(yyout,"ERROR CANNOT MATCH at %s!\n",buff);
             } else {
+            	buff[_leng] = '\0';
+            	printf("stop at %ld %s\n",yypos,buff); 
                 buff[yyleng] = '\0';
-                strcpy(yytext,yyleng);
+                strcpy(yytext,buff);
+                fseek(yyin,yypos,SEEK_SET);
                 return doAction(actIdx);
             }
         })"<<'\n';
         
-        
-
     }
     /*
 

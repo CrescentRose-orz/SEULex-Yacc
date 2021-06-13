@@ -185,7 +185,7 @@
     //bracket todo 【】
     NFA_Cluster NFA_Cluster::getBracket(NFA &buff,string &bracket,int l,int r){
     bool skip[charSetMAX+1] = {0};
-    
+    bool trans = 0;
     bool reverse = 0;
         if (l == r){
             throw invalid_argument("empty bracket is not allowed");
@@ -194,6 +194,12 @@
         if (bracket[l]=='^'){
             ++l;
             reverse = 1;
+            for (int i = 0; i < charSetMin; ++i){
+                skip[i] = 1;
+            }
+            for (int i =controlMin; i <= controlMax; ++i){
+                skip[i] = 0;
+            }
         }
         if (!NFA_Cluster::checkBracket(bracket,l,r)){
             stringstream s;
@@ -201,6 +207,22 @@
             throw invalid_argument(s.str());
         }
         for (int i = l; i <= r; ++i){
+            if (trans){
+                if (reverse){
+                    skip[RE::trans(bracket[i])] = 1;
+                } else {
+                    #ifdef USE_MUTITHREAD
+                    WrLock(buff.Wrlock);
+                    #endif
+                    buff[rt.head].addTrans(rt.tail,RE::trans(bracket[i]));
+                }
+                trans = 0;
+                continue;
+            }
+            if (bracket[i] =='\\'){
+                trans = 1;
+                continue;
+            }
             if (bracket[i] != '-'){
                 if (reverse){
                     skip[bracket[i]] = 1;
@@ -229,10 +251,14 @@
             }
         }
         {
+        if (reverse){
+            #ifdef USE_MULTITHREAD
             WrLock(buff.Wrlock);
-            for (int i = 0; i <= charSetMAX; ++i){
-                if (!skip[i])
-                    buff[rt.head].addTrans(rt.tail,i);
+            #endif
+                for (int i = 0; i <= charSetMAX; ++i){
+                    if (!skip[i])
+                        buff[rt.head].addTrans(rt.tail,i);
+                }
             }
         }
         return rt;

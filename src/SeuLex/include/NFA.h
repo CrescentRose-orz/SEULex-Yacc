@@ -134,7 +134,7 @@ public:
     }
    // int transfer(int input);
     bool valid(){
-        return hasAction == -1 ? 0 : 1;
+        return hasAction == 1 ? 1 : 0;
     }
     vector<int> getTrans(int c){
         vector<int> rt;
