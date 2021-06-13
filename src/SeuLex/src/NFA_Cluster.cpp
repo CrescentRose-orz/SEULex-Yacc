@@ -37,7 +37,8 @@
             if (c!='.'){
                 buff[head].addTrans(tail,c);
             } else {
-                buff[head].addMultiTrans(tail,0,charSetMAX);
+                buff[head].addMultiTrans(tail,charSetMin,charSetMAX);
+                buff[head].addMultiTrans(tail,controlMin,controlMax);
             }
         }
     }

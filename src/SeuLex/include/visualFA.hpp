@@ -37,10 +37,10 @@ public :
 public :
     //visualFA(vector<T> dC,vector<edge> eP);
     visualFA(){
-        for (int i = 0; i < 32; ++i){
+        for (int i = 0; i < charSetMin; ++i){
             trans[i] ="\\\\"+to_string(i);
         }
-        for (int i = 32; i < min(256,CHARSIZE); ++i){
+        for (int i = charSetMin; i < min(256,CHARSIZE); ++i){
             trans[i] += (char)i;
         }
         trans['\n']="\\\\n";

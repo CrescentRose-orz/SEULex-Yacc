@@ -322,3 +322,98 @@ NFA_eclosure startPoint(_NFA);
     #endif
     cout<<"total "<<pool.size()<<"nodes"<<endl;
 }
+
+    void DFA::generateCode(fstream &file){
+        int buff[charSetMAX + 1];
+        file<<"int next["<<pool.size()<<"]["<<charSetMAX + 1<<"] = {";
+        for (int i = 0; i < pool.size(); ++i){
+            memset(buff,-1,sizeof(buff));
+            for (auto iter = pool[i].stateBegin(); iter != pool[i].stateEnd(); ++iter){
+                buff[iter->first] = iter->second;
+            }
+            file<<buff[0];
+            for (int j = 1; j <= charSetMAX; ++j){
+                file<<","<<buff[i];
+            }
+            file<<';';
+            if (i != pool.size()-1){
+                file<<"\n";
+            } else {
+                file<<"}\n";
+            }
+        }
+        file<<"int act["<<pool.size()<<"]= {";
+        file<<pool[0].act.getIdx();
+        for (int i = 1; i < pool.size(); ++i){
+         file<<","<<pool[i].act.getIdx();   
+        }
+        file<<"}\n";
+        file<<R"(
+        #define INF 0x7fff;
+        int yyleng;
+        char yytext[1024];
+        FILE* yyin;
+        FILE* yyout;
+        long yypos;
+
+        int yyLex(){
+            int nowState = 0 , c;
+            long _lastMatch = -1;
+            int lastAcState = -1;
+            int actIdx = INF;
+            int _leng = 0;
+            char buff[1024];
+            memset(yytext,0,sizeof(yytext));
+            yyleng = 0;
+            c = fgetc(yyin);
+            buff[_leng++] = c;
+            while (next[nowState][c] != -1){
+                nowState = next[nowState][c];
+                if (act[nowState] != -1){
+                    if (act[nowState] <= actIdx){
+                        actIdx = act[nowState];
+                        yypos = c == '\n'?ftell(yyin-1):ftell(yyin);
+                        yyleng = _leng;
+                    }
+                }
+                buff[_leng++] = c;
+            }
+            if (nowState == -1){
+                fprintf(yyout,"ERROR CANNOT MATCH at %s!\n",buff);
+            } else {
+                buff[yyleng] = '\0';
+                strcpy(yytext,yyleng);
+                return doAction(actIdx);
+            }
+        })"<<'\n';
+        
+        
+
+    }
+    /*
+
+
+
+
+
+ yyin和yyout：这是Lex中本身已定义的输入和输出文件指针。这两个变量指明了lex生成的词法分析器从哪里获得输入和输出到哪里。默认：键盘输入，屏幕输出。
+
+    yytext和yyleng：这也是lex中已定义的变量，直接用就可以了。
+
+    yytext：指向当前识别的词法单元（词文）的指针
+
+    yyleng：当前词法单元的长度。
+
+    ECHO：Lex中预定义的宏，可以出现在动作中，相当于fprintf(yyout, “%s”,yytext)，即输出当前匹配的词法单元。
+
+    yylex()：词法分析器驱动程序，用Lex翻译器生成的lex.yy.c内必然含有这个函数。
+
+    yywrap()：词法分析器遇到文件结尾时会调用yywrap()来决定下一步怎么做：
+
+    若yywrap()返回0，则继续扫描
+
+    若返回1，则返回报告文件结尾的0标记。
+
+    由于词法分析器总会调用yywrap，因此辅助函数中最好提供yywrap，如果不提供，则在用C编译器编译lex.yy.c时，需要链接相应的库，库中会给出标准的yywrap函数（标准函数返回1）。
+
+    */

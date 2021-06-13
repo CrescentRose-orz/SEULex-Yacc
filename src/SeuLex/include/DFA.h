@@ -31,8 +31,8 @@ public:
 
 class DFA_Node{
 private:
-    map<int,int> state;
-    action act;
+#define _state_type map<int,int>
+    _state_type state;
     bool hasAction = 0;
     #ifdef VISUAL
     visualFA<int> &fa; 
@@ -41,7 +41,14 @@ private:
     #endif
 public:
     int idx;
+    action act;    
     #ifdef VISUAL
+    _state_type::const_iterator stateBegin(){
+        return state.cbegin();
+    }
+    _state_type::const_iterator stateEnd(){
+        return state.cend();
+    }
     DFA_Node(visualFA<int> &_fa):fa(_fa){
         hasAction = 0;
         idx = -1;
@@ -143,6 +150,7 @@ public:
     int insert(NFA_eclosure &_e);
     void NFA2DFA(NFA& _NFA);
     void expandEclosure(NFA_eclosure &nowE);
+    void generateCode(fstream &file);
 
 };
 

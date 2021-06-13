@@ -9,6 +9,9 @@
 
 #define eps 128
 #define charSetMAX 128
+#define charSetMin 32
+#define controlMin 9
+#define controlMax 12
 #define VISUAL
 
 
