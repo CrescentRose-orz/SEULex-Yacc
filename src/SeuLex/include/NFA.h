@@ -106,7 +106,8 @@ public:
     }
     void addMultiTrans(int target,int l,int r){
         for (int i = l; i <= r; ++i){
-            addTrans(target,i);
+            if (i !='@' && i !='$')
+                addTrans(target,i);
         }
     }
     void addTrans(int target,int c){
