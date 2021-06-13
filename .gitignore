@@ -14,3 +14,7 @@ testlogger.*
 testlogger
 *.exe
 *.bmp
+*.bat
+*.svg
+*.exe
+*.dot

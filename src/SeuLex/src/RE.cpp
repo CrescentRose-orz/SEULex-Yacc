@@ -90,6 +90,7 @@
                         ++tail;
                     }
                     if (tail == raw.size() && raw[raw.size()-1] != '\"'){
+
                         throw invalid_argument(" missing '\"' expected in " + raw);
                     }
                     newRE += raw.substr(idx,tail - idx + 1);

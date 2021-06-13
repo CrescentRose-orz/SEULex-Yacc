@@ -351,16 +351,13 @@ int qcnt = 0,ccnt = 0;
 }
 
 void Lex::scanAuxiliaryFunction(){
-char buff[1000];
     logger.start("Scanning AuxiliaryFunctions");
     state = FUNCTIONS;
-    fin.getline(buff,1000);
+    char c = fin.get();
     while (!fin.eof()){
-        funCodeBuff += buff;
-        fin.getline(buff,1000);
-        cout<<"get "<<buff<<endl;
+        funCodeBuff += c;
+        fin.get();
     }
-    funCodeBuff += buff;
     logger.end("Scanning AuxiliaryFunctions");    
 }
 /*
