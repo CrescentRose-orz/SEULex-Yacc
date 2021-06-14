@@ -16,7 +16,7 @@ extern unordered_map<int, vector<int>> LHSToPos;
 // 终结符与非终结符边界，非终结符与左结合运算符边界
 // 终结符对应的Int范围为[0,TNBound)
 // 非终结符对应的Int范围为[TNbound,NLBound)
-extern int TNBound, int NLBound;
+extern int TNBound,NLBound;
 
 // 使用Int来表示的产生式集合
 extern ProducerVecInt TranslationRule_Int;

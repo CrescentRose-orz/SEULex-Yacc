@@ -13,5 +13,5 @@
 #include <algorithm>
 #include <direct.h>
 #include <queue>
-
+#include "CONSTANT.h"
 #endif // HEADER_H
