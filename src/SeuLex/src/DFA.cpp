@@ -302,27 +302,6 @@ NFA_eclosure startPoint(_NFA);
     #endif
     vis.insert({startPoint.hash,st});
     #ifdef USE_MULTITHREAD
-    // int tmpp = 0;
-    // taskCnt = 1;
-    // tp.commit(bind(&DFA::MULTITHREAD_expandEclosure,this,startPoint));
-    // for (int i = 1 ; i < 10000000;++i);
-
-    // while(1){
-    //     #ifdef DEBUG
-    //     ++tmpp;
-    //     if (tmpp == 1000000){
-    //         RdLock(taskM);
-    //         cout<<taskCnt<<" "<<tp.idlCount()<<endl;
-    //         tmpp = 0;
-    //     } 
-    //     #endif
-    //     if (tmpp == 10000000){
-    //         cout<<taskCnt<<" "<<tp.idlCount()<<endl;
-    //         tmpp = 0;
-    //     }
-    //     ++tmpp;
-    // }
-    // tp.close();
     thread th[THREADCNT];
     taskCnt = 1;
     idleCnt = THREADCNT;
@@ -470,3 +449,25 @@ NFA_eclosure startPoint(_NFA);
     由于词法分析器总会调用yywrap，因此辅助函数中最好提供yywrap，如果不提供，则在用C编译器编译lex.yy.c时，需要链接相应的库，库中会给出标准的yywrap函数（标准函数返回1）。
 
     */
+
+
+   /*
+
+
+
+
+
+
+    queue<>{
+        扩展
+
+        insert（）
+        queue。push（）
+
+    }
+
+
+
+
+
+   */

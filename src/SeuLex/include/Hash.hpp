@@ -94,3 +94,92 @@ struct hashFunction{
 		return hash<long long>()(p[0]);
 	}
 };
+
+
+
+
+
+
+/*
+
+{
+unorder_map<string,int> name1;
+{
+    int cnt = 255;
+    name1[input] = ++cnt;
+    name2[cnt-1] = input;
+
+
+unorder_map<int,int> name5;
+name5.insert()
+
+
+
+
+
+vector<string> name2;
+vector<string> produce..
+}
+
+//项目集里的语句
+class produceInCluster{
+public:
+    int place ;
+    int produceId;
+    vector<int> charSet;
+
+    构造函数
+
+    hash
+    int getNext(); //
+    produceInCluster expandNext(){
+
+
+    }
+};
+
+class LReClosure_Node{
+    unordered_set<long long> has;
+    vector<produceInCluster>
+    set<int>
+    hash
+    #define _state_type map<int,int>
+     _state_type state;
+
+    #ifdef VISUAL
+    visualFA<int> &fa; 
+    vector<pair<int,int>> edge;
+    bool aflag = 0;
+    #endif
+
+    void addTrans(int target,int c);
+    void getTrans(int c);
+
+    void expand(){
+    }
+
+
+    
+    if (!xxx.count(c)){
+        xxx.insert(c);
+    } s
+
+    
+    
+}
+
+
+class LR public:basicFA<LReClosure_Node>{
+    int add();
+    int add(T);
+    int head();
+
+}
+
+
+
+
+
+
+
+*/
