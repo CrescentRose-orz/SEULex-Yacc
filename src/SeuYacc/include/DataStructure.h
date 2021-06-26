@@ -32,6 +32,8 @@ unordered_map<int, vector<int>> LHSToPos;
 // 终结符对应的Int范围为[0,TNBound)
 // 非终结符对应的Int范围为[TNbound,NLBound)
 int TNBound,NLBound;
+int maxLen,maxIdx;
+
 
 // 使用Int来表示的产生式集合
 ProducerVecInt TranslationRule_Int;
