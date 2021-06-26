@@ -14,4 +14,5 @@
 #include <direct.h>
 #include <queue>
 #include "CONSTANT.h"
+#include "DataStructure.h"
 #endif // HEADER_H
