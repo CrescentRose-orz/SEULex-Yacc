@@ -40,7 +40,6 @@ int LR_Node::getTrans(int c){return state.count(c)?state[c]:-1;}
 void LR_Node::solveEclosure(){
 unordered_set<long long> vis;//某LR产生式+某终结符是否已经展开过
 queue<LR_Producer> q;//待展开的LR产生式
-LR_Producer now(0,0);
     for (auto &pr : producers){
         for (auto &lookAhead :pr.second.lookAhead){
             q.push(LR_Producer(pr.second,pr.second.nowPlace,lookAhead));
@@ -48,8 +47,7 @@ LR_Producer now(0,0);
         }
     }
     while (!q.empty()){
-        now = q.front();
-        q.pop();
+        LR_Producer &now = q.front();
         if (isTerminal(now.getNext())){ // 为结尾-1亦满足条件(-1<TNBound)
             continue;
         }
@@ -57,9 +55,12 @@ LR_Producer now(0,0);
             for (auto &look:now.lookAhead ){   
                 if (!vis.count(LR_Producer::getIdentifier(newProducer,0,look))){
                     q.push(LR_Producer(newProducer,0,look));
+                    addProducer(LR_Producer(newProducer,0,look));
                     vis.insert(LR_Producer::getIdentifier(newProducer,0,look));
+
                 }
             }
         }
+        q.pop();
     }
 }
