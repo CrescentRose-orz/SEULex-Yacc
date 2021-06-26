@@ -5,6 +5,8 @@
 #include"visualLR.hpp"
 #include"Hash.hpp"
 #include"LR_Producer.hpp"
+#include "CONSANT.h"
+#include"DataStructure.h"
 using namespace std;
 
 
