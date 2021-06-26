@@ -26,6 +26,11 @@ public:
         return valid;
     }
     basicHash(){memset(hash,0,sizeof(hash));valid = 0;}
+    /**
+     * @brief Construct a new basic Hash object
+     * 
+     * @param idx 非负整数，该元素的非重复编号 
+     */
     basicHash(int idx){
         for (int i = 0; i < HASH_CNT;++i){
             hash[i] = qPow(HASH_KEY[i],idx);
@@ -73,11 +78,32 @@ public:
 class eclosureHash:public basicHash{
 public:
     eclosureHash(){}
+    /**
+     * @brief Construct a new eclosure Hash object
+     *        由单元素的basicHash构造一个有初始集合元素的hash
+     * @param element basicHash
+     */
     eclosureHash(basicHash element){add(element);}
+    /**
+     * @brief 加入一个集合元素。
+     *  
+     * @param element 该元素的basicHash
+     */
     void add(basicHash element){
         for (int i = 0 ; i < HASH_CNT; ++i){
             hash[i] += element[i];
         }
+    }
+    /**
+     * @brief 加入一个集合元素。等价于add(basicHash(element));
+     * 
+     * @param element 非负整数 element为改元素的非负不重复编号
+     */
+    void add(int element){
+        add(basicHash(element));
+    }
+    eclosureHash(int element){
+        eclosureHash(basicHash(element));
     }
     bool operator ==(const eclosureHash &other)const{
         for (int i = 0 ; i <HASH_CNT; ++i){
