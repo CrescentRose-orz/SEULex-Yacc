@@ -18,3 +18,5 @@ testlogger
 *.svg
 *.exe
 *.dot
+*.png
+*.c
