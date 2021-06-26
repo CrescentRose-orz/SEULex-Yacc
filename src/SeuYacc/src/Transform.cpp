@@ -42,14 +42,16 @@ void transformTerminals(unordered_set<string>& Terminals_Str, unordered_map<stri
 void transformNonterminals(unordered_set<string>& Nonterminals_Str, unordered_map<string, int>& StrToInt, unordered_map<int, string>& IntToStr, int& TNBound, int& NLBound){
     
     int counter = TNBound;
-
+    maxLen = 1;
 	for (auto str : Nonterminals_Str){
 		StrToInt.insert(make_pair(str, counter));
 		IntToStr.insert(make_pair(counter, str));
+        for (;(1<<maxLen) <= str.length(); ++maxIdx);
 		counter++;
 	}
 
 	NLBound = counter;
+    for (maxIdx = 1;(1<<maxIdx) <= NLBound; ++maxIdx);
 }
 
 // 该函数将左结合操作符初始数据结构中的字符串映射为一个整型数
