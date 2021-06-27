@@ -17,15 +17,41 @@ private:
 #define _state_type map<int,int>
      _state_type state;
     #ifdef VISUAL
-    visualLR<int> &fa; 
+    visualLR<int> &vfa; 
     #endif
+    /**
+     * @brief int 产生式左边id - >产生式
+     * 
+     */
     unordered_map<int,LR_Producer> producers;
+    /**
+     * @brief int 转移符id - > 转移后，后移一项的产生式左边id
+     * 
+     */
+    unordered_map<int,int> transResult; 
+    /**
+     * @brief 中心项哈希，相等说明为同心项
+     * 
+     */
     eclosureHash coreHash;
     eclosureHash LR_Node_Hash;
 public:
     int idx;
     #ifdef VISUAL
     LR_Node(visualLR<int> &vLR);
+    /**
+     * @brief 拷贝构造函数
+     * 
+     * @param other 
+     */
+    LR_Node(const LR_Node &other);
+    /**
+     * @brief 赋值构造函数
+     * 
+     * @param other 
+     * @return LR_Node 
+     */
+    LR_Node& operator = (const LR_Node&other);
     #else
     //LR_Node();
     #endif

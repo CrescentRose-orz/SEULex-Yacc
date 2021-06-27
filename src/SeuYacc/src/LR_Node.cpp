@@ -2,7 +2,22 @@
 
 
 #ifdef VISUAL
-LR_Node::LR_Node(visualLR<int> &vLR):fa(vLR){}
+LR_Node::LR_Node(visualLR<int> &vLR):vfa(vLR){}
+LR_Node::LR_Node(const LR_Node &other):vfa(other.vfa){
+    producers = other.producers;
+    coreHash = other.coreHash;
+    LR_Node_Hash = other.LR_Node_Hash;
+    state = other.state;
+    idx = other.idx;
+}
+LR_Node& LR_Node::operator = (const LR_Node&other):vfa(other.vfa){
+    producers = other.producers;
+    coreHash = other.coreHash;
+    LR_Node_Hash = other.LR_Node_Hash;
+    state = other.state;
+    idx = other.idx;
+    return *this;
+}
 #endif
 
 void LR_Node::addTrans(int target,int c){
@@ -42,8 +57,8 @@ unordered_set<long long> vis;//某LR产生式+某终结符是否已经展开过
 queue<LR_Producer> q;//待展开的LR产生式
     for (auto &pr : producers){
         for (auto &lookAhead :pr.second.lookAhead){
-            q.push(LR_Producer(pr.second,pr.second.nowPlace,lookAhead));
-            vis.insert(LR_Producer::getIdentifier(pr.second,pr.second.nowPlace,lookAhead));
+            q.push(LR_Producer(pr.second, pr.second.nowPlace, lookAhead));
+            vis.insert(LR_Producer::getIdentifier(pr.second, pr.second.nowPlace, lookAhead));
         }
     }
     while (!q.empty()){
@@ -53,10 +68,10 @@ queue<LR_Producer> q;//待展开的LR产生式
         }
         for (auto &newProducer:LHSToPos[now.getNext()]){//此写法默认LHSToPos指一个非终结符对应的所有产生式id，待明确
             for (auto &look:now.lookAhead ){   
-                if (!vis.count(LR_Producer::getIdentifier(newProducer,0,look))){
-                    q.push(LR_Producer(newProducer,0,look));
-                    addProducer(LR_Producer(newProducer,0,look));
-                    vis.insert(LR_Producer::getIdentifier(newProducer,0,look));
+                if (!vis.count(LR_Producer::getIdentifier(newProducer, 0, look))){
+                    q.push(LR_Producer(newProducer, 0, look));
+                    addProducer(LR_Producer(newProducer, 0, look));
+                    vis.insert(LR_Producer::getIdentifier(newProducer, 0, look));
 
                 }
             }

@@ -18,6 +18,8 @@ typedef std::set<Item> StateCore;
 typedef std::map<std::pair<int, int>, int> DFATransitionTable;
 
 
+vector<int> producerBaseIdx;
+
 // 存放所有string与int相互映射关系
 unordered_map<string, int> StrToInt;
 unordered_map<int, string> IntToStr;
