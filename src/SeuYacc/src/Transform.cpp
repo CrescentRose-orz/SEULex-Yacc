@@ -42,6 +42,7 @@ void transformTerminals(unordered_set<string>& Terminals_Str, unordered_map<stri
 void transformNonterminals(unordered_set<string>& Nonterminals_Str, unordered_map<string, int>& StrToInt, unordered_map<int, string>& IntToStr, int& TNBound, int& NLBound){
     
     int counter = TNBound;
+    producerBaseIdx.resize(TNBound);
     maxLen = 1;
 	for (auto str : Nonterminals_Str){
 		StrToInt.insert(make_pair(str, counter));
