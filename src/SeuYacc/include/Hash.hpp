@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HASH_HEADER
+#define HASH_HEADER
 #include<bits/stdc++.h>
 
 using namespace std;
@@ -120,3 +121,4 @@ struct hashFunction{
 		return hash<long long>()(p[0]);
 	}
 };
+#endif

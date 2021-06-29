@@ -11,7 +11,6 @@ using namespace std;
 class LR:public basicFA<LR_Node>{
 
 private:
-    _mutex_type mapMutex;
     // queue<NFA_eclosure> q;
     // unordered_map<eclosureHash,int,hashFunction> DFAMap;
     // unordered_map<eclosureHash,int,hashFunction> vis;

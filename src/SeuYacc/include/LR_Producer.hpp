@@ -1,7 +1,20 @@
 #include"header.h"
 #include"Hash.hpp"
 
+/*
 
+需要做的更改：producer为产生式编号
+如何得到产生式左侧符号？
+
+
+
+
+
+
+
+
+
+*/
 class LR_Producer{
 private:
 
@@ -83,10 +96,10 @@ public:
      * @return int 若已在末尾，返回-1。
      */
     int getNext(){
-        return nowPlace!=getLength()?IntToStr[producer][nowPlace]:-1;
+        return nowPlace!=getLength()?IntToStr[getRight(producer)][nowPlace]:-1;
     }
     int getLength(){
-        return IntToStr[producer].length();
+        return IntToStr[getRight(producer)].length();
     }
     operator int(){
         return producer;
