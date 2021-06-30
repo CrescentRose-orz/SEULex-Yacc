@@ -64,5 +64,18 @@ int main(int argc, char const* argv[]){
     // 并构造int形式左部->positions(vector<int>，下标集合)的映射
     transformTranslationRule(TranslationRule_Str, TranslationRule_Int, StrToInt, IntToStr);
 
+    // ----------------以上为Str到Int的转换部分----------------
+    // ----------------下面开始进行求取First部分----------------
+
+    getFirst();
+    cout << IntToStr[-1] <<endl;
+
+    for(int i = 0; i < NLBound; i++){
+        cout << IntToStr[i] << "的First为：";
+        for(auto temp : First[i])
+            cout << IntToStr[temp] << ' ';
+        cout << endl;
+    }
+
     fclose(stdout);
 }
