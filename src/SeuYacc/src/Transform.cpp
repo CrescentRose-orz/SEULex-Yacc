@@ -4,6 +4,10 @@ using namespace std;
 
 void transformTerminals(unordered_set<string>& Terminals_Str, unordered_map<string, int>& StrToInt, unordered_map<int, string>& IntToStr, int& TNBound){
     
+    // 空串的对应值为-1
+    StrToInt.insert(make_pair(NullString, -1));
+    IntToStr.insert(make_pair(-1, NullString));
+
     int counter = 0;
 
 	for (auto str : Terminals_Str){
