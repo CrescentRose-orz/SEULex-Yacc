@@ -9,8 +9,6 @@
 
 using namespace std;
 
-
-
 int main(int argc, char const* argv[]){
     freopen("out.txt","w",stdout);
     // yacc规约文件的文件名
@@ -68,14 +66,9 @@ int main(int argc, char const* argv[]){
     // ----------------下面开始进行求取First部分----------------
 
     getFirst();
-    cout << IntToStr[-1] <<endl;
 
-    for(int i = 0; i < NLBound; i++){
-        cout << IntToStr[i] << "的First为：";
-        for(auto temp : First[i])
-            cout << IntToStr[temp] << ' ';
-        cout << endl;
-    }
+    // ----------------以上为求取所有单字符First部分----------------
+    // ----------------下面开始进行LR1项目集簇的构造----------------
 
     fclose(stdout);
 }
