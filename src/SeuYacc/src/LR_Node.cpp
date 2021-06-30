@@ -69,7 +69,19 @@ queue<LR_Producer> q;//待展开的LR产生式
         }
         //否则为非终结符，遍历所有该非终结符为左符号的产生式
         for (auto &newProducer:LHSToPos[now.getNext()]){//此写法默认LHSToPos指一个非终结符对应的所有产生式id，待明确
-            for (auto &look:now.lookAhead ){   //加入计算得的向前看符后，若闭包内不存在，则加入闭包和扩展队列
+            unordered_set<int> lookAhead;
+            vector<int> symbols;
+            for (int i = now.nowPlace + 1; i < now.getLength(); ++i){
+                symbols.push_back(getRight(now)[i]);
+            }
+            getFirst(symbols,lookAhead);
+            if (lookAhead.count(-1)){
+                lookAhead.erase(-1);
+                for (auto &look:now.lookAhead){
+                    lookAhead.insert(look);
+                }
+            }
+            for (auto &look:lookAhead ){   //加入计算得的向前看符后，若闭包内不存在，则加入闭包和扩展队列
                 if (!vis.count(LR_Producer::getIdentifier(newProducer, 0, look))){
                     q.push(LR_Producer(newProducer, 0, look));
                     addProducer(LR_Producer(newProducer, 0, look));
