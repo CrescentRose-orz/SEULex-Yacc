@@ -1,6 +1,5 @@
 #include "YaccFileParsing.h"
 
-
 using namespace std;
 
 int yaccFileParsing(const string& fileName, string& start, unordered_set<string>& Terminals_Str, ProducerVecStr& TranslationRule_Str, string& Declarations, string& CRoutines, unordered_set<string>& Left_Str, unordered_map<string, int>& Left_Precedence){
