@@ -2,20 +2,6 @@
 
 using namespace std;
 
-// 存储所有单个字符的first的映射
-
-
-// 终结符与非终结符边界
-// 终结符对应的Int范围为[0,TNBound)
-// 非终结符对应的Int范围为[TNbound,NLBound)
-//extern int TNBound, NLBound;
-
-// 使用Int来表示的产生式集合
-//extern ProducerVecInt TranslationRule_Int;
-
-// Int形式产生式左部->Int形式产生式右部的映射关系
-//extern unordered_map<int, vector<int>> LHSToPos;
-
 void getFirst(const int& symbol, unordered_set<int>& resultSet, unordered_set<int>& processedSymbol) {
 
 	// 该符号之前已求过first
