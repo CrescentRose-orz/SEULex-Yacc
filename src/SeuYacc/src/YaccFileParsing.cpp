@@ -37,8 +37,10 @@ int yaccFileParsing(const string& fileName, string& start, unordered_set<string>
 	}
 
     // 接下来对于token进行解析
-    while (str != "%token") 
-        inFile >> str;
+	if(str != "%token"){
+    	while (str != "%token") 
+        	inFile >> str;
+	}
 
 	// 解析所有token并存入集合中
 	inFile >> str;
