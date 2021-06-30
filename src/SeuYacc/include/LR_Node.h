@@ -38,6 +38,8 @@ public:
      */
     multimap<int,int> nextPros; 
     set<int> allNexts;
+    set<int> allEnds;
+
     int idx;
     #ifdef VISUAL
   
@@ -96,6 +98,42 @@ public:
      *   LALR判同心项集：n1.core()==n2.core()
      * @return eclosureHash 
      */
+    /**
+     *  @brief 返回所有边的迭代器 
+     *      用法：for(auto iter = node.getAllTransBegin(); iter!=node.getAllTransEnd();++iter){
+     *              iter->first 为读入字符
+     *              iter->second为转移到的状态id
+     *            }
+     * 
+     * 
+     */
+    map<int,int>::const_iterator getAllTransBegin(){
+        return state.cbegin();
+    }
+    /**
+     *  @brief 返回所有边的迭代器 
+     *      用法：for(auto iter = node.getAllTransBegin(); iter!=node.getAllTransEnd();++iter){
+     *              iter->first 为读入字符
+     *              iter->second为转移到的状态id
+     *            }
+     * 
+     * 
+     */
+    map<int,int>::const_iterator getAllTransEnd(){
+        return state.cend();
+    }
+    /**
+     * @brief Get the All Reduce object
+     *      set中存放在此节点所有可规约的产生式id
+     * @return set<int> 
+     */
+    set<LR_Producer> getAllReduce(){
+        set<LR_Producer> rt;
+        for (auto &item:allEnds){
+            rt.insert(producers[item]);
+        }
+        return rt;
+    }
     eclosureHash core();
     eclosureHash getHash();
 };

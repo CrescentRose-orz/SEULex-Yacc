@@ -36,6 +36,8 @@ void LR_Node::addProducer(LR_Producer producer){
         if (!producer.isEnd()){
             nextPros.insert({producer.getNext(),producer});
             allNexts.insert(producer.getNext());
+        } else {
+            allEnds.insert(producer);
         }
         coreHash.add(producer);
         for (auto &look:producer.lookAhead){
