@@ -29,7 +29,7 @@ int main(int argc, char const* argv[]){
     
     // 正确解析文件
     if(flag == 0)
-        cout << "\t File parsing COMPLETED." << endl;
+        cout << "\n File parsing COMPLETED." << endl;
     // 解析文件错误，退出文件
     else
         exit(0);
@@ -61,5 +61,39 @@ int main(int argc, char const* argv[]){
         cout << str << " ";
         cout << Left_Precedence[str] << " ";
     }
+
+    // 添加一条起始的产生式
+    setStart(start, TranslationRule_Str);
+
+    // 获得所有Str形式的非终结符
+    getNonterminals(TranslationRule_Str, Nonterminals_Str);
+
+    // 获得所有Str形式的终结符
+    getTerminals(TranslationRule_Str, Terminals_Str);
+
+    // 输出各个数据结构，检查其正确性
+    cout << "\nterminals: " << endl;
+    for (auto str : Terminals_Str){
+        cout << str << " ";
+    }
+
+    cout << "\nNonterminals: " << endl;
+    for (auto str : NonTerminals_Str){
+        cout << str << " ";
+    }
+
+    cout << "\ntranslationRule: " << endl;
+    for (int i = 0; i < TranslationRule_Str.size(); i++){
+        cout << TranslationRule_Str[i].first << "->";
+        for (int j = 0; j < TranslationRule_Str[i].second.size(); j++){
+            cout << TranslationRule_Str[i].second[j] << " ";
+        }
+        cout << endl;
+    }
+
+    // ----------------以上为yacc规则文件解析部分----------------
+    // ----------------下面开始进行Str到Int的转换----------------
+
+
     fclose(stdout);
 }
