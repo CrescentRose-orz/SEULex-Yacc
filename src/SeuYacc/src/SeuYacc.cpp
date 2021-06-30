@@ -50,8 +50,19 @@ int main(int argc, char const* argv[]){
     // ----------------以上为yacc规则文件解析部分----------------
     // ----------------下面开始进行Str到Int的转换----------------
 
-    
+    // 构造终结符str->int的映射
+    transformTerminals(Terminals_Str, StrToInt, IntToStr, TNBound);
 
+    // 构造非终结符str->int的映射
+    transformNonterminals(Nonterminals_Str, StrToInt, IntToStr, TNBound, NLBound);
+
+    // 构造左结合运算符str->int的映射
+    transformLeft(Left_Str, StrToInt, IntToStr, NLBound);
+
+    // 根据非终结符及终结符转换结果
+    // 构造int形式表示产生式集合
+    // 并构造int形式左部->positions(vector<int>，下标集合)的映射
+    transformTranslationRule(TranslationRule_Str, TranslationRule_Int, StrToInt, IntToStr);
 
     fclose(stdout);
 }
