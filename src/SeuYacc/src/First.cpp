@@ -89,3 +89,42 @@ void getFirst() {
 		First.emplace(i, firstSet);
 	}
 }
+
+void getFirst(const vector<int>& symbols, unordered_set<int>& resultSet){
+	
+	// 输入为空串
+	if (symbols.size() == 0) { 
+		// 返回结果集为空串
+		resultSet.insert(-1);
+		return;
+	}
+
+	// 输入不为空串，则依次考察首字符的First
+	int i = 0;
+
+	// 不是最后一项，且其求得字符的First集存在空串时继续循环
+	while (i < symbols.size()) {
+		// 获取当前循环下的字符First集合
+		auto tempFirst = First[symbols[i]];
+
+		// 当前字符First集合中不存在空串，将该First集结果加入所求First集中，退出循环
+		if (tempFirst.find(-1) == tempFirst.end()) {
+			resultSet.insert(tempFirst.cbegin(), tempFirst.cend());
+			break;
+		}
+
+		// 假设存在空串且遍历到了字符串的最后一个字符
+		if (i == symbols.size()) {
+			// 将空串加入所求First集中，退出循环
+			resultSet.insert(-1); 
+			break;
+		}
+
+		// 假设存在空串但不是字符串的最后一个字符
+		// 消除空串，将该First集结果加入所求First集中，继续循环
+		tempFirst.erase(-1);
+		resultSet.insert(tempFirst.cbegin(), tempFirst.cend());
+		
+		++i;
+	}
+}
