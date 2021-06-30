@@ -1,7 +1,6 @@
 #ifndef BASICFA
 #define BASICFA
 #include"CONSTANT.h"
-#include"visualFA.hpp"
 #include<bits/stdc++.h>
 #include<shared_mutex>
 #include"Logger.h"
@@ -11,7 +10,6 @@ template<typename T>
 class basicFA{
 public:
     Logger logger;
-    _mutex_type Wrlock;
     int tail = 0;
     vector<T> pool;
     basicFA(){}
@@ -23,7 +21,7 @@ public:
     virtual int add(T)=0;
     virtual int head()=0;
     #ifdef VISUAL       
-    visualLR vLR;
+    visualLR<int> vLR;
     #endif
 };
 #endif

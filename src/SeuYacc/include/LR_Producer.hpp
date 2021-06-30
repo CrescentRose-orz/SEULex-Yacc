@@ -1,3 +1,5 @@
+#ifndef LRPRODUCER
+#define LRPRODUCER
 #include"header.h"
 #include"Hash.hpp"
 
@@ -51,6 +53,7 @@ public:
         rt |= lookAhead;
         return rt;
     }    
+    LR_Producer():producer(-1),nowPlace(-1){}
     /**
      * @brief Construct a new lr producer object
      * 
@@ -67,6 +70,7 @@ public:
      */
     LR_Producer(int prIdx,int nowIdx,int lookAhead):producer(prIdx),nowPlace(nowIdx){
         addLookAhead(lookAhead);
+    
     }
     /**
      * @brief 添加向前看符,内部提供重复检查无需判重
@@ -96,10 +100,10 @@ public:
      * @return int 若已在末尾，返回-1。
      */
     int getNext(){
-        return nowPlace!=getLength()?IntToStr[getRight(producer)][nowPlace]:-1;
+        return nowPlace!=getLength()?getRight(producer)[nowPlace]:-1;
     }
     int getLength(){
-        return IntToStr[getRight(producer)].length();
+        return getRight(producer).size();
     }
     operator int(){
         return producer;
@@ -112,3 +116,4 @@ public:
 //         return std::hash<int>()(p.producer);
 //     }
 // };
+#endif

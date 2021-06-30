@@ -26,4 +26,21 @@ int LR::addTrans(int from, int to, int c){
         throw invalid_argument("out of bound error occurs in adding trans edge in LR");
     }
     pool[from].addTrans(to , c);
+    return 0;
+}
+
+
+int LR::consturctLR(){
+unordered_map <eclosureHash, int, hashFunction> wholeLRNode;
+unordered_map <eclosureHash, int, hashFunction> vis;
+queue<int> q;
+    if (pool.empty()){
+        return -1;
+    }
+    q.push(0);
+    while (!q.empty()){
+        int now = q.front();
+        
+    }
+    return  pool.size();
 }

@@ -1,3 +1,5 @@
+#ifndef LR_NODE
+#define LR_NODE
 #include<CONSTANT.h>
 #include<map>
 #include"header.h"
@@ -13,11 +15,8 @@ using namespace std;
 
 class LR_Node{
 private:
-#define _state_type map<int,int>
-     _state_type state;
-    #ifdef VISUAL
-    visualLR<int> &vfa; 
-    #endif
+     map<int,int> state;
+
     /**
      * @brief int 产生式左边id - >产生式
      * 
@@ -35,6 +34,9 @@ private:
     eclosureHash coreHash;
     eclosureHash LR_Node_Hash;
 public:
+    #ifdef VISUAL
+    visualLR<int> &vfa; 
+    #endif
     int idx;
     #ifdef VISUAL
     LR_Node(visualLR<int> &vLR);
@@ -87,6 +89,8 @@ public:
      * @return eclosureHash 
      */
     eclosureHash core();
+    eclosureHash getHash();
 };
+#endif
 
 

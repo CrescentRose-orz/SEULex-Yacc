@@ -6,29 +6,10 @@
 
 using namespace std;
 
-// 全局数据变量
 
-// 存放Str形式的终结符
-unordered_set<string> Terminals_Str;
-// 存放Str形式的非终结符
-unordered_set<string> Nonterminals_Str;
-// 存放Str形式的产生式
-ProducerVecStr TranslationRule_Str;
-// 存放Str形式的左结合运算符
-unordered_set<string> Left_Str;
-// 存放Str形式的左结合运算符->优先级的映射
-unordered_map<string, int> Left_Precedence;
-// 存储所有单个字符(Int形式)->First集合(Int形式)的映射
-map<int, unordered_set<int>> First;
-// 存储Str形式的开始符
-string start;
-// 存储Str形式的C声明部分
-string Declarations;
-// 存储Str形式的辅助性C语言例程
-string CRoutines;
 
 int main(int argc, char const* argv[]){
-    
+    freopen("out.txt","w",stdout);
     // yacc规约文件的文件名
     string file_name;
 
@@ -80,4 +61,5 @@ int main(int argc, char const* argv[]){
         cout << str << " ";
         cout << Left_Precedence[str] << " ";
     }
+    fclose(stdout);
 }

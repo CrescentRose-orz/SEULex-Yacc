@@ -4,18 +4,18 @@
 using namespace std;
 
 // 存储所有单个字符的first的映射
-extern map<int, unordered_set<int>> First;
+
 
 // 终结符与非终结符边界
 // 终结符对应的Int范围为[0,TNBound)
 // 非终结符对应的Int范围为[TNbound,NLBound)
-extern int TNBound, NLBound;
+//extern int TNBound, NLBound;
 
 // 使用Int来表示的产生式集合
-extern ProducerVecInt TranslationRule_Int;
+//extern ProducerVecInt TranslationRule_Int;
 
 // Int形式产生式左部->Int形式产生式右部的映射关系
-extern unordered_map<int, vector<int>> LHSToPos;
+//extern unordered_map<int, vector<int>> LHSToPos;
 
 // 该函数对单个字符求其first，是一个递归算法
 // 该函数的输入依次为所求字符，返回结果集，以及一个维护的已求过first的非终结符集合

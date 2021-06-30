@@ -3,27 +3,7 @@
 
 using namespace std;
 
-// 存放所有string与int相互映射关系
-extern unordered_map<string, int> StrToInt;
-extern unordered_map<int, string> IntToStr;
 
-// 存放Int形式产生式->产生式在数据结构中的存放序号的映射关系
-extern unordered_map<vector<int>, int> ProToPos;
-
-// Int形式产生式左部->Int形式产生式右部的映射关系
-extern unordered_map<int, vector<int>> LHSToPos;
-
-// 终结符与非终结符边界，非终结符与左结合运算符边界
-// 终结符对应的Int范围为[0,TNBound)
-// 非终结符对应的Int范围为[TNbound,NLBound)
-extern int TNBound,NLBound;
-
-// 使用Int来表示的产生式集合
-extern ProducerVecInt TranslationRule_Int;
-
-
-// 该函数将终结符初始数据结构中的字符串映射为一个整型数
-// 该函数的输入依次为Str形式的终结符，所有Str->Int的映射，所有Int->Str的映射，终结符和非终结符的边界
 void transformTerminals(unordered_set<string>& Terminals_Str, unordered_map<string, int>& StrToInt, unordered_map<int, string>& IntToStr, int& TNBound){
     
     int counter = 0;
@@ -89,7 +69,7 @@ void transformTranslationRule(ProducerVecStr& TranslationRule_Str, ProducerVecIn
 	for (int i = 0; i < TranslationRule_Int.size(); i++){
         vector<int> temp = TranslationRule_Int[i].second;
 		temp.insert(temp.begin(), TranslationRule_Int[i].first);
-		ProToPos.insert(make_pair(temp, i));
+		//ProToPos.insert(make_pair(temp, i));
 	}
 
     // 产生LHS->Position的映射

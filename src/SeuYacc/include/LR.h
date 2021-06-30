@@ -1,3 +1,5 @@
+#ifndef LR_HEADER
+#define LR_HEADER
 #include"DataStructure.h"
 #include"header.h"
 #include"LR_Node.h"
@@ -54,7 +56,9 @@ public:
      * 
      * @return int LR起始点id
      */
-    int head();
+    int head(){
+        return 0;
+    }
     // bool exist(NFA_eclosure &_e);
     // int idx(NFA_eclosure &_e);
     // int insert(NFA_eclosure &_e);
@@ -70,3 +74,4 @@ public:
 
 
 
+#endif

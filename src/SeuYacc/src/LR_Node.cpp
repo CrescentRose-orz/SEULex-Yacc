@@ -29,13 +29,10 @@ void LR_Node::addTrans(int target,int c){
 
     #endif
 }
-int LR_Node::getTrans(int c){
-    return state.count(c)?state[c]:-1;
-}
 
 void LR_Node::addProducer(LR_Producer producer){
-    if (!producers.count(getLeft(producer))){
-        producers[getLeft(producer)] = producer;
+    if (!producers.count(producer)){
+        producers[producer] = producer;
         coreHash.add(producer);
         for (auto &look:producer.lookAhead){
             LR_Node_Hash.add(producer.getIdentifier(look));
@@ -43,7 +40,7 @@ void LR_Node::addProducer(LR_Producer producer){
         return;
     }
     for (auto &lookAhead:producer.lookAhead){
-        producers[getLeft(producer)].addLookAhead(lookAhead,LR_Node_Hash);
+        producers[producer].addLookAhead(lookAhead,LR_Node_Hash);
     }
 
 }
@@ -77,6 +74,11 @@ queue<LR_Producer> q;//待展开的LR产生式
                 }
             }
         }
+    
         q.pop();
     }
+}
+
+eclosureHash LR_Node::getHash(){
+    return LR_Node_Hash;
 }
