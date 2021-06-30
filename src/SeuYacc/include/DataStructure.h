@@ -34,19 +34,11 @@ extern unordered_map<int, string> IntToStr;
 // 存的是translationRule—_Int的下标。
 extern unordered_map<int, vector<int>> LHSToPos;
 
-
 // 终结符与非终结符边界，非终结符与左结合运算符边界
 // 终结符对应的Int范围为[0,TNBound)
 // 非终结符对应的Int范围为[TNbound,NLBound)
 extern int TNBound,NLBound;
 extern int maxLen,maxIdx;
-extern map<int, unordered_set<int>> First;
-
-// 使用Int来表示的产生式集合
-extern ProducerVecInt TranslationRule_Int;
-
-extern ProducerVecStr TranslationRule_Str;
-
 
 // 定义空串，可以根据不同的yacc.y进行调整
 const std::string NullString = "epsilon";
@@ -58,13 +50,13 @@ extern unordered_set<string> Terminals_Str;
 // 存放Str形式的非终结符
 extern unordered_set<string> Nonterminals_Str;
 // 存放Str形式的产生式
-//ProducerVecStr TranslationRule_Str;
+extern ProducerVecStr TranslationRule_Str;
 // 存放Str形式的左结合运算符
 extern unordered_set<string> Left_Str;
 // 存放Str形式的左结合运算符->优先级的映射
 extern unordered_map<string, int> Left_Precedence;
 // 存储所有单个字符(Int形式)->First集合(Int形式)的映射
-//map<int, unordered_set<int>> First;
+extern map<int, unordered_set<int>> First;
 // 存储Str形式的开始符
 extern string start;
 // 存储Str形式的C声明部分
@@ -73,6 +65,8 @@ extern string Declarations;
 extern string CRoutines;
 
 
+// 存放Int形式的产生式
+extern ProducerVecInt TranslationRule_Int;
 
 
 
