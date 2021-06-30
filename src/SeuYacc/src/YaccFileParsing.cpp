@@ -17,7 +17,7 @@ int yaccFileParsing(const string& fileName, string& start, unordered_set<string>
 
     // str用来临时存储读入的内容
 	string str;
-	getline(inFile, str);
+	inFile >> str;
 
     // 解析C声明部分
 	if (str == "%{") {
