@@ -9,8 +9,6 @@
 
 using namespace std;
 
-
-
 int main(int argc, char const* argv[]){
     freopen("out.txt","w",stdout);
     // yacc规约文件的文件名
