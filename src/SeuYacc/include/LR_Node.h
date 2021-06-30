@@ -17,16 +17,7 @@ class LR_Node{
 private:
      map<int,int> state;
 
-    /**
-     * @brief int 产生式左边id - >产生式
-     * 
-     */
-    unordered_map<int,LR_Producer> producers;
-    /**
-     * @brief int 转移符id - > 转移后，后移一项的产生式左边id
-     * 
-     */
-    unordered_map<int,int> transResult; 
+
     /**
      * @brief 中心项哈希，相等说明为同心项
      * 
@@ -34,12 +25,28 @@ private:
     eclosureHash coreHash;
     eclosureHash LR_Node_Hash;
 public:
-    #ifdef VISUAL
-    visualLR<int> &vfa; 
-    #endif
+
+    /**
+     * @brief int 产生式id - >LR产生式对象
+     * 
+     */
+    unordered_map<int,LR_Producer> producers;
+    /**
+     * @brief int 转移符id - > 产生g式id
+     * 
+     */
+    multimap<int,int> nextPros; 
+    set<int> allNexts;
     int idx;
     #ifdef VISUAL
-    LR_Node(visualLR<int> &vLR);
+  
+    auto producerCBegin(){
+        return producers.cbegin();
+    }
+    auto producerCEnd(){
+        return producers.cend();
+    }
+    LR_Node();
     /**
      * @brief 拷贝构造函数
      * 

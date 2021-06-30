@@ -105,6 +105,24 @@ public:
     int getLength(){
         return getRight(producer).size();
     }
+    /**
+     * @brief 检查该producer是否已经可以规约（移进到末尾了）
+     * 
+     * @return true 
+     * @return false 
+     */
+    bool isEnd(){
+        return getLength()==nowPlace;
+    }
+    /**
+     * @brief 返回移进一个字符的LR_Producer
+     * 不提供规约检查（调用前请使用isEnd()检查
+     * @return LR_Producer 
+     */
+    LR_Producer move(){
+        LR_Producer rt = *this;
+        ++rt.nowPlace;
+    }
     operator int(){
         return producer;
     }

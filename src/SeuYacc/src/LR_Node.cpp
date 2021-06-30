@@ -2,15 +2,15 @@
 
 
 #ifdef VISUAL
-LR_Node::LR_Node(visualLR<int> &vLR):vfa(vLR){}
-LR_Node::LR_Node(const LR_Node &other):vfa(other.vfa){
+LR_Node::LR_Node(){}
+LR_Node::LR_Node(const LR_Node &other){
     producers = other.producers;
     coreHash = other.coreHash;
     LR_Node_Hash = other.LR_Node_Hash;
     state = other.state;
     idx = other.idx;
 }
-LR_Node& LR_Node::operator = (const LR_Node&other){//赋值构造函数不会传递vfa别名，故只能用作临时变量，不可参与可视化！
+LR_Node& LR_Node::operator = (const LR_Node&other){
     producers = other.producers;
     coreHash = other.coreHash;
     LR_Node_Hash = other.LR_Node_Hash;
@@ -33,6 +33,10 @@ void LR_Node::addTrans(int target,int c){
 void LR_Node::addProducer(LR_Producer producer){
     if (!producers.count(producer)){
         producers[producer] = producer;
+        if (!producer.isEnd()){
+            nextPros.insert({producer.getNext(),producer});
+            allNexts.insert(producer.getNext());
+        }
         coreHash.add(producer);
         for (auto &look:producer.lookAhead){
             LR_Node_Hash.add(producer.getIdentifier(look));
