@@ -153,8 +153,9 @@ LR LR::consturctLALR(){
     // 初始值为状态x->-1
     // 合并同心项后所有同心项映射到同一项
     // 用于最后更改LALR中的每个node的Trans
-    for(int i = 0; i < state_num; i++)
+    for(int i = 0; i < state_num; i++){
         temp[i] = -1;
+    }
 
     // 初始节点node需要保留
     LR_Node node0 = pool[0];
@@ -172,8 +173,9 @@ LR LR::consturctLALR(){
         // 该node没有同心项，即桶中元素个数为1
         if(getConcentricBegin(coreHash) == getConcentricEnd(coreHash)){
             // 初始节点已处理过，直接跳过就行（初始节点应该没有同心项
-            if(getConcentricBegin(coreHash)->second == 0)
+            if(getConcentricBegin(coreHash)->second == 0){
                 continue;
+            }
 
             // 直接将该节点加入LALR项目集簇中，并改变映射temp
             LR_Node node = pool[getConcentricBegin(coreHash)->second];
@@ -189,11 +191,13 @@ LR LR::consturctLALR(){
         temp[getConcentricBegin(coreHash)->second] = count;
         // 合并同心项
         for (auto & iter = getConcentricBegin(coreHash); iter != getConcentricEnd(coreHash); ++iter){
-            if(iter == getConcentricBegin(coreHash))
+            if(iter == getConcentricBegin(coreHash)){
                 continue;
+            }
             // 遍历每个同心项的产生式，对合并后的节点Insert每一个产生式(效果相当于merge)
-            for(auto & iter2 = pool[iter->second].producerCBegin(); iter2 != pool[iter->second].producerCEnd(); ++iter2)
+            for(auto & iter2 = pool[iter->second].producerCBegin(); iter2 != pool[iter->second].producerCEnd(); ++iter2){
                 node.addProducer(iter2->second);
+            }
             temp[iter->second] = count;
         }
         rt.add(node);
@@ -202,10 +206,11 @@ LR LR::consturctLALR(){
 
     // 使用temp表更新LALR每个节点的Trans
     // 生成遍历LALR中每个节点的迭代器
-    for(int i = 0; i < rt.pool.size(); i++)
-        for(auto iter = rt[i].state.begin(); iter != rt[i].state.end(); ++iter)
+    for(int i = 0; i < rt.pool.size(); i++){
+        for(auto iter = rt[i].state.begin(); iter != rt[i].state.end(); ++iter){
             iter->second = temp[iter->second];
-
+        }
+    }
     delete []temp;
 
     return rt;
