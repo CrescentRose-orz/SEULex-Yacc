@@ -93,8 +93,11 @@ int main(int argc, char const* argv[]){
         cout<<endl;
         cout<<"get node: "<< myLR.consturctLR()<<endl;
         myLR.logger.end("construct lr1");
-        myLR.printVisualLR(vLROut);
+        myLR.logger.save();
+        //myLR.printVisualLR(vLROut);
         myLR.logger.end("yacc");
+        myLR.logger.save();
+        myLR.constructParsingTable();
     fclose(stdout);
     } catch(exception e){
         cout<<"error occurs"<<endl;

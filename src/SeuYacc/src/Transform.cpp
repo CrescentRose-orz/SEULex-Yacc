@@ -8,13 +8,18 @@ void transformTerminals(unordered_set<string>& Terminals_Str, unordered_map<stri
     StrToInt.insert(make_pair(NullString, -1));
     IntToStr.insert(make_pair(-1, NullString));
 
-    int counter = 0;
+    int counter = 128;
 
 	for (auto str : Terminals_Str){
-		StrToInt.insert(make_pair(str, counter));
-		IntToStr.insert(make_pair(counter, str));
-		counter++;
-	}
+        if (str.size()==1){
+            StrToInt.insert({str,str[0]});
+            IntToStr.insert({str[0],str});
+        } else {
+            StrToInt.insert(make_pair(str, counter));
+            IntToStr.insert(make_pair(counter, str));
+            counter++;
+	    }
+    }
 
 	TNBound = counter;
 }

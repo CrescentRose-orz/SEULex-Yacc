@@ -149,6 +149,7 @@ auto LR::getConcentricEnd(eclosureHash concentric){
 int LR::constructParsingTable(){
     // 首先生成y.tab.h，其中存储了终结符与int之间的映射
     ofstream out;
+    cout<<"begin constructParsing"<<endl;
 	out.open("y.tab.h", ios::out);
 	out << "#ifndef Y_TAB_H" << endl;
 	out << "#define Y_TAB_H" << endl;
@@ -156,22 +157,61 @@ int LR::constructParsingTable(){
     out << endl;
 
     out << "// epsilon" << endl;
-    out << "#difine " << "" <<"epsilon -1" << endl;
-
+    out << "#define " << "" <<"epsilon -1" << endl;
+    out <<"#define "<<"TNBound "<<TNBound<<endl;
     out << endl;
 
     out << "// terminals" << endl;
-    for (int i = 0; i < TNBound; i++)
-		out << "#difine " << IntToStr[i] <<" "<< i << endl;
+    for (int i = 128; i < TNBound; i++)
+		out << "#define " << IntToStr[i] <<" "<< i << endl;
 
     out << endl;
 
     out << "// nonterminals" << endl;
     for (int i = TNBound; i < NLBound; i++)
-		out << "#difine " << IntToStr[i] <<" "<< i << endl;
-    
+		out << "#define " << IntToStr[i] <<" "<< i << endl;
+    out <<"#define acc "<<acc<<endl;
     out << endl;
-	
+    out <<"#define NTerminalBase "<<TNBound<<endl;
+    out <<"#define isTerminal(x) (x<"<<TNBound<<")"<<endl;
+
+    out<<"char (*I2S)["<<NLBound<<"]={"<<endl;
+    for (int i = 0 ; i < NLBound;++i){
+        if (i<128){
+            if (i<30){
+                out<<"\"\\\\"<<i<<"\","<<endl;
+            } else{ 
+                if (i =='\\'){
+                    out<<"\"\\\\\","<<endl;
+                } else if (i == '\"') {
+                    out<<"\"\\\"\","<<endl;
+                } else {
+                    out<<"\""<<(char)i<<"\","<<endl;
+                }
+            }
+            continue;
+        }
+        if (i!=NLBound - 1)
+            out<<"\""<<I2S(i)<<"\","<<endl;
+        else 
+            out<<"\""<<I2S(i)<<"\"};"<<endl;
+    }
+    out<<"int proCnt["<<TranslationRule_Int.size()<<"]={"<<endl;
+    for (int i = 0; i < TranslationRule_Int.size();++i){
+        out<<TranslationRule_Int[i].second.size()<<(i!=TranslationRule_Int.size()-1?",":"};");
+    }
+    out<<endl;
+    out<<"int proGet["<<TranslationRule_Int.size()<<"]={"<<endl;
+    for (int i = 0; i < TranslationRule_Int.size();++i){
+        out<<TranslationRule_Int[i].first<<(i!=TranslationRule_Int.size()-1?",":"};");
+    }
+    out<<endl;
+    //out <<"char (*)["<<IntToStr.si
+
+
+
+
+
 	out << "#endif" << endl;
 	out.close();
 
@@ -189,79 +229,100 @@ int LR::constructParsingTable(){
     out << endl;
     int state_num = this->pool.size();
     int nonterminal_num = NLBound - TNBound;
+    // 存储每一个状态的GOTO子表(一维数组int[非终结符个数])
+    {
+    int *temp = new int[nonterminal_num];
     // 生成并输出GOTO表，GOTO表的结构为int[状态个数][非终结符个数]
     out << "int GOTO[" << state_num << "][" << nonterminal_num << "] = {"<< endl;
     for(int i = 0; i < state_num; i++){
-        // 存储每一个状态的GOTO子表(一维数组int[非终结符个数])
-        int *temp = new int[nonterminal_num];
         // 初始化每一项均为-1(出错)
-        for(int j = 0; j < nonterminal_num; j++)
-            temp[j] = -1;
-
+        memset(temp,-1,sizeof(int)*nonterminal_num);
         // 根据项目集簇生成GOTO表
         for(auto iter = this->pool[i].getAllTransBegin(); iter != this->pool[i].getAllTransEnd(); ++iter){
             // 确认其为非终结符
-            if(iter->first < NLBound && iter->first >= NLBound)
-                temp[iter->first - NLBound] = iter->second;
-
-
+            if(iter->first < NLBound && iter->first >= TNBound)
+                temp[iter->first - TNBound] = iter->second;
+        }
         // 将temp写入GOTO表
-        out << "\t{";
-        for(int j = 0; j < nonterminal_num - 1; j++)
-            out << temp[j] << ", ";
-        out << temp[nonterminal_num - 1] << "}," << endl;
-
-        delete []temp;
+        if (i < state_num - 1){
+            for(int j = 0; j < nonterminal_num ; j++)
+                out << temp[j] <<",";
+            out<<endl;
+        } else {
+            for(int j = 0; j < nonterminal_num - 1; j++)
+                out << temp[j] <<",";    
+            out<<temp[nonterminal_num - 1]<<"};"<<endl;;
+        }
     }
-
-    out << "};" << endl << endl;
-
+    delete []temp;
+    }
     // 生成并输出ACTION表，ACTION表的结构为int[状态个数][终结符个数]
     // 约定0为出错，+x代表移进到第x-1个状态，-x代表使用第x-1号产生式规约，+x其中x=StrToInt.size()+1代表acc
     int terminal_num = TNBound;
     out << "int ACTION[" << state_num << "][" << terminal_num << "] = {"<< endl;
+    // 存储每一个状态的ACTION子表(一维数组int[终结符个数])
+    int *temp = new int[terminal_num];
     for(int i = 0; i < state_num; i++){
-        // 存储每一个状态的ACTION子表(一维数组int[终结符个数])
-        int *temp = new int[terminal_num];
         // 初始化每一项均为0(出错)
-        for(int j = 0; j < terminal_num; j++)
-            temp[j] = 0;
-
+        memset(temp,0,sizeof(int)*terminal_num);
+        
         // 根据项目集簇生成ACTION表
         // 规约项
         set<LR_Producer> pros = this->pool[i].getAllReduce();
-        for(auto & pro : pros)
+        for(auto & pro : pros){
             for(auto & num : pro.lookAhead){
                 // acc情况，即对向前看#符号进行产生式号为0(start->translation_unit)的规约
+                if (pro.nowPlace!=getRight(pro.producer).size()){
+                    out<<"ERROR NOT REDUCEBAL"<<endl;
+                    return 1;
+                }
                 if(pro.producer == 0 && IntToStr[num] == "#")
                     temp[num] = acc;
                 else
                     temp[num] = -(pro.producer + 1);
             }
-        
+        }
         // 移进项
-        for(auto iter = this->pool[i].getAllTransBegin(); iter != this->pool[i].getAllTransEnd(); ++iter)
+        for(auto iter = this->pool[i].getAllTransBegin(); iter != this->pool[i].getAllTransEnd(); ++iter){
             // 确认其为非终结符
-            if(iter->first < NLBound){
+            if (iter->first >= TNBound){
+                continue;
+            }
+            if(iter->first < TNBound ){
                 // 出现移进规约冲突，报错
-                if(temp[iter->first] != 0){
-                    cout << "ERROR: Not A LALR grammar!\n" <<endl;
+                if(temp[iter->first] != 0 && S2I("ELSE") != iter->first){
+                    out << "ERROR: Not A LALR grammar!\n" <<endl;
+                    out << I2S(iter->first)<<" to node"<<iter->second<<endl;
+                    for(auto & pro : pros){
+                        for(auto & num : pro.lookAhead){
+                                // acc情况，即对向前看#符号进行产生式号为0(start->translation_unit)的规约
+                                if (num == iter->first){
+                                    out<<I2S(getLeft(pro.producer))<<" -> ";
+                                    for (auto id:getRight(pro.producer)){
+                                        out<<I2S(id)<<" ";
+                                    }
+                                    out<<endl;
+                                }
+                            }
+                    }
                     return 1;
                 }
                 temp[iter->first] = iter->second + 1;
             }
+        }
+        // 将temp写入GOTO表
+        if (i < state_num - 1){
+            for(int j = 0; j < terminal_num ; j++)
+                out << temp[j] <<",";
+            out<<endl;
+        } else {
+            for(int j = 0; j < terminal_num - 1; j++)
+                out << temp[j] <<",";    
+            out<<temp[terminal_num-1]<<"};"<<endl;;
+        }
 
-        // 将temp写入ACTION表
-        out << "\t{";
-        for(int j = 0; j < terminal_num - 1; j++)
-            out << temp[j] << ", ";
-        out << temp[terminal_num - 1] << "}," << endl;
-
-        delete []temp;
     }
-
-    out << "};" << endl << endl;
-    
+    delete []temp;
     out << R"(
 // The following are from the yacc file
 

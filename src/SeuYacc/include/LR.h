@@ -18,8 +18,8 @@ private:
     // unordered_map<eclosureHash,int,hashFunction> vis;
 
 public:
-    multimap<eclosureHash,int,hashFunction> concentricItem;
-    set<eclosureHash> allKeys;
+    unordered_multimap<eclosureHash,int,hashFunction> concentricItem;
+    unordered_set<eclosureHash,hashFunction> allKeys;
     int tail = 0;
     LR();
     LR(string s);
