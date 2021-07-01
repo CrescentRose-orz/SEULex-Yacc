@@ -23,6 +23,7 @@ int LR::add(LR_Node &node){
     node.idx = tail;
     pool.push_back(node);
     concentricItem.insert({node.core(),node.idx});
+    allKeys.insert(node.core());
     return tail++;
     // todo vlr update
 }

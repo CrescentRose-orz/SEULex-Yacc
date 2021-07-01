@@ -19,6 +19,7 @@ private:
 
 public:
     multimap<eclosureHash,int,hashFunction> concentricItem;
+    set<eclosureHash> allKeys;
     int tail = 0;
     LR();
     LR(string s);
