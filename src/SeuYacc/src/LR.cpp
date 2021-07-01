@@ -108,6 +108,7 @@ int LR::constructParsingTable(){
 
     // ----------头文件部分----------
 	out << "#include \"y.tab.h\"" << endl;
+    out << "#include \"lex.yy.c\"" << endl;
 
     // -----------命名空间-----------
     out << "using namespace std;" << endl;
@@ -189,7 +190,85 @@ int LR::constructParsingTable(){
 
     out << "};" << endl << endl;
     
-    
+    out << R"(
+// The following are from the yacc file
+
+int main(int argc, char const *argv[])
+{
+	cout << "YACC" << endl;
+
+	if (argc != 2) {
+		cout << "ERROR: A parameter is missing!\n";
+		return -1;
+	}
+	else {
+        yyin = fopen(argv[1], "r");
+	}
+	
+	string ct;
+	input_buffer.push_back({"#", "#"});
+	
+	parser_stack.push(0);
+
+	int cursor = 0;
+
+	int a = termMap[input_buffer[cursor].token_type];
+	string v = input_buffer[cursor].token_value;
+
+	int s, t, action;
+
+	pair<string, vector<string>> production;
+
+	while (true)
+	{
+		s = parser_stack.top();
+		if (ACTION[s].find(a) == ACTION[s].end()) {
+			yyerror();
+			return -1;
+		}
+		action = ACTION[s][a];
+		if (action > 0 ) {
+			parser_stack.push(action);
+			TerminalNode* tm = new TerminalNode(node_num++, termVec[a], v);
+			nodes_stack.push(tm);
+			a = termMap[input_buffer[cursor].token_type];
+			v = input_buffer[cursor].token_value;
+			cursor++;
+		}
+		else if (action < 0) {
+			production = pvs[-action];
+			vector<int> children;
+
+			for (int i = 0; i < production.second.size(); i++)
+			{
+				Node *top = nodes_stack.top();
+				children.insert(children.begin(), top->index);
+				nodes_map[top->index] = top;
+				nodes_stack.pop();
+
+				parser_stack.pop();
+			}
+			
+			t = parser_stack.top();
+			parser_stack.push(GOTO[t][noterMap[production.first]]);
+			
+			NonterminalNode *no = new NonterminalNode(node_num++, production.first, children);
+			nodes_stack.push(no);
+
+			output_production(production);
+		}
+		else {
+			Node *top = nodes_stack.top();
+			nodes_map[top->index] = top;
+			break;
+		}
+	}
+	print_parse_tree();
+	cout << "COMPLETED!" << endl;
+	return 0;
+}
+    )";
+
     // 构建成功
     return 0;
 }
