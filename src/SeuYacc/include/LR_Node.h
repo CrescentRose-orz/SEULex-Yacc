@@ -15,8 +15,6 @@ using namespace std;
 
 class LR_Node{
 private:
-     map<int,int> state;
-
 
     /**
      * @brief 中心项哈希，相等说明为同心项
@@ -25,7 +23,7 @@ private:
     eclosureHash coreHash;
     eclosureHash LR_Node_Hash;
 public:
-
+    map<int,int> state;
     /**
      * @brief int 产生式id - >LR产生式对象
      * 
