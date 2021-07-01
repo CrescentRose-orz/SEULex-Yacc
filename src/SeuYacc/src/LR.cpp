@@ -22,6 +22,7 @@ int LR::add(){
 int LR::add(LR_Node &node){
     node.idx = tail;
     pool.push_back(node);
+    concentricItem.insert({node.core(),node.idx});
     return tail++;
     // todo vlr update
 }
@@ -130,6 +131,19 @@ bool flag = 1;
         visualLR vLR;
         vLR.print(fout,*this);
     }
+
+auto LR::getConcentricBegin(eclosureHash concentric){
+    auto pairIter = concentricItem.equal_range(concentric);
+    return pairIter.first;
+}
+
+auto LR::getConcentricEnd(eclosureHash concentric){
+    auto pairIter = concentricItem.equal_range(concentric);
+    return pairIter.second;
+}
+
+
+
 
 int LR::constructParsingTable(){
     // 首先生成y.tab.h，其中存储了终结符与int之间的映射

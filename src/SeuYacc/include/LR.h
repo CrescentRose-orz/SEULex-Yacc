@@ -16,7 +16,9 @@ private:
     // queue<NFA_eclosure> q;
     // unordered_map<eclosureHash,int,hashFunction> DFAMap;
     // unordered_map<eclosureHash,int,hashFunction> vis;
+
 public:
+    multimap<eclosureHash,int,hashFunction> concentricItem;
     int tail = 0;
     LR();
     LR(string s);
@@ -72,7 +74,21 @@ public:
      */
     int consturctLR();
     void printVisualLR(fstream &fout);
-
+    /**
+     * @brief 分类同心项
+     * 
+     */
+    void checkSame();
+    /**
+     * @brief 返回对于哈希为concentric的起始迭代器
+     * 
+     */
+    auto getConcentricBegin(eclosureHash concentric);
+    /**
+     * @brief 返回对于哈希为concentric的结束迭代器
+     * 
+     */
+    auto getConcentricEnd(eclosureHash concentric); 
     /**
      * @brief 构造LALR规约表并生成y.tab.h和y.tab.c
      * @exception LALR规约表中存在冲突
