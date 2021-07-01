@@ -5,11 +5,11 @@
 #include"LR_Node.h"
 #include"Logger.h"
 #include"basicFA.hpp"
+#include"visualLR.h"
 using namespace std;
 
 
-
-
+class visualLR;
 class LR:public basicFA<LR_Node>{
 
 private:
@@ -19,6 +19,7 @@ private:
 public:
     int tail = 0;
     LR();
+    LR(string s);
     LR(Logger &log);
     /**
      * @brief 新建一个LR节点 访问方式：
@@ -29,7 +30,7 @@ public:
      */
     int add();
     /**
-     * @brief 将一个LR节点插入LR_Node 注意构造该节点需要传入相同的可视化对象
+     * @brief 将一个LR节点插入LR_Node 
      * exp:
      * LR_Node myNode(myLR.vLR);
      * LR_Node.xxxxxx;
@@ -70,6 +71,7 @@ public:
      * @return int LR图节点数
      */
     int consturctLR();
+    void printVisualLR(fstream &fout);
 };
 
 

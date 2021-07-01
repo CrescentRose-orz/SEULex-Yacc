@@ -13,3 +13,7 @@ void getFirst();
 // 该重载函数对字符串求first
 // 该重载函数的输入依次为所求字符串，返回结果集
 void getFirst(const vector<int>& symbols, unordered_set<int>& resultSet);
+
+
+
+

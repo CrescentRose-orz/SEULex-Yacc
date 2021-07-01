@@ -4,7 +4,6 @@
 #include<map>
 #include"header.h"
 #include<vector>
-#include"visualLR.hpp"
 #include"Hash.hpp"
 #include"LR_Producer.hpp"
 #include"DataStructure.h"

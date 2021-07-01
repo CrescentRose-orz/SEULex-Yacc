@@ -107,6 +107,9 @@ public:
         eclosureHash(basicHash(element));
     }
     bool operator ==(const eclosureHash &other)const{
+        if ((hash[0]==other.hash[0])^(hash[1]==other.hash[1])){
+            cout<<"WARNING HASH MAY BE NOT ENOUGHT!"<<endl;
+        }
         for (int i = 0 ; i <HASH_CNT; ++i){
             if (hash[i] != other.hash[i]){
                 return 0;

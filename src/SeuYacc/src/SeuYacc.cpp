@@ -6,7 +6,7 @@
 #include "YaccFileParsing.h"
 #include "Transform.h"
 #include "First.h"
-
+#include "LR.h"
 using namespace std;
 
 int main(int argc, char const* argv[]){
@@ -69,6 +69,41 @@ int main(int argc, char const* argv[]){
 
     // ----------------以上为求取所有单字符First部分----------------
     // ----------------下面开始进行LR1项目集簇的构造----------------
-
+    cout<<S2I("start")<<endl;
+    LR myLR("yacc.log");
+    LR_Node startNode;
+    fstream vLROut;
+    try{
+    for (auto &id:LHSToPos[S2I("start")]){
+        startNode.addProducer(LR_Producer(id,0,S2I("#")));
+    }
+    myLR.add(startNode);
+    cout<<"begin startPoint"<<endl;
+    myLR[0].solveEclosure();
+    cout<<"adding startPoint done!"<<endl;
+        myLR.logger.start("yacc");
+        vLROut.open("LR1.dot",ios::out);
+        myLR.logger.start("construct lr1");
+        cout<<"begin construct lr"<<endl;
+        cout<<myLR[0].nextPros.count(S2I("declaration_specifiers"))<<" counts of next"<<endl;
+        cout<<"All next:"<<endl;
+        for (auto &t:myLR[0].allNexts){
+            cout<<" "<<t<<"("<<I2S(t)<<") ";
+        }
+        cout<<endl;
+        cout<<"get node: "<< myLR.consturctLR()<<endl;
+        myLR.logger.end("construct lr1");
+        myLR.printVisualLR(vLROut);
+        myLR.logger.end("yacc");
     fclose(stdout);
+    } catch(exception e){
+        cout<<"error occurs"<<endl;
+        cout<<e.what()<<endl;
+        myLR.logger.error("yacc","error occurs \n",0);
+        myLR.logger.close();
+        myLR.printVisualLR(vLROut);
+        system("pause");
+    }
+    cout<<"main process ended!"<<endl;
+    system("pause");
 }

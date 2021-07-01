@@ -4,6 +4,9 @@
 #ifdef VISUAL
 LR_Node::LR_Node(){}
 LR_Node::LR_Node(const LR_Node &other){
+    allNexts = other.allNexts;
+    allEnds = other.allEnds;
+    nextPros = other.nextPros;
     producers = other.producers;
     coreHash = other.coreHash;
     LR_Node_Hash = other.LR_Node_Hash;
@@ -11,6 +14,9 @@ LR_Node::LR_Node(const LR_Node &other){
     idx = other.idx;
 }
 LR_Node& LR_Node::operator = (const LR_Node&other){
+    allNexts = other.allNexts;
+    allEnds = other.allEnds;
+    nextPros = other.nextPros;
     producers = other.producers;
     coreHash = other.coreHash;
     LR_Node_Hash = other.LR_Node_Hash;
@@ -33,9 +39,21 @@ void LR_Node::addTrans(int target,int c){
 void LR_Node::addProducer(LR_Producer producer){
     if (!producers.count(producer)){
         producers[producer] = producer;
+        #ifdef DEBUG
+        cout<<"add producer "<<I2S(getLeft(producer.producer))<<" -> ";
+
+        for(auto &id:getRight(producer)){
+            cout<<I2S(id)<<" ";
+        }
+        cout<<endl;
+        #endif
         if (!producer.isEnd()){
             nextPros.insert({producer.getNext(),producer});
             allNexts.insert(producer.getNext());
+            #ifdef DEBUG
+            cout<<"gain new next "<<producer.getNext()<<" "<<(producer.getNext())<<endl;
+            cout<<nextPros.count(producer.getNext()) <<endl;
+            #endif
         } else {
             allEnds.insert(producer);
         }
@@ -65,12 +83,12 @@ queue<LR_Producer> q;//待展开的LR产生式
         }
     }
     while (!q.empty()){//对所有待扩展产生式扩展
-        LR_Producer &now = q.front();
+        LR_Producer now = q.front();
+        q.pop();
         if (isTerminal(now.getNext())){ //若点后为终结符或末尾，不扩展 为结尾-1亦满足条件(-1<TNBound)
             continue;
         }
         //否则为非终结符，遍历所有该非终结符为左符号的产生式
-        for (auto &newProducer:LHSToPos[now.getNext()]){//此写法默认LHSToPos指一个非终结符对应的所有产生式id，待明确
             unordered_set<int> lookAhead;
             vector<int> symbols;
             for (int i = now.nowPlace + 1; i < now.getLength(); ++i){
@@ -83,17 +101,19 @@ queue<LR_Producer> q;//待展开的LR产生式
                     lookAhead.insert(look);
                 }
             }
-            for (auto &look:lookAhead ){   //加入计算得的向前看符后，若闭包内不存在，则加入闭包和扩展队列
-                if (!vis.count(LR_Producer::getIdentifier(newProducer, 0, look))){
-                    q.push(LR_Producer(newProducer, 0, look));
-                    addProducer(LR_Producer(newProducer, 0, look));
-                    vis.insert(LR_Producer::getIdentifier(newProducer, 0, look));
+            #ifdef DEUBG
+            cout<<"processing on producer start with "<<I2S(now.getNext())<<endl;;
+            #endif
+            for (auto &newProducer:LHSToPos[now.getNext()]){//此写法默认LHSToPos指一个非终结符对应的所有产生式id，待明确
+                for (auto &look:lookAhead ){   //加入计算得的向前看符后，若闭包内不存在，则加入闭包和扩展队列
+                    if (!vis.count(LR_Producer::getIdentifier(newProducer, 0, look))){
+                        q.push(LR_Producer(newProducer, 0, look));
+                        addProducer(LR_Producer(newProducer, 0, look));
+                        vis.insert(LR_Producer::getIdentifier(newProducer, 0, look));
 
-                }
+                    }
             }
         }
-    
-        q.pop();
     }
 }
 

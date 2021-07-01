@@ -122,9 +122,13 @@ public:
     LR_Producer move(){
         LR_Producer rt = *this;
         ++rt.nowPlace;
+        return rt;
     }
     operator int(){
         return producer;
+    }
+    bool operator < (const LR_Producer &other) const {
+        return producer < other.producer;
     }
     
 };
