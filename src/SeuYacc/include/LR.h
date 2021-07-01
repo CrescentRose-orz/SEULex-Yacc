@@ -72,6 +72,13 @@ public:
      */
     int consturctLR();
     void printVisualLR(fstream &fout);
+
+    /**
+     * @brief 构造LALR规约表并生成y.tab.h和y.tab.c
+     * @exception LALR规约表中存在冲突
+     * @return int 构建状态，0表示成功构建，1表示构建失败
+     */
+    int constructParsingTable();
 };
 
 
