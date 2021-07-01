@@ -105,7 +105,7 @@ void getFirst(const vector<int>& symbols, unordered_set<int>& resultSet){
 	// 不是最后一项，且其求得字符的First集存在空串时继续循环
 	while (i < symbols.size()) {
 		// 获取当前循环下的字符First集合
-		auto tempFirst = First[symbols[i]];
+		auto & tempFirst = First[symbols[i]];
 
 		// 当前字符First集合中不存在空串，将该First集结果加入所求First集中，退出循环
 		if (tempFirst.find(-1) == tempFirst.end()) {
