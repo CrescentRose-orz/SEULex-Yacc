@@ -96,6 +96,10 @@ public:
      * @return int 构建状态，0表示成功构建，1表示构建失败
      */
     int constructParsingTable();
+
+    void printNode(int idx){
+        pool[idx].print();
+    }
 };
 
 

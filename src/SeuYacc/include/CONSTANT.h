@@ -2,8 +2,8 @@
 #define CONSTANT_HEADER
 
 #define VISUAL
-
-
+//#define DEBUG
+#define DEBUG_FOR_ECL
 #define isTerminal(x) (x < TNBound)
 #define I2S(x) IntToStr[x]
 #define S2I(x) StrToInt[x]

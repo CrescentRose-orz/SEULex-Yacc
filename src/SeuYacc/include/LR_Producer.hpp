@@ -130,7 +130,19 @@ public:
     bool operator < (const LR_Producer &other) const {
         return producer < other.producer;
     }
-    
+    void print(){
+        cout <<I2S(getLeft(producer))<<" -> ";
+        for (int i = 0 ; i < getRight(producer).size();++i){
+            if (i == nowPlace){
+                cout<<"· ";
+            }
+            cout<<I2S(getRight(producer)[i])<<" ";
+        }
+        cout<<" lookAhead: ";
+        for (auto &id:lookAhead){
+            cout<<"'"<<I2S(id)<<"' ";
+        }
+    }
 };
 
 // struct HashFunForProducer{

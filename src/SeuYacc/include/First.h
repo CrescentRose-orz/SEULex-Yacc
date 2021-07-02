@@ -16,4 +16,10 @@ void getFirst(const vector<int>& symbols, unordered_set<int>& resultSet);
 
 
 
+void solveFirst();
+
+
+void solveSingle(int idx,unordered_set<int> &vis);
+
+
 

@@ -10,11 +10,10 @@
 using namespace std;
 
 int main(int argc, char const* argv[]){
-    freopen("out.txt","w",stdout);
+    
+    FILE *fp = freopen("out.txt","w",stdout);
     // yacc规约文件的文件名
     string file_name;
-
-    // 参数个数不正确
 	if (argc != 2) {
 		cout << "ERROR: A parameter is missing!\n";
 		return -1;
@@ -64,12 +63,55 @@ int main(int argc, char const* argv[]){
 
     // ----------------以上为Str到Int的转换部分----------------
     // ----------------下面开始进行求取First部分----------------
-
+    // for (auto pp:TranslationRule_Int){
+    //     cout<<I2S(pp.first)<<" -> ";
+    //     for (auto pro:pp.second){
+    //         cout<<I2S(pro)<<" ";
+    //     }
+    //     cout<<endl;
+    // }
+    // cout<<NLBound<<" "<<S2I("declaration_list")<<endl;
+    // for (auto pro:LHSToPos[S2I("declaration_list")]){
+    //     cout<<"declaration_list ->";
+    //     for (auto id:getRight(pro)){
+    //         cout<<I2S(id)<<" ";
+    //     }
+    //     cout<<endl;
+    // }
+    // for (auto pro:LHSToPos[S2I("declaration")]){
+    //     cout<<"declaration ->";
+    //     for (auto id:getRight(pro)){
+    //         cout<<I2S(id)<<" ";
+    //     }
+    //     cout<<endl;
+    // }
+//    solveFirst();
     getFirst();
+    // cout<<"first:"<<endl;
+    // for (int i = 0; i < NLBound;++i){
+    //     if (i<128){
+    //         cout<<"'"<<(char)i<<"':"<<endl;
+    //     } else {
+    //         cout<<I2S(i)<<":"<<endl;            
+    //     }
+    //     for (auto &id:First[i]){
+    //         cout<<"'"<<I2S(id)<<"' ";
+    //     }
+    //     cout<<endl;
+    // }
 
+    //
     // ----------------以上为求取所有单字符First部分----------------
     // ----------------下面开始进行LR1项目集簇的构造----------------
-    cout<<S2I("start")<<endl;
+    cout<<"test begin"<<endl;
+    LR_Node test;
+    test.addProducer(LR_Producer(LHSToPos[S2I("pointer")][0],1,100));
+    test.addProducer(LR_Producer(LHSToPos[S2I("pointer")][1],1,100));
+    test.addProducer(LR_Producer(LHSToPos[S2I("pointer")][2],1,100));
+    test.solveEclosure();
+    test.print();
+    cout<<"test ended!"<<endl<<endl;
+    return 0;
     LR myLR("yacc.log");
     LR_Node startNode;
     fstream vLROut;
@@ -98,7 +140,19 @@ int main(int argc, char const* argv[]){
         myLR.logger.end("yacc");
         myLR.logger.save();
         myLR.constructParsingTable();
-    fclose(stdout);
+        fflush(fp);
+        fclose(fp);
+        freopen("CON","w",stdout);
+        //fclose(stdout);
+        while (1){
+            int id;
+            cin>>id;
+            if (id < 0){
+                break;
+            }
+            myLR.printNode(id);
+        }
+        
     } catch(exception e){
         cout<<"error occurs"<<endl;
         cout<<e.what()<<endl;

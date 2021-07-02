@@ -48,9 +48,20 @@ void getFirst(const int& symbol, unordered_set<int>& resultSet, unordered_set<in
 				unordered_set<int> temp_set;
 				while(j < producer.second.size()){
 					temp_set.clear();
-					// 若非终结符已求过first则退出循环以防止左递归的出现
-					if(processedSymbol.find(producer.second[j]) != processedSymbol.end())
+					if (symbol == producer.second[j]){
 						break;
+					}
+					// 若非终结符已求过first则退出循环以防止左递归的出现
+					if(processedSymbol.find(producer.second[j]) != processedSymbol.end()){
+						unordered_set<int> tmp2;
+						getFirst(producer.second[j], tmp2, processedSymbol);
+						temp_set.insert(tmp2.cbegin(),tmp2.cend());
+						if (!tmp2.count(-1)){
+							resultSet.insert(temp_set.cbegin(), temp_set.cend());
+							break;
+						}
+					//	break;
+					}
 
 					// 对于未求过first的符号求取其first
 					getFirst(producer.second[j], temp_set, processedSymbol);
@@ -75,6 +86,7 @@ void getFirst(const int& symbol, unordered_set<int>& resultSet, unordered_set<in
 				}
 			}
 		}
+		First.emplace(symbol,resultSet);
 	}
 }
 
@@ -127,4 +139,47 @@ void getFirst(const vector<int>& symbols, unordered_set<int>& resultSet){
 		
 		++i;
 	}
+}
+
+void solveFirst(){
+unordered_set<int> vis;
+	for (int i = 0 ; i < NLBound; ++i){
+		if (!vis.count(i)){
+			solveSingle(i,vis);
+		}
+	}
+
+
+}
+
+void solveSingle(int idx,unordered_set<int> &vis){
+	if (vis.count(idx)){
+		return;
+	}
+	if (isTerminal(idx)){
+		First[idx].insert(idx);
+		vis.insert(idx);
+		return;
+	}
+	vis.insert(idx);
+	for (auto pros:LHSToPos[idx]){
+		for (auto now:getRight(pros)){
+			if (now == idx){
+				break;
+			}
+			solveSingle(now,vis);
+			bool flag = false;
+			for (auto _first:First[now]){
+				if (_first != -1){
+					First[idx].insert(_first);
+				} else {
+					flag = true;
+				}
+				if (!flag){
+					break;
+				}
+			}
+		}
+	}
+	
 }

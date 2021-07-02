@@ -86,14 +86,15 @@ void transformTranslationRule(ProducerVecStr& TranslationRule_Str, ProducerVecIn
         int temp2 = TranslationRule_Int[i].first;
         if(temp2 == temp){
             temp_vector.push_back(i);
-            continue;
         }
         else{
             LHSToPos.insert(make_pair(temp, temp_vector));
             temp = temp2;
             temp_vector.clear();
             temp_vector.push_back(i);
-            continue;
+        }
+        if (i == TranslationRule_Int.size()-1){
+            LHSToPos.insert(make_pair(temp, temp_vector));
         }
     }
 

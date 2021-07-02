@@ -11,7 +11,12 @@
 using namespace std;
 
 
-
+// class producerMap:public unordered_map<int,LR_Producer>{
+//     public:
+//     LR_Producer& operator[](const int &k){
+//         return this->unordered_map<int,LR_Producer>::operator[]((k<<maxLen)+);
+//     }
+// };
 
 class LR_Node{
 private:
@@ -135,6 +140,18 @@ public:
     }
     eclosureHash core();
     eclosureHash getHash();
+    void print(){
+        int i = 1;
+        for (auto iter = producers.begin();iter!=producers.end();++iter){
+            cout<<"("<<i++<<") ";
+            iter->second.print();
+            cout<<endl;
+        }
+        cout<<"Symbol Trans"<<endl;
+        for (auto iter = state.begin();iter!=state.end();++iter ){
+            cout<<I2S(iter->first)<<" "<<iter->second<<endl;
+        }
+    }
 };
 #endif
 
