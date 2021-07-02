@@ -91,6 +91,12 @@ public:
      */
     auto getConcentricEnd(eclosureHash concentric); 
     /**
+     * @brief 构造LALR
+     * @exception 合并同心项时存在冲突
+     * @return 新的LR
+     */
+    LR consturctLALR();    
+    /**
      * @brief 构造LALR规约表并生成y.tab.h和y.tab.c
      * @exception LALR规约表中存在冲突
      * @return int 构建状态，0表示成功构建，1表示构建失败

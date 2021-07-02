@@ -154,8 +154,78 @@ auto LR::getConcentricEnd(eclosureHash concentric){
     return pairIter.second;
 }
 
+LR LR::consturctLALR(){
+    LR rt;
+    // 存储所有的映射状态
+    int state_num = pool.size();
+    int *temp = new int[state_num];
 
+    // 存储原LR(1)节点id->生成的LALR节点下标id的映射
+    // 初始值为状态x->-1
+    // 合并同心项后所有同心项映射到同一项
+    // 用于最后更改LALR中的每个node的Trans
+    for(int i = 0; i < state_num; i++){
+        temp[i] = -1;
+    }
 
+    // 初始节点node需要保留
+    LR_Node node0 = pool[0];
+    temp[0] = 0;
+    rt.add(node0);
+
+    // count对应当前LALR项目集簇中欲加入的一项的下标
+    int count = 1;
+
+    //eclosureHash coreHash = pool[i].core();
+    //for (auto iter = getConcentricBegin(coreHash);iter!=end;++iter)
+
+    // 遍历所有同心项的hash桶(所有同心项的hash值相同)
+    for (auto & coreHash : allKeys){
+        // 该node没有同心项，即桶中元素个数为1
+        if(getConcentricBegin(coreHash) == getConcentricEnd(coreHash)){
+            // 初始节点已处理过，直接跳过就行（初始节点应该没有同心项
+            if(getConcentricBegin(coreHash)->second == 0){
+                continue;
+            }
+
+            // 直接将该节点加入LALR项目集簇中，并改变映射temp
+            LR_Node node = pool[getConcentricBegin(coreHash)->second];
+            rt.add(node);
+            temp[getConcentricBegin(coreHash)->second] = count;
+            count++;
+            continue;
+        }
+
+        // 存在同心项的情况
+        // 先取第一项
+        LR_Node node = pool[getConcentricBegin(coreHash)->second];
+        temp[getConcentricBegin(coreHash)->second] = count;
+        // 合并同心项
+        for (auto & iter = getConcentricBegin(coreHash); iter != getConcentricEnd(coreHash); ++iter){
+            if(iter == getConcentricBegin(coreHash)){
+                continue;
+            }
+            // 遍历每个同心项的产生式，对合并后的节点Insert每一个产生式(效果相当于merge)
+            for(auto & iter2 = pool[iter->second].producerCBegin(); iter2 != pool[iter->second].producerCEnd(); ++iter2){
+                node.addProducer(iter2->second);
+            }
+            temp[iter->second] = count;
+        }
+        rt.add(node);
+        count++;
+    }
+
+    // 使用temp表更新LALR每个节点的Trans
+    // 生成遍历LALR中每个节点的迭代器
+    for(int i = 0; i < rt.pool.size(); i++){
+        for(auto iter = rt[i].state.begin(); iter != rt[i].state.end(); ++iter){
+            iter->second = temp[iter->second];
+        }
+    }
+    delete []temp;
+
+    return rt;
+}
 
 int LR::constructParsingTable(){
     // 首先生成y.tab.h，其中存储了终结符与int之间的映射
