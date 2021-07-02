@@ -127,20 +127,20 @@ int main(int argc, char const* argv[]){
         vLROut.open("LR1.dot",ios::out);
         myLR.logger.start("construct lr1");
         cout<<"begin construct lr"<<endl;
-        for (auto &t:myLR[0].allNexts){
-            cout<<" "<<t<<"("<<I2S(t)<<") ";
-        }
         cout<<endl;
-        cout<<"get node: "<< myLR.consturctLR()<<endl;
         myLR.logger.end("construct lr1");
         myLR.logger.save();
         //myLR.printVisualLR(vLROut);
-        myLR.logger.end("yacc");
-        myLR.logger.save();
+        myLR.logger.start("construct LALR");
         LR &&myLALR = myLR.consturctLALR();
+        myLR.logger.end("construct LALR");
+        myLR.logger.start("construct ParsingTable");
         myLALR.constructParsingTable();
+        myLR.logger.end("construct ParsingTable");
         cout<<myLR.allKeys.size()<<endl;
         cout<<"total node:"<<myLALR.pool.size()<<endl;
+        myLR.logger.end("yacc");
+        myLR.logger.save();
         //myLR.constructParsingTable();
         fflush(fp);
         fclose(fp);
