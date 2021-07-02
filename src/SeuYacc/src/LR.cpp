@@ -222,12 +222,6 @@ LR LR::consturctLALR(){
         }
     }
 
-    for(int i = 0; i < state_num; i++){
-        if(temp[i] == -1){
-            cout << "你不对劲" << endl;
-        }
-    }
-
     delete []temp;
 
     return rt;
