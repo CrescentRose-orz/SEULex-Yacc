@@ -103,15 +103,15 @@ int main(int argc, char const* argv[]){
     //
     // ----------------以上为求取所有单字符First部分----------------
     // ----------------下面开始进行LR1项目集簇的构造----------------
-    cout<<"test begin"<<endl;
-    LR_Node test;
-    test.addProducer(LR_Producer(LHSToPos[S2I("pointer")][0],1,100));
-    test.addProducer(LR_Producer(LHSToPos[S2I("pointer")][1],1,100));
-    test.addProducer(LR_Producer(LHSToPos[S2I("pointer")][2],1,100));
-    test.solveEclosure();
-    test.print();
-    cout<<"test ended!"<<endl<<endl;
-    return 0;
+    // cout<<"test begin"<<endl;
+    // LR_Node test;
+    // test.addProducer(LR_Producer(LHSToPos[S2I("pointer")][0],1,100));
+    // test.addProducer(LR_Producer(LHSToPos[S2I("pointer")][1],1,100));
+    // test.addProducer(LR_Producer(LHSToPos[S2I("pointer")][2],1,100));
+    // test.solveEclosure();
+    // test.print();
+    // cout<<"test ended!"<<endl<<endl;
+    // return 0;
     LR myLR("yacc.log");
     LR_Node startNode;
     fstream vLROut;
@@ -127,8 +127,6 @@ int main(int argc, char const* argv[]){
         vLROut.open("LR1.dot",ios::out);
         myLR.logger.start("construct lr1");
         cout<<"begin construct lr"<<endl;
-        cout<<myLR[0].nextPros.count(S2I("declaration_specifiers"))<<" counts of next"<<endl;
-        cout<<"All next:"<<endl;
         for (auto &t:myLR[0].allNexts){
             cout<<" "<<t<<"("<<I2S(t)<<") ";
         }
@@ -139,7 +137,11 @@ int main(int argc, char const* argv[]){
         //myLR.printVisualLR(vLROut);
         myLR.logger.end("yacc");
         myLR.logger.save();
-        myLR.constructParsingTable();
+        LR &&myLALR = myLR.consturctLALR();
+        myLALR.constructParsingTable();
+        cout<<myLR.allKeys.size()<<endl;
+        cout<<"total node:"<<myLALR.pool.size()<<endl;
+        //myLR.constructParsingTable();
         fflush(fp);
         fclose(fp);
         freopen("CON","w",stdout);
@@ -150,7 +152,7 @@ int main(int argc, char const* argv[]){
             if (id < 0){
                 break;
             }
-            myLR.printNode(id);
+            myLALR.printNode(id);
         }
         
     } catch(exception e){

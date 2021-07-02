@@ -201,12 +201,12 @@ LR LR::consturctLALR(){
         LR_Node node = pool[getConcentricBegin(coreHash)->second];
         temp[getConcentricBegin(coreHash)->second] = count;
         // 合并同心项
-        for (auto & iter = getConcentricBegin(coreHash); iter != getConcentricEnd(coreHash); ++iter){
+        for (auto  iter = getConcentricBegin(coreHash); iter != getConcentricEnd(coreHash); ++iter){
             if(iter == getConcentricBegin(coreHash)){
                 continue;
             }
             // 遍历每个同心项的产生式，对合并后的节点Insert每一个产生式(效果相当于merge)
-            for(auto & iter2 = pool[iter->second].producerCBegin(); iter2 != pool[iter->second].producerCEnd(); ++iter2){
+            for(auto  iter2 = pool[iter->second].producerCBegin(); iter2 != pool[iter->second].producerCEnd(); ++iter2){
                 node.addProducer(iter2->second);
             }
             temp[iter->second] = count;
@@ -256,7 +256,7 @@ int LR::constructParsingTable(){
     out <<"#define NTerminalBase "<<TNBound<<endl;
     out <<"#define isTerminal(x) (x<"<<TNBound<<")"<<endl;
 
-    out<<"char (*I2S)["<<NLBound<<"]={"<<endl;
+    out<<"char *I2S[]={"<<endl;
     for (int i = 0 ; i < NLBound;++i){
         if (i<128){
             if (i<30){
@@ -302,7 +302,7 @@ int LR::constructParsingTable(){
     {
     int *temp = new int[nonterminal_num];
     // 生成并输出GOTO表，GOTO表的结构为int[状态个数][非终结符个数]
-    out << "int GOTO[" << state_num << "][" << nonterminal_num << "] = {"<< endl;
+    out << "int _GOTO[" << state_num << "][" << nonterminal_num << "] = {"<< endl;
     for(int i = 0; i < state_num; i++){
         // 初始化每一项均为-1(出错)
         memset(temp,-1,sizeof(int)*nonterminal_num);

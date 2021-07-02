@@ -55,16 +55,16 @@ int producerID = (producer.producer<<maxLen)+producer.nowPlace;
         cout<<endl;
         #endif
         if (!producer.isEnd()){
-            nextPros.insert({producer.getNext(),producer});
+            nextPros.insert({producer.getNext(),producerID});
             allNexts.insert(producer.getNext());
             #ifdef DEBUG_Node
             cout<<"gain new next "<<producer.getNext()<<" "<<(producer.getNext())<<endl;
             cout<<nextPros.count(producer.getNext()) <<endl;
             #endif
         } else {
-            allEnds.insert(producer);
+            allEnds.insert(producerID);
         }
-        coreHash.add(producer);
+        coreHash.add(producerID);
         for (auto &look:producer.lookAhead){
             LR_Node_Hash.add(producer.getIdentifier(look));
         }
@@ -76,7 +76,7 @@ int producerID = (producer.producer<<maxLen)+producer.nowPlace;
     cout<<endl;
     #endif
     for (auto &lookAhead:producer.lookAhead){
-        producers[producer].addLookAhead(lookAhead,LR_Node_Hash);
+        producers[producerID].addLookAhead(lookAhead,LR_Node_Hash);
     }
 
 }
