@@ -1,36 +1,16 @@
 #ifndef DFA_HEADER
 #define DFA_HEADER
 #include"Hash.hpp"
+#include"NFA_eclosure.h"
 #include<bits/stdc++.h>
 #include"NFA.h"
 #include"basicFA.hpp"
 #include"CONSTANT.h"
 #include"threadpool.hpp"
 #include"semaphore.h"
+
 using namespace std;
 class DFA;
-class NFA_eclosure{
-private:
-    NFA& _NFA;
-public:
-    int actIdx = -1;
-    action _action;
-    set<int> NFAs;
-    eclosureHash hash;
-    NFA_eclosure(const NFA_eclosure & other);
-    NFA_eclosure(NFA &_NFA);//:hash(),_NFA(_NFA)
-    //NFA_eclosure(int idx);//:hash(basicHash(idx));
-    void add(int idx);  
-    bool operator == (const NFA_eclosure &other)const;
-    bool has(int idx);
-    void expandEclosure();
-    friend ostream &operator << (ostream& out,const NFA_eclosure &eNFA);
-    NFA_eclosure move(int &c);
-    #ifdef DEBUG2
-    int check();
-    #endif
-};
-
 
 class DFA_Node{
 private:

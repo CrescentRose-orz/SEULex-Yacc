@@ -12,27 +12,6 @@
 #define dev
 using namespace std;
 const int NFA_t =258;
-enum operandType{opNFA = 0,opNum,opString};
-
-
-class operand {
-public:
-    operandType type;
-    string content;
-    int num;
-    operand(){
-        type = opNFA;
-    }
-    operand(int num){
-        this -> type = opNum;
-        this -> num = num;
-    }
-    operand(string content){
-        this -> type = opString;
-        this -> content = content;
-    }
-};
-
 
 
 class NFA_Node{

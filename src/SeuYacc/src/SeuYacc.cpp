@@ -127,7 +127,7 @@ int main(int argc, char const* argv[]){
         vLROut.open("LR1.dot",ios::out);
         myLR.logger.start("construct lr1");
         cout<<"begin construct lr"<<endl;
-        cout<<endl;
+        myLR.consturctLR();
         myLR.logger.end("construct lr1");
         myLR.logger.save();
         //myLR.printVisualLR(vLROut);

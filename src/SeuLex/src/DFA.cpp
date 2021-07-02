@@ -1,65 +1,5 @@
 #include"DFA.h"
 
-NFA_eclosure::NFA_eclosure(const NFA_eclosure & other):_NFA(other._NFA){
-    NFAs= other.NFAs;
-    hash = other.hash;                     
-}
-
-NFA_eclosure::NFA_eclosure(NFA &_NFA):hash(),_NFA(_NFA){}
-    //NFA_eclosure(int idx);//:hash(basicHash(idx));
-void NFA_eclosure::add(int idx){
-    NFAs.insert(idx);
-    hash.add(_NFA[idx].hash());
-    #ifdef USE_MULTITHREAD
-    RdLock(_NFA.Wrlock);
-    #endif
-    if (_NFA[idx].valid()){
-        action &&other = _NFA[idx].getAction();
-        if (_action.getIdx() == -1){
-            _action = other;
-        } else if (_action > other){
-            _action = other;
-        }
-    }
-}
-bool NFA_eclosure::operator == (const NFA_eclosure &other)const{
-    return hash == other.hash;
-}
-void NFA_eclosure::expandEclosure(){
-queue<int> q;
-int now;
-    for (auto _nfa:NFAs){
-        q.push(_nfa);
-    }
-    while(!q.empty()){
-        now = q.front();
-        q.pop();
-        {
-            #ifdef USE_MULTITHREAD
-            RdLock(_NFA.Wrlock);
-            #endif
-            vector<int> &&rt =_NFA[now].getTrans(eps);
-            for (auto &t:rt){
-                if (!has(t)){
-                    q.push(t);
-                    add(t);
-                }
-            }
-        }
-    }
-}
-bool NFA_eclosure::has(int x){
-    return NFAs.find(x) != NFAs.end();
-}
-ostream& operator << (ostream& out,NFA_eclosure& eNFA){
-    out<<"{";
-    for(auto iter = eNFA.NFAs.begin();iter!=eNFA.NFAs.end();++iter){
-        out<<*iter<<" ";
-    }
-    out<<"}";
-    return out;
-}
-
 
 DFA::DFA(){}
 DFA::DFA(Logger &log):basicFA(log){}
@@ -152,21 +92,6 @@ int DFA::insert(NFA_eclosure &_e){
     return rt;
 }
 
-NFA_eclosure NFA_eclosure::move(int &c){
-NFA_eclosure newE(_NFA);
-    for (auto &t:NFAs){
-        #ifdef USE_MULTITHREAD
-        RdLock(_NFA.Wrlock);
-        #endif
-        vector<int> &&rt = _NFA[t].getTrans(c);
-        for (auto &newt:rt){
-            if (!newE.has(newt)){
-                newE.add(newt);
-            }
-        }
-    }
-    return newE;
-}
 
 void DFA::expandEclosure(NFA_eclosure &nowE){
     for (int i = 0; i <= charSetMAX; ++i){
@@ -422,52 +347,3 @@ NFA_eclosure startPoint(_NFA);
         })"<<'\n';
         
     }
-    /*
-
-
-
-
-
- yyin和yyout：这是Lex中本身已定义的输入和输出文件指针。这两个变量指明了lex生成的词法分析器从哪里获得输入和输出到哪里。默认：键盘输入，屏幕输出。
-
-    yytext和yyleng：这也是lex中已定义的变量，直接用就可以了。
-
-    yytext：指向当前识别的词法单元（词文）的指针
-
-    yyleng：当前词法单元的长度。
-
-    ECHO：Lex中预定义的宏，可以出现在动作中，相当于fprintf(yyout, “%s”,yytext)，即输出当前匹配的词法单元。
-
-    yylex()：词法分析器驱动程序，用Lex翻译器生成的lex.yy.c内必然含有这个函数。
-
-    yywrap()：词法分析器遇到文件结尾时会调用yywrap()来决定下一步怎么做：
-
-    若yywrap()返回0，则继续扫描
-
-    若返回1，则返回报告文件结尾的0标记。
-
-    由于词法分析器总会调用yywrap，因此辅助函数中最好提供yywrap，如果不提供，则在用C编译器编译lex.yy.c时，需要链接相应的库，库中会给出标准的yywrap函数（标准函数返回1）。
-
-    */
-
-
-   /*
-
-
-
-
-
-
-    queue<>{
-        扩展
-
-        insert（）
-        queue。push（）
-
-    }
-
-
-
-
-
-   */
