@@ -1,5 +1,5 @@
-#ifndef NFA_CLUSTER
-#define NFA_CLUSTER
+#ifndef NFA_ECLOSURE
+#define NFA_ECLOSURE
 #include"NFA.h"
 #include"bits/stdc++.h"
 #include"Hash.hpp"
@@ -24,7 +24,7 @@ public:
     bool operator == (const NFA_eclosure &other)const;
     bool has(int idx);
     void expandEclosure();
-    friend ostream &operator << (ostream& out,const NFA_eclosure &eNFA);
+    friend ostream &operator << (ostream& out,const NFA_eclosure  &eNFA);
     NFA_eclosure move(int &c);
     #ifdef DEBUG2
     int check();

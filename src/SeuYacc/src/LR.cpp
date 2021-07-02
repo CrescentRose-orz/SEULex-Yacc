@@ -404,9 +404,187 @@ int LR::constructParsingTable(){
 
     out << R"(
 // The following are from the yacc file
+#include "y.tab.h"
+#include "lex.yy.c"
+int vTail = 0;
+char outputBuff1[5000],outputBuff2[5000];
+typedef struct _visualToken{
+    int id;
+    int value; 
 
+}visualToken;
 
+void translateProducer(char in[]){
+int i;
+char tmp[2] ={'\0','\0'};
+	outputBuff1[0]='\0';
+	for (i = 0 ; i < strlen(in); ++i){
+		switch (in[i]){
+			case '<':
+				strcat(outputBuff1,"&lt;");
+				break;
+			case '>':
+				strcat(outputBuff1,"&gt;");
+				break;
+			case '&':
+				strcat(outputBuff1,"&amp;");
+				break;
+			case '\"':
+				strcat(outputBuff1,"&quot;");
+				break;
+			case ' ':
+				strcat(outputBuff1,"&emsp;");
+				break;
+			default:
+				tmp[0] = in[i];
+				strcat(outputBuff1,tmp);
+		}
+	} 
 }
+void translateText(){
+int i;
+char tmp[2] ={'\0','\0'};
+	outputBuff2[0]='\0';
+	for (i = 0 ; i < yyleng; ++i){
+		switch (yytext[i]){
+			case '<':
+				strcat(outputBuff2,"&lt;");
+				break;
+			case '>':
+				strcat(outputBuff2,"&gt;");
+				break;
+			case '&':
+				strcat(outputBuff2,"&amp;");
+				break;
+			case '\"':
+				strcat(outputBuff2,"&quot;");
+				break;
+			case ' ':
+				strcat(outputBuff2,"&emsp;");
+				break;
+			default:
+				tmp[0] = yytext[i];
+				strcat(outputBuff2,tmp);
+		}
+	} 
+}
+
+
+int addItem(int c){
+	if (c =='#'){
+		return 0;
+	}
+	translateProducer(I2S[c]);
+	translateText();
+	fprintf(yyout,"\"%d\"[ shape = \"rect\" label =<<table border=\"0\" cellborder=\"1\" cellspacing=\"0\" cellpadding=\"4\"><tr><td bgcolor=\"grey\"  align = \"center\">Token:%s</td></tr><tr><td align=\"left\">Value:%s</td></tr></table>>];\n",vTail,outputBuff1,outputBuff2); 
+	++vTail;
+	return 0;
+	/*fprintf(yyout,"%d:\"%s\"\n",vTail++,yytext);*/
+}
+int addEdge(int a,int b){
+	fprintf(yyout,"\"%d\" -- \"%d\"\n",a,b);
+	return 0;
+}
+int addRItem(visualToken token){
+	translateProducer(I2S[token.value]);
+	if (strcmp(I2S[token.value],"translation_unit")==0){
+		fprintf(yyout,"\"%d\"[ shape = \"rect\" label =<<table border=\"0\" cellborder=\"5\" cellspacing=\"0\" cellpadding=\"4\"><tr><td bgcolor=\"black\" align = \"center\"><font color = \"white\">Symbol:%s</font></td></tr></table>>];\n",token.id,outputBuff1);	
+	} else {
+		fprintf(yyout,"\"%d\"[ shape = \"rect\" label =<<table border=\"0\" cellborder=\"1\" cellspacing=\"0\" cellpadding=\"4\"><tr><td>Symbol:%s</td></tr></table>>];\n",token.id,outputBuff1);	
+	}
+	++vTail;
+}
+
+
+int valTop = -1;
+int sTop = -1;
+int sSt[10000];
+visualToken valSt[10000];
+
+void yyparse(){
+int c ;
+int now;
+visualToken token,newtoken;
+
+	sSt[++sTop] = 0;
+	do{
+		c = yyLex();
+	}while(c==' ');
+	printf("get %s for %s\n",I2S[c],yytext);
+	token.value = c;
+	token.id = vTail; 
+	addItem(c);
+	while(1){
+		now = sSt[sTop];
+		printf("now at %d\n",now);
+		if (ACTION[now][c]==acc){
+			printf("success! \n");
+			return ;
+		} 
+		if (ACTION[now][c]>0){
+			valSt[++valTop] = token;
+		/*	addItemEdge(token);*/
+			printf("moving for %s \n",I2S[c]);
+			sSt[++sTop]=ACTION[now][c]-1;
+			printf("move to %d\n",ACTION[now][c]-1);
+			printf("move ok\n");
+			if (yyEOF == 2){
+				break; 
+			}
+			do{
+				c = yyLex();
+			}while(c==' ');
+			token.value = c;
+			token.id = vTail; 
+			addItem(c);
+			printf("get %s for %s\n",I2S[c],yytext);
+		} else if (ACTION[now][c]<0) {
+			int oldNow = now;
+			int newSymbol;
+			printf("reducing\n");
+			printf("reduce get %s \n",I2S[proGet[(-ACTION[oldNow][c])-1]]);
+			sTop-=proCnt[(-ACTION[oldNow][c])-1];
+			newSymbol = proGet[(-ACTION[oldNow][c])-1];
+			newtoken.value = newSymbol;
+			newtoken.id = vTail;
+			addRItem(newtoken);
+			for (int i = 0 ; i < proCnt[(-ACTION[oldNow][c])-1];++i){
+				/*addEdge(newtoken,valSt[valTop]);*/
+				addEdge(newtoken.id,valSt[valTop].id);
+				--valTop;
+			}
+			valSt[++valTop]=newtoken;
+			now = sSt[sTop];
+			sSt[++sTop] = _GOTO[now][newSymbol-TNBound]; 
+		} else {
+			printf("ERROR!!!!\n");
+			return;
+		}
+	}
+	printf("meet end of file!\n");
+	return ;
+}
+
+
+int main(int argc, char const *argv[]){
+
+/*	freopen("debug.log","w",stdout);*/
+	if (argc != 2){
+		printf("please input file name!\n");
+		system("pause");
+		return 0;
+	}
+	yyin = fopen(argv[1],"r");
+	yyout = fopen("output.dot","w");
+	fprintf(yyout,"graph{\n");
+	yyparse();
+	fprintf(yyout,"}\n");
+	printf("done!\n");
+	fclose(yyout);
+	/*fclose(stdout);*/
+	system("pause");
+}
+    
     )";
 
     // 构建成功

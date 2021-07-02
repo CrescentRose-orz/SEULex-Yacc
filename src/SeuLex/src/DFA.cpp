@@ -3,7 +3,6 @@
 
 DFA::DFA(){}
 DFA::DFA(Logger &log):basicFA(log){}
-
 int DFA::add(){
     WrLock(Wrlock);
     pool.emplace_back(DFA_Node(vFA));
@@ -32,7 +31,9 @@ int DFA::addTrans(int from, int to, int c){
     return 0;
 }
 bool DFA::exist(NFA_eclosure &_e){
+    #ifdef USE_MULTITHREAD
     RdLock(mapMutex);
+    #endif
    // shared_guard<shared_mutex> lock(mapMutex);
     return DFAMap.count(_e.hash);
 }
@@ -83,7 +84,9 @@ int DFA::insert(NFA_eclosure &_e){
     #endif
     {
         rt = add();
+        #ifdef USE_MULTITHREAD
         WrLock(mapMutex);
+        #endif
         DFAMap[_e.hash] = rt;
         if (_e._action.getIdx() != 0){
             pool[rt].setAction(_e._action);
@@ -258,92 +261,257 @@ NFA_eclosure startPoint(_NFA);
     cout<<"total "<<pool.size()<<"nodes"<<endl;
 }
 
-    void DFA::generateCode(fstream &file){
-        int buff[charSetMAX + 1];
-        file<<"int next["<<pool.size()<<"]["<<charSetMAX + 1<<"] = {";
-        for (int i = 0; i < pool.size(); ++i){
-            memset(buff,-1,sizeof(buff));
-            for (auto iter = pool[i].stateBegin();iter != pool[i].stateEnd(); ++iter){ 
-                #ifdef DEBUG
-                stringstream s;
-                s<<"get node "<<i<<"char  "<<iter->first<<" to state"<<iter->second<<endl;
-                logger.customMSG(s.str());
-                #endif
-                buff[iter->first] = iter->second;
-            }
-            file<<buff[0];
-            for (int j = 1; j <= charSetMAX; ++j){
-                file<<","<<buff[j];
-            }
-            if (i != pool.size()-1){
-                file<<",\n";
-            } else {
-                file<<"};\n";
-            }
-        }
-        file<<"int act["<<pool.size()<<"]= {";
-        file<<pool[0].act.getIdx();
-        for (int i = 1; i < pool.size(); ++i){
-         file<<","<<pool[i].act.getIdx();   
-        }
-        file<<"};\n";
-        file<<R"(#define INF 0x7fff;
-        int yyleng;
-        char yytext[1024];
-        FILE* yyin;
-        FILE* yyout;
-        long yypos;
-        int yyEOF;
+// struct _item{
+//     unordered_set<int> num;
+//     eclosureHash hash;
+// }Item;
 
-        int input(){
-            int c = fgetc(yyin);
-            ++yypos;
-            if (c == -1)
-                return 0;
-            return c;
+DFA DFA::minimize(){
+DFA rt(logger);
+queue<unordered_set<int>> q;
+unordered_set<int> nonterminal;
+unordered_map<int,unordered_set<int>>  Terminal;
+unordered_map<int,int> belong;
+int cnt = 1;
+int st = -1;
+unordered_map<int,int> member;
+    belong[-1] = -1;
+    for (int i = 0 ; i < pool.size();++i){  
+        if (!pool[i].valid()){
+            nonterminal.insert(i);
+        } else {
+            Terminal[pool[i].act.getIdx()].insert(i);
         }
-
-
-        int yyLex(){
-            int nowState = 0 , c;
-            long _lastMatch = -1;
-            int lastAcState = -1;
-            int actIdx = INF;
-            int _leng = 0;
-            char buff[1024];
-            memset(yytext,0,sizeof(yytext));
-            yyleng = 0;
-            c = fgetc(yyin);
-            buff[_leng++] = c;
-            while (c != -1 &&next[nowState][c] != -1){
-                nowState = next[nowState][c];
-                if (act[nowState] != -1){
-                    {
-                        actIdx = act[nowState];
-                        yypos = c == '\n'?ftell(yyin)-1:ftell(yyin);
-                        yyleng = _leng;
-                    }
-                } else {
-                	buff[_leng]='\0';
-                	printf("unfortunate that %s didn't have action\n",buff);
-				}
-                c = fgetc(yyin);
-                if (c != EOF)
-                    buff[_leng++] = c;
-            }
-            if (c == -1){
-                yyEOF = 1;
-            }
-            if (nowState == -1){
-                fprintf(yyout,"ERROR CANNOT MATCH at %s!\n",buff);
-            } else {
-            	buff[_leng] = '\0';
-            	printf("stop at %ld %s\n",yypos,buff); 
-                buff[yyleng] = '\0';
-                strcpy(yytext,buff);
-                fseek(yyin,yypos,SEEK_SET);
-                return doAction(actIdx);
-            }
-        })"<<'\n';
-        
     }
+    if (!nonterminal.empty()){
+        ++st;
+        for (auto &id:nonterminal){
+            belong[id] = st;
+        }
+        q.push(nonterminal);
+    }
+    for (auto &item:Terminal){
+        ++st;
+        #ifdef debug_MINI 
+        stringstream ss;
+        ss<<"group "<<st<<" has:";
+        //logger.customMSG(ss.str());
+        #endif
+        for (auto &id:(item.second)){
+            belong[id] = st;
+        #ifdef debug_MINI 
+
+        stringstream ss;
+        ss<<id<<" has act:"<<pool[id].act.getIdx();
+       
+        logger.customMSG(ss.str());
+        #endif
+        }
+        q.push(item.second);
+    }
+    while(!q.empty()){
+        int flag = false;
+        unordered_set<int> now = q.front();
+        q.pop();
+        if (now.size() != 1){
+            for (int i = 30; i <=charSetMAX; ++i){
+                //int flag = pool[*now.cbegin()].getTrans(i);
+                unordered_map<int,unordered_set<int>> newSplit;
+                for (auto iter =now.cbegin();iter!=now.cend();++iter){
+                    newSplit[belong[pool[*iter].getTrans(i)]].insert(*iter);
+                }
+                if (newSplit.size()>1){
+                    flag = true;
+                    for (auto iter = newSplit.cbegin();iter != newSplit.cend();++iter){
+                        ++st;
+                        for (auto &id:iter->second){
+                            belong[id] = st;
+                        }
+                        q.push(iter->second);
+                    }
+                    break;
+                }
+            }
+        }
+        if (flag){continue;}
+        if (!now.count(0)){
+            member[cnt]=(*now.cbegin());
+            #ifdef debug_MINI 
+
+            stringstream ss;
+            ss<<"final group "<<cnt<<" with delegate "<<*now.cbegin() <<" has ";
+            #endif
+            for (auto &id:now){
+                belong[id] = cnt;
+            #ifdef debug_MINI 
+
+                ss<<" "<<id;
+                #endif
+            }
+            ++cnt;
+            #ifdef debug_MINI 
+
+            logger.customMSG(ss.str());
+            #endif
+        } else {
+            #ifdef debug_MINI
+            stringstream ss;
+            ss<<"final group "<<0<<" with delegate "<<*now.cbegin() <<" has ";
+            #endif
+            for (auto &id:now){
+                belong[id] = 0;
+                #ifdef debug_MINI
+                ss<<" "<<id;
+                #endif
+            }
+            member[0]=(*now.cbegin());
+            #ifdef debug_MINI 
+            logger.customMSG(ss.str());
+            #endif
+        }
+    }
+    for (int i = 0; i < cnt; ++i){
+        rt.add();
+        for (auto iter = pool[member[i]].stateBegin(); iter != pool[member[i]].stateEnd();++iter){
+            if (belong[iter->second]>=cnt){
+                #ifdef debug_MINI 
+                stringstream ss;
+                ss<<"try to add edge to"<<belong[iter->second]<<" while total node is"<<cnt<<endl;
+
+                throw invalid_argument(ss.str());
+                                #endif
+            }
+            #ifdef debug_MINI
+            {
+                stringstream ss;
+                ss<<"add edge from "<<i<<" to "<<belong[iter->second]<<" with c ="<<iter->first;
+                logger.customMSG(ss.str());
+            }
+            #endif
+            rt.addTrans(i,belong[iter->second],iter->first);
+        }
+        if (pool[member[i]].valid()){
+            #ifdef debug_MINI
+            {
+                stringstream ss;
+                ss<<"delegate "<<member[i]<<" has act "<<pool[member[i]].act.getIdx()<<" for group"<<i<<endl;
+                logger.customMSG(ss.str());
+            }
+            #endif
+            rt[i].setAction(pool[member[i]].act);
+        } 
+
+        for (auto iter = rt.pool[i].stateBegin();iter !=rt.pool[i].stateEnd(); ++iter){ 
+            #ifdef DEBUG
+            stringstream s;
+            s<<"get node "<<i<<"char  "<<iter->first<<" to state"<<iter->second<<endl;
+            logger.customMSG(s.str());
+            #endif
+                    #ifdef debug_MINI
+            stringstream ss;
+            ss<<"node "<<i<<" has edge"<<iter->first<<" to "<<iter->second<<endl;
+            logger.customMSG(ss.str());
+            #endif
+        }
+        #ifdef debug_MINI
+            stringstream ss;
+            ss<<"node "<<i<<" has act"<<rt.pool[i].act.getIdx();
+            logger.customMSG(ss.str());
+        #endif
+    }
+    return rt;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+void DFA::generateCode(fstream &file,int flag){
+    int buff[charSetMAX + 1];
+    file<<"int next["<<pool.size()<<"]["<<charSetMAX + 1<<"] = {";
+    for (int i = 0; i < pool.size(); ++i){
+        memset(buff,-1,sizeof(buff));
+        for (auto iter = pool[i].stateBegin();iter != pool[i].stateEnd(); ++iter){ 
+            #ifdef DEBUG
+            stringstream s;
+            s<<"get node "<<i<<"char  "<<iter->first<<" to state"<<iter->second<<endl;
+            logger.customMSG(s.str());
+            #endif
+            buff[iter->first] = iter->second;
+        }
+        file<<buff[0];
+        for (int j = 1; j <= charSetMAX; ++j){
+            file<<","<<buff[j];
+        }
+        if (i != pool.size()-1){
+            file<<",\n";
+        } else {
+            file<<"};\n";
+        }
+    }
+    file<<"int act["<<pool.size()<<"]= {";
+    file<<pool[0].act.getIdx();
+    for (int i = 1; i < pool.size(); ++i){
+        file<<","<<pool[i].act.getIdx();   
+    }
+    file<<"};\n";
+    file<<R"(
+
+
+
+int yyLex(){
+    int nowState = 0 , c;
+    long _lastMatch = -1;
+    int lastAcState = -1;
+    int actIdx = INF;
+    int _leng = 0;
+    char buff[1024];
+    memset(yytext,0,sizeof(yytext));
+    yyleng = 0;
+    c = fgetc(yyin);
+    if (yyEOF >= 1){
+        yyEOF = 2;
+        return '#';
+    }
+    buff[_leng++] = c;
+    while (c != -1 &&next[nowState][c] != -1){
+        nowState = next[nowState][c];
+        if (act[nowState] != -1){
+            {
+                actIdx = act[nowState];
+                yypos = c == '\n'?ftell(yyin)-1:ftell(yyin);
+                yyleng = _leng;
+            }
+        } else {
+            buff[_leng]='\0';
+        }
+        c = fgetc(yyin);
+        if (c != EOF)
+            buff[_leng++] = c;
+    }
+    if (c == -1){
+        yyEOF = 1;
+    }
+    if (nowState == -1){
+        fprintf(yyout,"ERROR CANNOT MATCH at %s!\n",buff);
+    } else {
+        buff[_leng] = '\0';
+        printf("stop at %ld %s\n",yypos,buff); 
+        buff[yyleng] = '\0';
+        strcpy(yytext,buff);
+        fseek(yyin,yypos,SEEK_SET);
+    )";
+    if (flag){
+    file<<R"(
+        return doAction(actIdx);
+    }
+})"<<'\n';
+    }
+}

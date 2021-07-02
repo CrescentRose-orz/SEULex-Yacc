@@ -52,7 +52,7 @@ int now;
 bool NFA_eclosure::has(int x){
     return NFAs.find(x) != NFAs.end();
 }
-ostream& operator << (ostream& out,NFA_eclosure& eNFA){
+ostream& operator << (ostream& out,const NFA_eclosure & eNFA){
     out<<"{";
     for(auto iter = eNFA.NFAs.begin();iter!=eNFA.NFAs.end();++iter){
         out<<*iter<<" ";

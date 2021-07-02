@@ -122,7 +122,7 @@ streampos _pos = fin.tellg();
         }
     } else {
         logger.error("file not completed ",partName[state],lineCnt);  
-        //todo : throw exception                   
+        throw invalid_argument("lex file not completed! %%expected");                  
     }
     return 0;
 }
@@ -301,7 +301,6 @@ int lineStatus;
     }
     logger.end("Scanning Rules");
 }
-
 void Lex::readRE_action(){
 string &&RE = readRE(),act;
 char c,lastc;
@@ -353,11 +352,13 @@ int qcnt = 0,ccnt = 0;
 void Lex::scanAuxiliaryFunction(){
     logger.start("Scanning AuxiliaryFunctions");
     state = FUNCTIONS;
+    funCodeBuff.clear();
     char c = fin.get();
     while (!fin.eof()){
         funCodeBuff += c;
-        fin.get();
+        c = fin.get();
     }
+    cout<<endl;
     logger.end("Scanning AuxiliaryFunctions");    
 }
 /*
@@ -444,10 +445,14 @@ void Lex::unfoldAllRE(){
     logger.end("unfold all RE");
 }
 
-void Lex::generateAction(fstream &fout){
+void Lex::generateAction(fstream &fout,int flag){
     fout<<endl;
+    if (flag){
+        fout<<"int doAction(int idx){"<<endl;
+    }else{
+    fout<<"     int idx = actIdx;"<<endl;
+    }
     fout<<R"(
-        int doAction(int idx){
             switch(idx){)"<<'\n';
     for (int i = 0; i <Action.size();++i){
         fout<<R"(
@@ -456,10 +461,14 @@ void Lex::generateAction(fstream &fout){
         fout<<"                 break;";
     }
     fout<<"\n        }";
-    fout<<"\n     }";
+    if (!flag){
+        fout<<"\n   return yyLex();";
+        fout<<"\n       }";
+    }
+    fout<<"\n}";
 }
 
-void Lex::start(){
+void Lex::start(int flag){
     threadpool threadPool;    
     initAll();
     logger.start("main");
@@ -497,20 +506,71 @@ void Lex::start(){
         logger.start("create DFA with NFA");
         _DFA.NFA2DFA(_NFA);
         logger.end("create DFA with NFA");
+        {
+            stringstream ss;
+            ss<<"total "<<_DFA.pool.size()<<" nodes"<<endl;
+            logger.customMSG(ss.str());
+        }
         fout.open("DFA.dot",ios::out);
-        _DFA.vFA.print(fout);
+
+        logger.start("minimizing dfa");
+        DFA &&miniDFA = _DFA.minimize();
+        stringstream ss;
+        ss<<"minimzed DFA:"<<miniDFA.pool.size()<<" nodes";
+        logger.customMSG(ss.str());
+        logger.end("minimizing dfa");
+        miniDFA.vFA.print(fout);
         logger.start("Generating code");
         fout.open("lex.yy.c",ios::out);
+        if (flag){
+            fout<<R"(
+#define return(x) printf(#x)
+        )";
+        } else {
+            fout<<R"(
+#include"y.tab.h"
+            )";
+        }
         fout<<R"(
 #include <string.h>
-#define return(x) printf(#x)
-#define ECHO(x) printf(#x)
+#define ECHO printf("%s",yytext)
+#define error(x) printf(x)
+#define INF 0x7fff;
+)"<<codeBuff<<R"(
+int yyleng;
+char yytext[1024];
+FILE* yyin;
+FILE* yyout;
+long yypos;
+int yyEOF;
+
+int input(){
+    int c = fgetc(yyin);
+    ++yypos;
+    if (c == -1)
+        return 0;
+    return c;
+}
+
 )"<<endl;
-        fout<<codeBuff;
-        generateAction(fout);
+        trim(funCodeBuff);
         fout<<funCodeBuff<<endl;
-        _DFA.generateCode(fout);
-        fout<<R"(
+        fout<<R"(/*----function defined by lex.l*/)"<<endl;
+        if (flag){
+            generateAction(fout,flag);
+        }
+        //_DFA.generateCode(fout,flag);
+        //for (auto iter = miniDFA[0].stateBegin();iter!=miniDFA[0].stateEnd();++iter){
+        //     cout<<"edge "<<iter->first<<" to "<<iter->second<<endl;
+        // }
+        // cout<<miniDFA[0].act.getIdx();
+        // system("pause");
+        miniDFA.generateCode(fout,flag);
+        if (!flag){
+            generateAction(fout,flag);
+        } 
+        if (flag){
+            fout<<R"(
 int main(){
     int i;
     char name[1000];
@@ -519,16 +579,16 @@ int main(){
     yyin = fopen(name,"r");
     while (yyEOF != 1){
         yyLex();
-        printf(" get: %s\n",yytext); 
-        system("pause");                    
+        printf(" get: %s\n",yytext);                   
     }
 
     return 0;
 }
-        )"<<endl;
+            )"<<endl;
+        }
         fout.close();
-
-        logger.end("Genenating code");        
+        logger.end("Generating code");       
+        logger.end("main"); 
     }catch (invalid_argument e){
         logger.customMSG(e.what());
         cerr<<e.what()<<endl;
@@ -556,11 +616,8 @@ int main(){
     #ifdef USE_MULTITHREAD
 
     #endif
-    logger.end("main");
+    logger.save();
     logger.close();
-
-    cout<<"got code:";
-    cout<<codeBuff<<endl;
     system("pause");
     return;
 }

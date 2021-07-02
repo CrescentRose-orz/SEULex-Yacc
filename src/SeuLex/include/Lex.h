@@ -82,7 +82,7 @@ private:
 
     void unfoldAllRE();
 
-    void generateAction(fstream &fout);
+    void generateAction(fstream &fout,int flag);
 
 public:
     //USE DEFAULT CONSTRUCTOR IS NOT PREFFERED
@@ -91,7 +91,7 @@ public:
     Lex(string,string);
     ~Lex();    
     bool setInputFile(string);
-    void start();
+    void start(int flag = 0);
     void print();
     static bool checkFileName(string fileName);
 };
