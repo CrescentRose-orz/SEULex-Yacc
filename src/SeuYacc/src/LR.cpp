@@ -71,10 +71,12 @@ bool flag = 1;
             #endif
             LR_Node tmp;
             auto iterPair = nowNode.nextPros.equal_range(next);
+            #ifdef DEBUG
             if (iterPair.first == iterPair.second){
                 cout<<"indeed none"<<endl;
                 continue;
             }
+            #endif
             for (auto iter = iterPair.first; iter != iterPair.second; ++iter){
 
                 {
@@ -124,9 +126,6 @@ bool flag = 1;
                     logger.customMSG(s.str());
                 }
             #endif
-            if (now == newId){
-                cout<<"SPECIAL!"<<endl;
-            }
             addTrans(now,newId,next);
         }
     }
