@@ -184,7 +184,6 @@ LR LR::consturctLALR(){
         if(getConcentricBegin(coreHash) == getConcentricEnd(coreHash)){
             // 初始节点已处理过，直接跳过就行（初始节点应该没有同心项
             if(getConcentricBegin(coreHash)->second == 0){
-                cout << "你不对劲" << endl;
                 continue;
             }
 
@@ -222,6 +221,13 @@ LR LR::consturctLALR(){
             iter->second = temp[iter->second];
         }
     }
+
+    for(int i = 0; i < state_num; i++){
+        if(temp[i] == -1){
+            cout << "你不对劲" << endl;
+        }
+    }
+
     delete []temp;
 
     return rt;
