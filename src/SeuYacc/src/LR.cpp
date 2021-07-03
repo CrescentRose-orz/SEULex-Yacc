@@ -378,7 +378,7 @@ int LR::constructParsingTable(){
             }
             if(iter->first < TNBound ){
                 // 出现移进规约冲突，报错
-                if(temp[iter->first] != 0 && S2I("ELSE") != iter->first){
+                if(temp[iter->first] != 0){
                     stringstream ss;
                     ss << "[WARNING] Reduce - shift conflict detected!\n" <<endl;
                     ss << "Shift:"<<I2S(iter->first)<<" to node"<<iter->second<<endl;
