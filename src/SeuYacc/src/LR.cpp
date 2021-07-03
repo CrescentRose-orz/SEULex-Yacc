@@ -342,13 +342,31 @@ int LR::constructParsingTable(){
             for(auto & num : pro.lookAhead){
                 // acc情况，即对向前看#符号进行产生式号为0(start->translation_unit)的规约
                 if (pro.nowPlace!=getRight(pro.producer).size()){
-                    out<<"ERROR NOT REDUCEBAL"<<endl;
+                    throw invalid_argument("ERROR NOT REDUCEBAL when acc");
                     return 1;
                 }
-                if(pro.producer == 0 && IntToStr[num] == "#")
+                if(pro.producer == 0 && IntToStr[num] == "#"){
                     temp[num] = acc;
-                else
+                }else{
+                    if (temp[num] != -1){
+                        stringstream ss;
+                        ss << "[WARNING] Reduce - Reduce conflict detected!\n" <<endl;
+                        ss << "Reduce:"<<I2S(getLeft(pro.producer))<<" -> ";
+                        for (auto &id:getRight(pro.producer)){
+                            ss << I2S(id)<<" ";
+                        }
+                        ss <<endl;
+                        ss << "Reduce:"<<I2S(getLeft(-1-temp[num]))<<" -> ";
+                        for (auto &id:getRight(-1-temp[num])){
+                            ss << I2S(id)<<" ";
+                        }
+                        ss <<endl;
+                        ss << " Handle with default disambiguating rule : earlier producer"<<endl;
+                        logger.error("generating code in (LA)LR",ss.str(),0);
+                        temp[num] = max (temp[num],-(pro.producer+1));
+                    }
                     temp[num] = -(pro.producer + 1);
+                }
             }
         }
         // 移进项
@@ -360,21 +378,24 @@ int LR::constructParsingTable(){
             if(iter->first < TNBound ){
                 // 出现移进规约冲突，报错
                 if(temp[iter->first] != 0 && S2I("ELSE") != iter->first){
-                    out << "ERROR: Not A LALR grammar!\n" <<endl;
-                    out << I2S(iter->first)<<" to node"<<iter->second<<endl;
+                    stringstream ss;
+                    ss << "[WARNING] Reduce - shift conflict detected!\n" <<endl;
+                    ss << "Shift:"<<I2S(iter->first)<<" to node"<<iter->second<<endl;
                     for(auto & pro : pros){
                         for(auto & num : pro.lookAhead){
                                 // acc情况，即对向前看#符号进行产生式号为0(start->translation_unit)的规约
                                 if (num == iter->first){
-                                    out<<I2S(getLeft(pro.producer))<<" -> ";
+                                    ss<<"Reduce:";
+                                    ss<<I2S(getLeft(pro.producer))<<" -> ";
                                     for (auto id:getRight(pro.producer)){
-                                        out<<I2S(id)<<" ";
+                                        ss<<I2S(id)<<" ";
                                     }
-                                    out<<endl;
+                                    ss<<endl;
                                 }
                             }
                     }
-                    return 1;
+                    ss << " Handle with default disambiguating rule : Shift"<<endl;
+                    logger.error("generating code in (LA)LR",ss.str(),0);
                 }
                 temp[iter->first] = iter->second + 1;
             }
@@ -408,6 +429,9 @@ int LR::constructParsingTable(){
 #include "lex.yy.c"
 int vTail = 0;
 char outputBuff1[5000],outputBuff2[5000];
+const char* outputName =NULL;
+const char* inputName = NULL;
+int debugFlag = 0;
 typedef struct _visualToken{
     int id;
     int value; 
@@ -505,29 +529,33 @@ void yyparse(){
 int c ;
 int now;
 visualToken token,newtoken;
-
 	sSt[++sTop] = 0;
 	do{
 		c = yyLex();
 	}while(c==' ');
-	printf("get %s for %s\n",I2S[c],yytext);
+	/*printf("get %s for %s\n",I2S[c],yytext);*/
 	token.value = c;
-	token.id = vTail; 
-	addItem(c);
 	while(1){
 		now = sSt[sTop];
-		printf("now at %d\n",now);
+		if (debugFlag)
+			printf("now at %d\n",now);
 		if (ACTION[now][c]==acc){
-			printf("success! \n");
+			if (debugFlag)
+				printf("success! \n");
 			return ;
 		} 
 		if (ACTION[now][c]>0){
+			token.id = vTail;
+			addItem(c);
 			valSt[++valTop] = token;
 		/*	addItemEdge(token);*/
-			printf("moving for %s \n",I2S[c]);
+			if (debugFlag)
+				printf("moving for %s \n",I2S[c]);
 			sSt[++sTop]=ACTION[now][c]-1;
-			printf("move to %d\n",ACTION[now][c]-1);
-			printf("move ok\n");
+			if (debugFlag){
+				printf("move to %d\n",ACTION[now][c]-1);
+				printf("move ok\n");
+			}	
 			if (yyEOF == 2){
 				break; 
 			}
@@ -535,14 +563,14 @@ visualToken token,newtoken;
 				c = yyLex();
 			}while(c==' ');
 			token.value = c;
-			token.id = vTail; 
-			addItem(c);
-			printf("get %s for %s\n",I2S[c],yytext);
+			/*printf("get %s for %s\n",I2S[c],yytext);*/
 		} else if (ACTION[now][c]<0) {
 			int oldNow = now;
 			int newSymbol;
-			printf("reducing\n");
-			printf("reduce get %s \n",I2S[proGet[(-ACTION[oldNow][c])-1]]);
+			if (debugFlag){
+				printf("reducing\n");
+				printf("reduce get %s \n",I2S[proGet[(-ACTION[oldNow][c])-1]]);
+			}
 			sTop-=proCnt[(-ACTION[oldNow][c])-1];
 			newSymbol = proGet[(-ACTION[oldNow][c])-1];
 			newtoken.value = newSymbol;
@@ -557,31 +585,91 @@ visualToken token,newtoken;
 			now = sSt[sTop];
 			sSt[++sTop] = _GOTO[now][newSymbol-TNBound]; 
 		} else {
-			printf("ERROR!!!!\n");
+			if (debugFlag)
+				printf("ERROR!!!!\n");
 			return;
 		}
 	}
-	printf("meet end of file!\n");
+	if (debugFlag)
+		printf("meet end of file!\n");
 	return ;
 }
 
+void invalidInput(){
+	printf("expected input format: \n");
+	printf("-debug: ouput debug message to log \n");
+	printf("-o fileName[without extension]:	syntax tree output file name,default is the same with inputFile \n");
+	printf("-f fileName[with extension]: input file Name\n");
+	system("pause");
+}
 
 int main(int argc, char const *argv[]){
-
-/*	freopen("debug.log","w",stdout);*/
-	if (argc != 2){
-		printf("please input file name!\n");
-		system("pause");
+char temp[100];
+	for (int i = 1; i < argc; ++i){
+		if (argv[i][0] != '-'){
+			printf("expected input flag start with \'-\' but get :%s\n ",argv[i]);
+			invalidInput();
+			return 1;
+		}
+		if (strcmp(argv[i],"-debug")==0){
+			debugFlag = 1;
+			continue;
+		}
+		if (strcmp(argv[i],"-o")==0){
+			if (i < argc){
+				outputName = argv[++i];
+			}
+			continue;
+		}
+		if (strcmp(argv[i],"-f")==0){
+			if (i < argc){
+				inputName = argv[++i];
+			}
+			continue;
+		}	
+		printf("unexpected argument %s \n",argv[i]);
+		invalidInput();
+	}
+	if (inputName == NULL){
+		printf("you must set the input fileName\n!");
+		invalidInput();
+	}
+	if (outputName == NULL){
+		outputName = inputName;
+	}
+	if (debugFlag){
+		freopen("debug.log","w",stdout);
+	}
+	yyin = fopen(inputName,"r");
+	if (yyin == NULL){
+		fprintf(stderr,"file  %s open failed!!\n",inputName);
+	}
+	sprintf(temp,"%s.dot",outputName);
+	yyout = fopen(temp,"w");
+	if (yyin == NULL){
+		fprintf(stderr,"file  %s open failed!!\n",inputName);
 		return 0;
 	}
-	yyin = fopen(argv[1],"r");
-	yyout = fopen("output.dot","w");
+	if (yyout == NULL){
+		fprintf(stderr,"file  %s open failed!!\n",temp);		
+		return 0;
+	}
 	fprintf(yyout,"graph{\n");
+	fprintf(stderr,"yacc parsing begin!\n");
 	yyparse();
 	fprintf(yyout,"}\n");
-	printf("done!\n");
+	fprintf(stderr,"yacc parsing finished!\n");
 	fclose(yyout);
-	/*fclose(stdout);*/
+	sprintf(temp,"dot %s.dot -Tsvg -o %s.svg",outputName,outputName);
+	system(temp);
+	sprintf(temp,"dot %s.dot -Tpng -o %s.png",outputName,outputName);
+	system(temp);
+	if (debugFlag){
+		fclose(stdout);
+	}
+	if (debugFlag){
+		fprintf(stderr,"press any key to finished...\n");	
+	}
 	system("pause");
 }
     

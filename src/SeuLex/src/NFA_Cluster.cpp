@@ -295,8 +295,7 @@ bool trans = 0;
     buff.logger.customMSG(s.str());
     buff.logger.save();
     #endif
-    //operatorStack.push('`');
-    NFA_Cluster &&head = NFA_Cluster::createEmpty(buff);
+    //NFA_Cluster &&head = NFA_Cluster::createEmpty(buff);
     while(i<RE.size()){
         #ifdef DEBUG
         stringstream s;
