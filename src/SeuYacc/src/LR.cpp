@@ -155,6 +155,7 @@ auto LR::getConcentricEnd(eclosureHash concentric){
 
 LR LR::consturctLALR(){
     LR rt;
+    rt.logger = logger;
     // 存储所有的映射状态
     int state_num = pool.size();
     int *temp = new int[state_num];
@@ -348,7 +349,7 @@ int LR::constructParsingTable(){
                 if(pro.producer == 0 && IntToStr[num] == "#"){
                     temp[num] = acc;
                 }else{
-                    if (temp[num] != -1){
+                    if (temp[num] != 0){
                         stringstream ss;
                         ss << "[WARNING] Reduce - Reduce conflict detected!\n" <<endl;
                         ss << "Reduce:"<<I2S(getLeft(pro.producer))<<" -> ";

@@ -16,6 +16,7 @@ int main(int argc, char const* argv[]){
     string file_name;
 	if (argc != 2) {
 		cout << "ERROR: A parameter is missing!\n";
+        system("pause");
 		return -1;
 	}
 
