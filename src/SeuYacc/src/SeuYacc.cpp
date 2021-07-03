@@ -139,15 +139,21 @@ int main(int argc, char const* argv[]){
         myLR.logger.end("construct ParsingTable");
         cout<<myLR.allKeys.size()<<endl;
         cout<<"total node:"<<myLALR.pool.size()<<endl;
+        fstream vLR;
+        vLR.open("LALR.dot",ios::out);
+        myLALR.printVisualLR(vLR);
+        vLR.close();
         myLR.logger.end("yacc");
         myLR.logger.save();
         //myLR.constructParsingTable();
         fflush(fp);
         fclose(fp);
         freopen("CON","w",stdout);
+        cout<<"Done!"<<endl;
         //fclose(stdout);
         while (1){
             int id;
+            cout<<"type -1 to exit or show LR Node info:(type node id):"<<endl;
             cin>>id;
             if (id < 0){
                 break;

@@ -35,19 +35,22 @@
     }
 
     void visualLR::printProducer(fstream &fout,LR_Producer pro){
-        fout<<R"(<tr><td align="left" port="r)"<<pro.producer<<R"(">&#40; )"<<pro.producer<<R"( &#41; )";
-        fout<<tI2S(getLeft(pro.producer))<<" -&gt ";
+        fout<<R"(<tr><td align="left" valign="top" port="r)"<<pro.producer<<R"(">&#40; )"<<pro.producer<<R"( &#41; )";
+        fout<<tI2S(getLeft(pro.producer))<<" -&gt; ";
         for (int i = 0; i < getRight(pro.producer).size();++i){
             if (i == pro.nowPlace){
                 fout<<"&bull;";
             }
             fout<<tI2S(getRight(pro.producer)[i]);
-            fout<<R"(</td><td bgcolor="grey" align="right">)";
-            for (auto &id:pro.lookAhead){
-                fout<<tI2S(id)<<" ";
-            }
-            fout<<R"(</td></tr>)";
         }
+        if (pro.isEnd()){
+            fout<<"&bull;";   
+        }
+        fout<<R"(</td><td bgcolor="grey" align="right">)";
+        for (auto &id:pro.lookAhead){
+            fout<<tI2S(id)<<" ";
+        }
+        fout<<R"(</td></tr>)";
     }
     void visualLR::print(fstream &fout,LR &_LR)
     {
