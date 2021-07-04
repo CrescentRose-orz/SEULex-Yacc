@@ -463,9 +463,6 @@ void DFA::generateCode(fstream &file,int flag){
     }
     file<<"};\n";
     file<<R"(
-
-
-
 int yyLex(){
     int nowState = 0 , c;
     long _lastMatch = -1;
@@ -493,7 +490,7 @@ int yyLex(){
             buff[_leng]='\0';
         }
         c = fgetc(yyin);
-        if (c != EOF)
+        if (c != EOF&& c !='\n'&& c!='\r' && c!=' ')
             buff[_leng++] = c;
     }
     if (c == -1){
@@ -503,7 +500,6 @@ int yyLex(){
         fprintf(yyout,"ERROR CANNOT MATCH at %s!\n",buff);
     } else {
         buff[_leng] = '\0';
-        printf("stop at %ld %s\n",yypos,buff); 
         buff[yyleng] = '\0';
         strcpy(yytext,buff);
         fseek(yyin,yypos,SEEK_SET);

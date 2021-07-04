@@ -533,7 +533,7 @@ void Lex::start(int flag){
         }
         fout<<R"(
 #include <string.h>
-#define ECHO printf("%s",yytext)
+#define ECHO fprintf(yyout,"%s",yytext)
 #define error(x) printf(x)
 #define INF 0x7fff;
 )"<<codeBuff<<R"(
@@ -571,19 +571,24 @@ int input(){
         } 
         if (flag){
             fout<<R"(
+
 int main(){
     int i;
     char name[1000];
     printf("input file name:\n");
     scanf("%s",name); 
     yyin = fopen(name,"r");
+    yyout = fopen ("lexer2.out","w");
     while (yyEOF != 1){
-        yyLex();
-        printf(" get: %s\n",yytext);                   
+        do{
+			yyLex();
+		} while(yyleng==0&&yyEOF == 0);
+        fprintf(yyout," ------ \"%s\"\n",yytext);                   
     }
-
+    fclose(yyout);
     return 0;
 }
+    
             )"<<endl;
         }
         fout.close();

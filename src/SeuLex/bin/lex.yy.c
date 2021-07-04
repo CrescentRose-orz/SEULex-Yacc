@@ -1,17 +1,22 @@
 
-#include"y.tab.h"
-            
+#define return(x) fprintf(yyout,#x)
+        
 #include <string.h>
 #define ECHO printf("%s",yytext)
 #define error(x) printf(x)
 #define INF 0x7fff;
-
-#include <stdio.h>
-#include "y.tab.h"
-
-void comment(void);
-int check_type(void);
-void count(void);
+
+
+#include <stdio.h>
+
+
+
+void comment(void);
+
+int check_type(void);
+
+void count(void);
+
 
 int yyleng;
 char yytext[1024];
@@ -29,63 +34,420 @@ int input(){
 }
 
 
-int yywrap(void)
-{
-	return 1;
-}
-
-
-void comment(void)
-{
-	char c, prev = 0;
-  
-	while ((c = input()) != 0)      /* (EOF maps to 0) */
-	{
-		if (c == '/' && prev == '*')
-			return;
-		prev = c;
-	}
-	error("unterminated comment");
-}
-
-
-int column = 0;
-
-void count(void)
-{
-	int i;
-
-	for (i = 0; yytext[i] != '\0'; i++)
-		if (yytext[i] == '\n')
-			column = 0;
-		else if (yytext[i] == '\t')
-			column += 8 - (column % 8);
-		else
-			column++;
-
-	ECHO;
-}
-
-
-int check_type(void)
-{
-/*
-* pseudo code --- this is what it should check
-*
-*	if (yytext == type_name)
-*		return TYPE_NAME;
-*
-*	return IDENTIFIER;
-*/
-
-/*
-*	it actually will only return IDENTIFIER
-*/
-
-	return IDENTIFIER;
+int yywrap(void)
+
+{
+
+	return 1;
+
+}
+
+
+
+
+
+void comment(void)
+
+{
+
+	char c, prev = 0;
+
+  
+
+	while ((c = input()) != 0)      /* (EOF maps to 0) */
+
+	{
+
+		if (c == '/' && prev == '*')
+
+			return;
+
+		prev = c;
+
+	}
+
+	error("unterminated comment");
+
+}
+
+
+
+
+
+int column = 0;
+
+
+
+void count(void)
+
+{
+
+	int i;
+
+
+
+	for (i = 0; yytext[i] != '\0'; i++)
+
+		if (yytext[i] == '\n')
+
+			column = 0;
+
+		else if (yytext[i] == '\t')
+
+			column += 8 - (column % 8);
+
+		else
+
+			column++;
+
+
+
+	ECHO;
+
+}
+
+
+
+
+
+int check_type(void)
+
+{
+
+/*
+
+* pseudo code --- this is what it should check
+
+*
+
+*	if (yytext == type_name)
+
+*		return TYPE_NAME;
+
+*
+
+*	return IDENTIFIER;
+
+*/
+
+
+
+/*
+
+*	it actually will only return IDENTIFIER
+
+*/
+
+
+
+	return(IDENTIFIER);
+
 }
 /*----function defined by lex.l*/
-int next[643][129] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,256,65,256,256,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,263,56,259,256,-1,62,59,257,77,67,71,73,75,81,84,86,273,267,267,267,267,267,267,267,267,267,91,54,51,89,48,43,-1,641,641,641,641,641,641,641,641,641,641,641,212,641,641,641,641,641,641,641,641,641,641,641,641,641,641,188,256,183,35,565,256,616,568,576,558,580,577,603,641,400,641,641,555,641,641,641,641,641,611,551,630,563,560,538,641,641,641,182,31,178,26,256,261,
+
+int doAction(int idx){
+
+            switch(idx){
+
+            case 1:
+                 {comment();}
+                 break;
+            case 2:
+                 {/*consume//-comment*/}
+                 break;
+            case 3:
+                 {count();return(AUTO);}
+                 break;
+            case 4:
+                 {count();return(BOOL);}
+                 break;
+            case 5:
+                 {count();return(BREAK);}
+                 break;
+            case 6:
+                 {count();return(CASE);}
+                 break;
+            case 7:
+                 {count();return(CHAR);}
+                 break;
+            case 8:
+                 {count();return(COMPLEX);}
+                 break;
+            case 9:
+                 {count();return(CONST);}
+                 break;
+            case 10:
+                 {count();return(CONTINUE);}
+                 break;
+            case 11:
+                 {count();return(DEFAULT);}
+                 break;
+            case 12:
+                 {count();return(DO);}
+                 break;
+            case 13:
+                 {count();return(DOUBLE);}
+                 break;
+            case 14:
+                 {count();return(ELSE);}
+                 break;
+            case 15:
+                 {count();return(ENUM);}
+                 break;
+            case 16:
+                 {count();return(EXTERN);}
+                 break;
+            case 17:
+                 {count();return(FLOAT);}
+                 break;
+            case 18:
+                 {count();return(FOR);}
+                 break;
+            case 19:
+                 {count();return(GOTO);}
+                 break;
+            case 20:
+                 {count();return(IF);}
+                 break;
+            case 21:
+                 {count();return(IMAGINARY);}
+                 break;
+            case 22:
+                 {count();return(INLINE);}
+                 break;
+            case 23:
+                 {count();return(INT);}
+                 break;
+            case 24:
+                 {count();return(LONG);}
+                 break;
+            case 25:
+                 {count();return(REGISTER);}
+                 break;
+            case 26:
+                 {count();return(RESTRICT);}
+                 break;
+            case 27:
+                 {count();return(RETURN);}
+                 break;
+            case 28:
+                 {count();return(SHORT);}
+                 break;
+            case 29:
+                 {count();return(SIGNED);}
+                 break;
+            case 30:
+                 {count();return(SIZEOF);}
+                 break;
+            case 31:
+                 {count();return(STATIC);}
+                 break;
+            case 32:
+                 {count();return(STRUCT);}
+                 break;
+            case 33:
+                 {count();return(SWITCH);}
+                 break;
+            case 34:
+                 {count();return(TYPEDEF);}
+                 break;
+            case 35:
+                 {count();return(UNION);}
+                 break;
+            case 36:
+                 {count();return(UNSIGNED);}
+                 break;
+            case 37:
+                 {count();return(VOID);}
+                 break;
+            case 38:
+                 {count();return(VOLATILE);}
+                 break;
+            case 39:
+                 {count();return(WHILE);}
+                 break;
+            case 40:
+                 {count();return(IDENTIFIER);}
+                 break;
+            case 41:
+                 {count();return(CONSTANT);}
+                 break;
+            case 42:
+                 {count();return(CONSTANT);}
+                 break;
+            case 43:
+                 {count();return(CONSTANT);}
+                 break;
+            case 44:
+                 {count();return(CONSTANT);}
+                 break;
+            case 45:
+                 {count();return(CONSTANT);}
+                 break;
+            case 46:
+                 {count();return(CONSTANT);}
+                 break;
+            case 47:
+                 {count();return(CONSTANT);}
+                 break;
+            case 48:
+                 {count();return(CONSTANT);}
+                 break;
+            case 49:
+                 {count();return(CONSTANT);}
+                 break;
+            case 50:
+                 {count();return(CONSTANT);}
+                 break;
+            case 51:
+                 {count();return(STRING_LITERAL);}
+                 break;
+            case 52:
+                 {count();return(ELLIPSIS);}
+                 break;
+            case 53:
+                 {count();return(RIGHT_ASSIGN);}
+                 break;
+            case 54:
+                 {count();return(LEFT_ASSIGN);}
+                 break;
+            case 55:
+                 {count();return(ADD_ASSIGN);}
+                 break;
+            case 56:
+                 {count();return(SUB_ASSIGN);}
+                 break;
+            case 57:
+                 {count();return(MUL_ASSIGN);}
+                 break;
+            case 58:
+                 {count();return(DIV_ASSIGN);}
+                 break;
+            case 59:
+                 {count();return(MOD_ASSIGN);}
+                 break;
+            case 60:
+                 {count();return(AND_ASSIGN);}
+                 break;
+            case 61:
+                 {count();return(XOR_ASSIGN);}
+                 break;
+            case 62:
+                 {count();return(OR_ASSIGN);}
+                 break;
+            case 63:
+                 {count();return(RIGHT_OP);}
+                 break;
+            case 64:
+                 {count();return(LEFT_OP);}
+                 break;
+            case 65:
+                 {count();return(INC_OP);}
+                 break;
+            case 66:
+                 {count();return(DEC_OP);}
+                 break;
+            case 67:
+                 {count();return(PTR_OP);}
+                 break;
+            case 68:
+                 {count();return(AND_OP);}
+                 break;
+            case 69:
+                 {count();return(OR_OP);}
+                 break;
+            case 70:
+                 {count();return(LE_OP);}
+                 break;
+            case 71:
+                 {count();return(GE_OP);}
+                 break;
+            case 72:
+                 {count();return(EQ_OP);}
+                 break;
+            case 73:
+                 {count();return(NE_OP);}
+                 break;
+            case 74:
+                 {count();return(';');}
+                 break;
+            case 75:
+                 {count();return('{');}
+                 break;
+            case 76:
+                 {count();return('}');}
+                 break;
+            case 77:
+                 {count();return(',');}
+                 break;
+            case 78:
+                 {count();return(':');}
+                 break;
+            case 79:
+                 {count();return('=');}
+                 break;
+            case 80:
+                 {count();return('(');}
+                 break;
+            case 81:
+                 {count();return(')');}
+                 break;
+            case 82:
+                 {count();return('[');}
+                 break;
+            case 83:
+                 {count();return(']');}
+                 break;
+            case 84:
+                 {count();return('.');}
+                 break;
+            case 85:
+                 {count();return('&');}
+                 break;
+            case 86:
+                 {count();return('!');}
+                 break;
+            case 87:
+                 {count();return('~');}
+                 break;
+            case 88:
+                 {count();return('-');}
+                 break;
+            case 89:
+                 {count();return('+');}
+                 break;
+            case 90:
+                 {count();return('*');}
+                 break;
+            case 91:
+                 {count();return('/');}
+                 break;
+            case 92:
+                 {count();return('%');}
+                 break;
+            case 93:
+                 {count();return('<');}
+                 break;
+            case 94:
+                 {count();return('>');}
+                 break;
+            case 95:
+                 {count();return('^');}
+                 break;
+            case 96:
+                 {count();return('|');}
+                 break;
+            case 97:
+                 {count();return('?');}
+                 break;
+            case 98:
+                 {count();return(SPACE);}
+                 break;
+            case 99:
+                 {/*Addcodetocomplainaboutunmatchedcharacters*/}
+                 break;
+        }
+}int next[643][129] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,256,65,256,256,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,263,56,259,256,-1,62,59,257,77,67,71,73,75,81,84,86,273,267,267,267,267,267,267,267,267,267,91,54,51,89,48,43,-1,641,641,641,641,641,641,641,641,641,641,641,212,641,641,641,641,641,641,641,641,641,641,641,641,641,641,188,256,183,35,565,256,616,568,576,558,580,577,603,641,400,641,641,555,641,641,641,641,641,611,551,630,563,560,538,641,641,641,182,31,178,26,256,261,
 -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
@@ -730,8 +1092,6 @@ int next[643][129] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,256,65,256,256,-1,-1,-1,-1,-1,-
 -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,213,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,641,641,641,641,641,641,641,641,641,641,-1,-1,-1,-1,-1,-1,-1,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,-1,-1,-1,-1,641,-1,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,641,-1,-1,-1,-1,-1,640};
 int act[643]= {99,21,38,36,26,25,10,8,34,11,33,32,31,30,29,27,22,16,13,39,35,28,68,68,73,73,87,87,76,59,59,96,96,17,75,95,95,83,4,82,3,60,60,97,97,18,57,57,94,94,15,93,93,14,74,74,86,86,7,85,85,6,92,92,20,98,19,81,81,2,2,90,90,89,89,77,77,80,80,1,1,88,88,9,84,5,91,91,12,79,79,78,78,65,65,55,55,66,66,56,56,67,67,46,58,58,64,64,70,70,72,72,71,71,63,63,61,61,62,62,69,69,52,52,41,54,54,53,53,23,49,24,37,-1,-1,21,21,38,38,36,36,26,26,25,25,10,10,8,8,34,34,11,11,33,33,32,32,31,31,30,30,29,29,27,27,22,22,16,16,13,13,39,39,35,35,28,28,76,76,17,17,75,75,83,83,4,4,82,82,3,3,18,18,15,15,14,14,7,7,6,6,99,20,20,98,19,19,44,44,44,44,40,40,40,43,43,43,43,51,51,51,51,9,9,84,84,5,5,12,12,42,42,47,47,47,45,45,41,41,23,23,50,50,50,24,24,37,37,48,48,-1,-1,-1,99,99,99,99,99,99,99,99,99,98,98,40,43,43,43,43,42,42,42,42,42,42,46,46,46,46,46,46,46,47,47,47,47,47,47,45,45,45,49,49,49,49,49,50,50,50,50,50,50,48,48,48,-1,-1,-1,40,40,40,46,46,46,46,46,46,47,47,47,45,41,49,49,49,49,49,49,49,49,50,50,50,48,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,40,40,40,40,40,40,40,40,40,43,43,46,47,45,41,41,41,41,41,41,41,41,41,41,41,49,49,49,50,48,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,40,40,40,43,43,43,43,43,43,43,43,43,43,43,43,43,42,42,42,42,42,42,42,42,42,42,42,42,46,46,47,47,45,45,41,41,41,41,41,41,49,49,50,50,48,48,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,40,43,43,43,43,43,43,43,42,42,42,42,42,42,42,42,41,41,41,41,41,41,-1,-1,-1,40,43,43,43,43,42,42,42,42,42,42,41,41,41,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,40,43,43,43,42,42,42,41,40,43,42,41,41,40,43,43,42,42,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40};
 
-
-
 int yyLex(){
     int nowState = 0 , c;
     long _lastMatch = -1;
@@ -742,6 +1102,10 @@ int yyLex(){
     memset(yytext,0,sizeof(yytext));
     yyleng = 0;
     c = fgetc(yyin);
+    if (yyEOF >= 1){
+        yyEOF = 2;
+        return '#';
+    }
     buff[_leng++] = c;
     while (c != -1 &&next[nowState][c] != -1){
         nowState = next[nowState][c];
@@ -755,7 +1119,7 @@ int yyLex(){
             buff[_leng]='\0';
         }
         c = fgetc(yyin);
-        if (c != EOF)
+        if (c != EOF&& c !='\n'&& c!='\r' && c!=' ')
             buff[_leng++] = c;
     }
     if (c == -1){
@@ -765,312 +1129,27 @@ int yyLex(){
         fprintf(yyout,"ERROR CANNOT MATCH at %s!\n",buff);
     } else {
         buff[_leng] = '\0';
-        printf("stop at %ld %s\n",yypos,buff); 
         buff[yyleng] = '\0';
         strcpy(yytext,buff);
         fseek(yyin,yypos,SEEK_SET);
-    
-     int idx = actIdx
-
-            switch(idx){
-
-            case 1:
-                 {comment();}
-                 break;
-            case 2:
-                 {/*consume//-comment*/}
-                 break;
-            case 3:
-                 {count();return(AUTO);}
-                 break;
-            case 4:
-                 {count();return(BOOL);}
-                 break;
-            case 5:
-                 {count();return(BREAK);}
-                 break;
-            case 6:
-                 {count();return(CASE);}
-                 break;
-            case 7:
-                 {count();return(CHAR);}
-                 break;
-            case 8:
-                 {count();return(COMPLEX);}
-                 break;
-            case 9:
-                 {count();return(CONST);}
-                 break;
-            case 10:
-                 {count();return(CONTINUE);}
-                 break;
-            case 11:
-                 {count();return(DEFAULT);}
-                 break;
-            case 12:
-                 {count();return(DO);}
-                 break;
-            case 13:
-                 {count();return(DOUBLE);}
-                 break;
-            case 14:
-                 {count();return(ELSE);}
-                 break;
-            case 15:
-                 {count();return(ENUM);}
-                 break;
-            case 16:
-                 {count();return(EXTERN);}
-                 break;
-            case 17:
-                 {count();return(FLOAT);}
-                 break;
-            case 18:
-                 {count();return(FOR);}
-                 break;
-            case 19:
-                 {count();return(GOTO);}
-                 break;
-            case 20:
-                 {count();return(IF);}
-                 break;
-            case 21:
-                 {count();return(IMAGINARY);}
-                 break;
-            case 22:
-                 {count();return(INLINE);}
-                 break;
-            case 23:
-                 {count();return(INT);}
-                 break;
-            case 24:
-                 {count();return(LONG);}
-                 break;
-            case 25:
-                 {count();return(REGISTER);}
-                 break;
-            case 26:
-                 {count();return(RESTRICT);}
-                 break;
-            case 27:
-                 {count();return(RETURN);}
-                 break;
-            case 28:
-                 {count();return(SHORT);}
-                 break;
-            case 29:
-                 {count();return(SIGNED);}
-                 break;
-            case 30:
-                 {count();return(SIZEOF);}
-                 break;
-            case 31:
-                 {count();return(STATIC);}
-                 break;
-            case 32:
-                 {count();return(STRUCT);}
-                 break;
-            case 33:
-                 {count();return(SWITCH);}
-                 break;
-            case 34:
-                 {count();return(TYPEDEF);}
-                 break;
-            case 35:
-                 {count();return(UNION);}
-                 break;
-            case 36:
-                 {count();return(UNSIGNED);}
-                 break;
-            case 37:
-                 {count();return(VOID);}
-                 break;
-            case 38:
-                 {count();return(VOLATILE);}
-                 break;
-            case 39:
-                 {count();return(WHILE);}
-                 break;
-            case 40:
-                 {count();return(check_type());}
-                 break;
-            case 41:
-                 {count();return(CONSTANT);}
-                 break;
-            case 42:
-                 {count();return(CONSTANT);}
-                 break;
-            case 43:
-                 {count();return(CONSTANT);}
-                 break;
-            case 44:
-                 {count();return(CONSTANT);}
-                 break;
-            case 45:
-                 {count();return(CONSTANT);}
-                 break;
-            case 46:
-                 {count();return(CONSTANT);}
-                 break;
-            case 47:
-                 {count();return(CONSTANT);}
-                 break;
-            case 48:
-                 {count();return(CONSTANT);}
-                 break;
-            case 49:
-                 {count();return(CONSTANT);}
-                 break;
-            case 50:
-                 {count();return(CONSTANT);}
-                 break;
-            case 51:
-                 {count();return(STRING_LITERAL);}
-                 break;
-            case 52:
-                 {count();return(ELLIPSIS);}
-                 break;
-            case 53:
-                 {count();return(RIGHT_ASSIGN);}
-                 break;
-            case 54:
-                 {count();return(LEFT_ASSIGN);}
-                 break;
-            case 55:
-                 {count();return(ADD_ASSIGN);}
-                 break;
-            case 56:
-                 {count();return(SUB_ASSIGN);}
-                 break;
-            case 57:
-                 {count();return(MUL_ASSIGN);}
-                 break;
-            case 58:
-                 {count();return(DIV_ASSIGN);}
-                 break;
-            case 59:
-                 {count();return(MOD_ASSIGN);}
-                 break;
-            case 60:
-                 {count();return(AND_ASSIGN);}
-                 break;
-            case 61:
-                 {count();return(XOR_ASSIGN);}
-                 break;
-            case 62:
-                 {count();return(OR_ASSIGN);}
-                 break;
-            case 63:
-                 {count();return(RIGHT_OP);}
-                 break;
-            case 64:
-                 {count();return(LEFT_OP);}
-                 break;
-            case 65:
-                 {count();return(INC_OP);}
-                 break;
-            case 66:
-                 {count();return(DEC_OP);}
-                 break;
-            case 67:
-                 {count();return(PTR_OP);}
-                 break;
-            case 68:
-                 {count();return(AND_OP);}
-                 break;
-            case 69:
-                 {count();return(OR_OP);}
-                 break;
-            case 70:
-                 {count();return(LE_OP);}
-                 break;
-            case 71:
-                 {count();return(GE_OP);}
-                 break;
-            case 72:
-                 {count();return(EQ_OP);}
-                 break;
-            case 73:
-                 {count();return(NE_OP);}
-                 break;
-            case 74:
-                 {count();return(';');}
-                 break;
-            case 75:
-                 {count();return('{');}
-                 break;
-            case 76:
-                 {count();return('}');}
-                 break;
-            case 77:
-                 {count();return(',');}
-                 break;
-            case 78:
-                 {count();return(':');}
-                 break;
-            case 79:
-                 {count();return('=');}
-                 break;
-            case 80:
-                 {count();return('(');}
-                 break;
-            case 81:
-                 {count();return(')');}
-                 break;
-            case 82:
-                 {count();return('[');}
-                 break;
-            case 83:
-                 {count();return(']');}
-                 break;
-            case 84:
-                 {count();return('.');}
-                 break;
-            case 85:
-                 {count();return('&');}
-                 break;
-            case 86:
-                 {count();return('!');}
-                 break;
-            case 87:
-                 {count();return('~');}
-                 break;
-            case 88:
-                 {count();return('-');}
-                 break;
-            case 89:
-                 {count();return('+');}
-                 break;
-            case 90:
-                 {count();return('*');}
-                 break;
-            case 91:
-                 {count();return('/');}
-                 break;
-            case 92:
-                 {count();return('%');}
-                 break;
-            case 93:
-                 {count();return('<');}
-                 break;
-            case 94:
-                 {count();return('>');}
-                 break;
-            case 95:
-                 {count();return('^');}
-                 break;
-            case 96:
-                 {count();return('|');}
-                 break;
-            case 97:
-                 {count();return('?');}
-                 break;
-            case 98:
-                 {count();}
-                 break;
-            case 99:
-                 {/*Addcodetocomplainaboutunmatchedcharacters*/}
-                 break;
-        }
-   return yyLex();
+        return doAction(actIdx);
+    }
 }
+
+int main(){
+    int i;
+    char name[1000];
+    printf("input file name:\n");
+    scanf("%s",name); 
+    yyin = fopen(name,"r");
+    yyout = fopen ("lexer2.out","w");
+    while (yyEOF != 1){
+        do{
+			yyLex();
+		} while(yyleng==0&&yyEOF == 0);
+        fprintf(yyout," ------ \"%s\"\n",yytext);                   
+    }
+    fclose(yyout);
+    return 0;
+}
+            

@@ -1,0 +1,60 @@
+INT: int
+:  
+IDENTIFIER: main
+'(': (
+')': )
+'{': {
+
+: 
+/*
+: 
+	
+INT: int
+:  
+IDENTIFIER: a
+'=': =
+CONSTANT: 3
+';': ;
+
+: 
+	
+DOUBLE: double
+:  
+IDENTIFIER: b
+'=': =
+CONSTANT: 2
+';': ;
+
+: 
+	
+INT: int
+:  
+IDENTIFIER: c
+'=': =
+IDENTIFIER: a
+'+': +
+'(': (
+INT: int
+')': )
+IDENTIFIER: b
+';': ;
+
+: 
+	
+IDENTIFIER: printf
+'(': (
+STRING_LITERAL: "%d"
+',': ,
+IDENTIFIER: c
+')': )
+';': ;
+
+: 
+	
+RETURN: return
+:  
+CONSTANT: 0
+';': ;
+
+'}': 
+}
