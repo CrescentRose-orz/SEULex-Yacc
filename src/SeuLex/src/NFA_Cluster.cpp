@@ -343,10 +343,8 @@ bool trans = 0;
                 operandStack.push(NFA_Cluster::getBracket(buff,RE,i+1,j-1));
                 i = j + 1;
                 break;
-            case '{': //todo
-                throw invalid_argument("not supported yet");
-
-
+            case '{': 
+                //throw invalid_argument("not supported yet");
                 newOp = RE_operator('{',0,0);
             case '(':
             case '|': 
