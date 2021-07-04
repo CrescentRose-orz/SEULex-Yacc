@@ -132,12 +132,15 @@ int main(int argc, char const* argv[]){
         myLR.logger.end("construct lr1");
         myLR.logger.save();
         //myLR.printVisualLR(vLROut);
+        
         myLR.logger.start("construct LALR");
         LR &&myLALR = myLR.consturctLALR();
         myLR.logger.end("construct LALR");
+
         myLR.logger.start("construct ParsingTable");
         myLALR.constructParsingTable();
         myLR.logger.end("construct ParsingTable");
+
         cout<<myLR.allKeys.size()<<endl;
         cout<<"total node:"<<myLALR.pool.size()<<endl;
         fstream vLR;
