@@ -533,7 +533,15 @@ void Lex::start(int flag){
         }
         fout<<R"(
 #include <string.h>
+)";
+if (flag){
+fout<<R"(
 #define ECHO fprintf(yyout,"%s",yytext)
+)";
+}else{
+    fout<<"#define ECHO"<<endl;
+}
+fout<<R"(
 #define error(x) printf(x)
 #define INF 0x7fff;
 )"<<codeBuff<<R"(

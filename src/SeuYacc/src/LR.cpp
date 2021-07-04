@@ -426,8 +426,6 @@ int LR::constructParsingTable(){
 
     out << R"(
 // The following are from the yacc file
-#include "y.tab.h"
-#include "lex.yy.c"
 int vTail = 0;
 char outputBuff1[5000],outputBuff2[5000];
 const char* outputName =NULL;
