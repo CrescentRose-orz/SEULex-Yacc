@@ -413,6 +413,11 @@ $ 作为正则表达式的最后一字符，匹配行的结尾。
         }
         transChar['n'] = '\n';
         transChar['r'] = '\r';
+        transChar['t'] = '\t';
+        transChar['f'] = '\f';
+        transChar['b'] = '\b';
+        transChar['a'] = '\a';
+        transChar['v'] = '\v';
         memset(newPri,0,sizeof(newPri));
         memset(oldPri,0,sizeof(newPri));    
         newPri['|'] = 1;    

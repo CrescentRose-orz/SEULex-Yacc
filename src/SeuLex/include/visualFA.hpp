@@ -47,6 +47,9 @@ public :
         trans[eps] = "ε";
         trans['\\'] ="\\\\";
         trans['\"']="\\\"";
+        trans['\t']="\\\\t";
+        trans['\f']="\\\\f";
+        trans['\r']="\\\\r";
         doubleCircle.clear();
         edgePool.clear();
     }
