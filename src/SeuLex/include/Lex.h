@@ -84,6 +84,8 @@ private:
 
     void generateAction(fstream &fout,int flag);
 
+
+    void generateLexer();
 public:
     //USE DEFAULT CONSTRUCTOR IS NOT PREFFERED
     Lex(); 

@@ -469,7 +469,9 @@ void Lex::generateAction(fstream &fout,int flag){
 }
 
 void Lex::start(int flag){
+#ifdef USE_MULTITHREAD
     threadpool threadPool;    
+#endif
     initAll();
     logger.start("main");
     if (!lexReady){
@@ -632,6 +634,76 @@ int main(){
     logger.save();
     logger.close();
     system("pause");
+    return;
+}
+
+
+
+void Lex::generateLexer(){
+    initAll();
+    logger.start("main");
+    if (!lexReady){
+        logger.error("try to start before input file is ready!","Lex::start()",1);
+        return ;
+    }
+    logger.start("Scanning lex file");
+    try{
+        unfoldAllRE();
+        cout<<"unfold ok,start with RE2NFA"<<endl;
+        logger.end("readin&prepare");
+        logger.start("create NFA with REs");
+        logger.save();
+        for (int i = 0; i < targetRE.size();++i){
+            _NFA.addRE(targetRE[i],Action[i]);
+        }
+        logger.end("create NFA with REs");
+        cout<<"NFA created!"<<endl;
+        fstream fout;
+        fout.open("NFA.dot",ios::out);
+        _NFA.vFA.print(fout);
+        logger.start("create DFA with NFA");
+        _DFA.NFA2DFA(_NFA);
+        logger.end("create DFA with NFA");
+        {
+            stringstream ss;
+            ss<<"total "<<_DFA.pool.size()<<" nodes"<<endl;
+            logger.customMSG(ss.str());
+        }
+        fout.open("DFA.dot",ios::out);
+        logger.start("minimizing dfa");
+        DFA &&miniDFA = _DFA.minimize();
+        stringstream ss;
+        ss<<"minimzed DFA:"<<miniDFA.pool.size()<<" nodes";
+        logger.customMSG(ss.str());
+        logger.end("minimizing dfa");
+        miniDFA.vFA.print(fout);
+        logger.end("main"); 
+    }catch (invalid_argument e){
+        logger.customMSG(e.what());
+        cerr<<e.what()<<endl;
+        logger.error("invalid input, program ended ","parsing lex",lineCnt);
+        logger.close();
+        fstream fout;
+        fout.open("NFA.dot",ios::out);
+        _NFA.vFA.print(fout);
+            fout.open("DFA.dot",ios::out);
+        _DFA.vFA.print(fout);
+        return ;
+    } 
+    catch(exception e){
+        logger.save();
+        cerr<<"unknow exception occurs"<<endl;
+        system("pause");
+        fstream fout;
+        fout.open("output.dot",ios::out);
+        _NFA.vFA.print(fout);
+        logger.error("Exception occured ","parsing lex file",lineCnt);
+        logger.customMSG(e.what());
+        logger.close();
+        return ;
+    }
+    logger.save();
+    logger.close();
     return;
 }
 

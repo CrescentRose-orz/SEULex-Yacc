@@ -2,7 +2,7 @@
 #include<shared_mutex>
 #define fin lfile 
 //#define USE_MULTITHREAD
-#define THREADCNT 8
+//#define THREADCNT 8
 //#define DEBUG
 #define DEBUG2
 

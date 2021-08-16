@@ -20,3 +20,4 @@ testlogger
 *.dot
 *.png
 *.c
+*RISCV
