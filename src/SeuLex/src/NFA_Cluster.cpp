@@ -82,20 +82,74 @@
             
         }
     }
+    //copy
+    NFA_Cluster NFA_Cluster::copy(NFA &buff,NFA_Cluster &origin){
+        int head = buff.add();
+        unordered_set<int> vis;
+        unordered_map<int,int> mapping; 
+        queue<int> q;
+        vis.insert(origin.head);
+        mapping.insert({origin.head,head}); 
+        q.push(origin.head);
+        while(!q.empty()){
+            int now = q.front();
+            vector<pair<int,int>> &&edges = buff[now].getAllTrans();
+            q.pop();
+            for (auto iter = edges.begin(); iter !=edges.end(); ++iter){
+                if (!mapping.count(iter->second)){
+                    int newNode = buff.add();
+                    mapping.insert({iter->second,newNode});
+                }
+                buff[mapping[now]].addTrans(mapping[iter->second],iter->first);
+                if (!vis.count(iter->second)){
+                    q.push(iter->second);
+                    vis.insert(iter->second);
+                }
+            }
+        }
+        return NFA_Cluster(mapping[origin.head],mapping[origin.tail]);
+    }
     // multi {}
     NFA_Cluster::NFA_Cluster(NFA &buff,int l,int r,NFA_Cluster a ){
-        throw invalid_argument("multi{} this function is not available");
+        //throw invalid_argument("multi{} this function is not available");
         if (l < 0 || r < l){
             throw invalid_argument("error, {l,r} must have l >= 0 && r >= l");
         }
+        if (r == 1){
+            if (l == 0){
+                NFA_Cluster(buff,'?',a);
+            } else {
+                this->head = a.head;
+                this->tail = a.tail;
+            }
+            return;
+        }
+        int rtHead , rtTail = a.tail,lastTail = -1;
+        for (int i = 0; i < r - 1; ++i){
+            NFA_Cluster &&now = NFA_Cluster::copy(buff,a);
+            if (lastTail >= 0){
+                buff[lastTail].addTrans(now.head,eps);
+            } else {
+                rtHead = now.head;
+            }
+            if (l <= i){
+                buff[now.head].addTrans(a.tail,eps);
+            }
+            lastTail = now.tail;
+        }
+
+        buff[lastTail].addTrans(a.head,eps);
+        if (l<r){
+            buff[a.head].addTrans(a.tail,eps);
+        }
+        this->head = rtHead;
+        this->tail = rtTail;
         // //NFA_Node _tail;
         // vector<NFA_Node> _heads(r+1);
         // tail = buff.add(_tail);
         // for (int i = l; i <= r; ++i){
         //     _heads[i].addTrans(tail,);
         // }
-
-
     }
     //single op : * ? +
     NFA_Cluster::NFA_Cluster(NFA &buff,char op ,NFA_Cluster a ){
@@ -264,8 +318,9 @@
         return rt;
     }
     //todo{}
-    NFA_Cluster NFA_Cluster::getBrace(NFA &buff,string &bracket,int l ,int r){
+    NFA_Cluster NFA_Cluster::getBrace(NFA &buff,NFA_Cluster a,int l ,int r){
         NFA_Cluster rt(0,0);
+        
         return rt;
     }
     NFA_Cluster NFA_Cluster::createEmpty(NFA &buff){
@@ -296,6 +351,7 @@ bool trans = 0;
     buff.logger.save();
     #endif
     //NFA_Cluster &&head = NFA_Cluster::createEmpty(buff);
+    cout<<"get RE: "<<RE<<endl;
     while(i<RE.size()){
         #ifdef DEBUG
         stringstream s;
@@ -345,7 +401,36 @@ bool trans = 0;
                 break;
             case '{': 
                 //throw invalid_argument("not supported yet");
-                newOp = RE_operator('{',0,0);
+                {
+                    string tmp;
+                    ++i;
+                    while(RE.size()>i && RE[i] != '}'){
+                        tmp += RE[i];
+                        ++i;
+                    }
+                    try {
+                        if (i >= RE.size()){
+                            string warning("'}' expected");
+                            throw invalid_argument(warning.c_str());
+                        }
+                        ++i;
+                        int l,r;
+                        sscanf(tmp.c_str(),"%d,%d",&l,&r);
+                        newOp = RE_operator('{',l,r);
+                    } catch(invalid_argument e){
+                        string warning(e.what());
+                            warning += "in RE:";
+                            warning += RE;
+                            throw invalid_argument(warning);
+                    };
+                    if (!operatorStack.empty())
+                    while (!operatorStack.empty()&&RE::newPri[newOp] < RE::oldPri[operatorStack.top()]){
+                        NFA_Cluster::cal(buff,operandStack,operatorStack.top());
+                        operatorStack.pop();
+                    } 
+                    operatorStack.push(newOp);
+                    break;
+                }
             case '(':
             case '|': 
             case '*':
@@ -478,7 +563,17 @@ stringstream s;
 
             break;
         case '{':
-            throw invalid_argument("{ not supported yet");
+            //throw invalid_argument("{ not supported yet");
+            {
+                NFA_Cluster &&tmp = NFA_Cluster(buff,op.l,op.r,operand1);
+                operandStack.push(tmp);
+                #ifdef DEBUG_OPBRACE
+                s<<"get "<<tmp.head<<" "<<tmp.tail<<" for ["<<operand1.head<<","<<operand1.tail<<"]"<<op.op<<endl;
+                buff.logger.customMSG(s.str());
+                buff.logger.save();
+                #endif
+            }
+            break;
         default:
             stringstream s;
             s << "unknown operator occurs" << op.op<<" founded";

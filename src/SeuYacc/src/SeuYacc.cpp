@@ -10,8 +10,8 @@
 using namespace std;
 
 int main(int argc, char const* argv[]){
-    
-    FILE *fp = freopen("out.txt","w",stdout);
+    FILE *fp = NULL;
+    //FILE *fp = freopen("out.txt","w",stdout);
     // yacc规约文件的文件名
     string file_name;
 	if (argc != 2) {
@@ -34,7 +34,7 @@ int main(int argc, char const* argv[]){
     // 解析文件错误，退出文件
     else
         exit(0);
-
+    cout <<"begin with producers"<<endl;
     // 添加一条起始的产生式
     setStart(start, TranslationRule_Str);
 
@@ -44,7 +44,7 @@ int main(int argc, char const* argv[]){
     // 获得所有Str形式的终结符
     getTerminals(TranslationRule_Str, Terminals_Str);
 
-
+    cout<<"all parsing completed"<<endl;
     // ----------------以上为yacc规则文件解析部分----------------
     // ----------------下面开始进行Str到Int的转换----------------
 
@@ -64,13 +64,14 @@ int main(int argc, char const* argv[]){
 
     // ----------------以上为Str到Int的转换部分----------------
     // ----------------下面开始进行求取First部分----------------
-    // for (auto pp:TranslationRule_Int){
-    //     cout<<I2S(pp.first)<<" -> ";
-    //     for (auto pro:pp.second){
-    //         cout<<I2S(pro)<<" ";
-    //     }
-    //     cout<<endl;
-    // }
+    cout<<"get producers below:"<<endl;
+    for (auto pp:TranslationRule_Int){
+        cout<<I2S(pp.first)<<" -> ";
+        for (auto pro:pp.second){
+            cout<<I2S(pro)<<" ";
+        }
+        cout<<endl;
+    }
     // cout<<NLBound<<" "<<S2I("declaration_list")<<endl;
     // for (auto pro:LHSToPos[S2I("declaration_list")]){
     //     cout<<"declaration_list ->";
@@ -87,19 +88,22 @@ int main(int argc, char const* argv[]){
     //     cout<<endl;
     // }
 //    solveFirst();
-    getFirst();
-    // cout<<"first:"<<endl;
-    // for (int i = 0; i < NLBound;++i){
-    //     if (i<128){
-    //         cout<<"'"<<(char)i<<"':"<<endl;
-    //     } else {
-    //         cout<<I2S(i)<<":"<<endl;            
-    //     }
-    //     for (auto &id:First[i]){
-    //         cout<<"'"<<I2S(id)<<"' ";
-    //     }
-    //     cout<<endl;
-    // }
+    cout<<"transform ok"<<endl;
+    //getFirst();
+    solveFirst();
+    cout<<"first solving ok"<<endl;
+    cout<<"first:"<<endl;
+    for (int i = 0; i < NLBound;++i){
+        if (i<128){
+            cout<<"'"<<(char)i<<"':"<<endl;
+        } else {
+            cout<<I2S(i)<<":"<<endl;            
+        }
+        for (auto &id:First[i]){
+            cout<<"'"<<I2S(id)<<"' ";
+        }
+        cout<<endl;
+    }
 
     //
     // ----------------以上为求取所有单字符First部分----------------
@@ -138,7 +142,7 @@ int main(int argc, char const* argv[]){
         myLR.logger.end("construct LALR");
 
         myLR.logger.start("construct ParsingTable");
-        myLALR.constructParsingTable();
+        myLALR.constructParsingTable(true);
         myLR.logger.end("construct ParsingTable");
 
         cout<<myLR.allKeys.size()<<endl;
@@ -150,9 +154,9 @@ int main(int argc, char const* argv[]){
         myLR.logger.end("yacc");
         myLR.logger.save();
         //myLR.constructParsingTable();
-        fflush(fp);
-        fclose(fp);
-        freopen("CON","w",stdout);
+        //fflush(fp);
+        //fclose(fp);
+        //freopen("CON","w",stdout);
         cout<<"Done!"<<endl;
         //fclose(stdout);
         while (1){

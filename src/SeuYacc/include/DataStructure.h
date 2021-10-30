@@ -4,6 +4,12 @@
 #include<bits/stdc++.h>
 using namespace std;
 
+extern std::map<string,string> SvalType;
+extern std::unordered_map<int,string>IvalType;
+extern bool hasUnion;
+extern string unionCode;
+
+
 // 为后续方便使用相关数据结构，此文件定义了使用到的数据结构
 
 // 初始产生式的序列（每一项中包含产生式的左部和产生式的右部）
@@ -64,12 +70,17 @@ extern string Declarations;
 // 存储Str形式的辅助性C语言例程
 extern string CRoutines;
 
+extern vector<string> reduceActionCode; 
+//初始产生式编号Int->string的语义动作
 
 // 存放Int形式的产生式
 extern ProducerVecInt TranslationRule_Int;
 
-
-
+extern string YYHEADER;
+extern string YY_REDUCER_BODY2;
+extern string YY_REDUCER_BODY1;
+extern string YY_PARSER_FUNCTION;
+extern string C_SOURCE_CODE;
 namespace std {
 
 	template<>

@@ -2,7 +2,7 @@
 #include<shared_mutex>
 #define fin lfile 
 //#define USE_MULTITHREAD
-//#define THREADCNT 8
+#define THREADCNT 8
 //#define DEBUG
 #define DEBUG2
 
@@ -14,6 +14,8 @@
 #define controlMin 9
 #define controlMax 12
 #define VISUAL
+
+#define DEBUG_OPBRACE
 
 
 #define RdLock(x) shared_lock<shared_timed_mutex> lock(x)

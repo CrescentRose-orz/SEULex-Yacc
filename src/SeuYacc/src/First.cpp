@@ -143,15 +143,69 @@ void getFirst(const vector<int>& symbols, unordered_set<int>& resultSet){
 
 void solveFirst(){
 unordered_set<int> vis;
+queue<int> changes;
+bool flag = true;
+	cout<<"solving first, NLBound = "<<NLBound<<endl;
 	for (int i = 0 ; i < NLBound; ++i){
-		if (!vis.count(i)){
-			solveSingle(i,vis);
+		solveSingleFirst(i,flag);
+		//changes.push(i);
+		// if (!vis.count(i)){
+		// 	solveSingle(i,vis);
+		// }
+	}
+	flag = true;
+	while(flag){
+		flag = false;
+		for (int i = TNBound; i < NLBound; ++i){
+			solveSingleFirst(i,flag);
 		}
 	}
+	// while(!changes.empty()){
+	// 	solveSingleFirst(changes.front(),changes);
+	// 	changes.pop();
+	// }
 
 
 }
 
+void solveSingleFirst(int idx,bool &changesFlag){
+	if (idx<128)
+		cout<<"solving "<<idx<<" : "<<(char)idx<<endl;
+	else
+		cout<<"solving "<<idx<<" : "<<I2S(idx)<<endl;
+	if (isTerminal(idx)){
+		First[idx].insert(idx);
+		return;
+	}
+	for (auto pros:LHSToPos[idx]){
+		cout<<"get new producer for "<<idx<<endl;
+		for (auto now:getRight(pros)){
+			cout<<"get "<<I2S(now)<<endl;
+			// if (now == idx){
+			// 	if ()
+			// 	break;
+			// }
+			//solveSingle(now,vis);
+			bool flag = false;
+			for (auto _first:First[now]){
+				if (_first != -1 ){
+					if (now != idx && First[idx].count(_first) == 0){
+						First[idx].insert(_first);
+						changesFlag = true;
+					}
+				} else {
+					flag = true;
+				}
+				if (!flag){
+					break;
+				}
+			}
+		}
+	}
+}
+
+
+// old version
 void solveSingle(int idx,unordered_set<int> &vis){
 	if (vis.count(idx)){
 		return;

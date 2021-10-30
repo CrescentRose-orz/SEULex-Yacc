@@ -14,9 +14,15 @@ void transformTerminals(unordered_set<string>& Terminals_Str, unordered_map<stri
         if (str.size()==1){
             StrToInt.insert({str,str[0]});
             IntToStr.insert({str[0],str});
+            if (SvalType.count(str)){
+                IvalType[str[0]] = SvalType[str];
+            }
         } else {
             StrToInt.insert(make_pair(str, counter));
             IntToStr.insert(make_pair(counter, str));
+            if (SvalType.count(str)){
+                IvalType[counter] = SvalType[str];
+            }
             counter++;
 	    }
     }
@@ -30,6 +36,9 @@ void transformNonterminals(unordered_set<string>& Nonterminals_Str, unordered_ma
 	for (auto str : Nonterminals_Str){
 		StrToInt.insert(make_pair(str, counter));
 		IntToStr.insert(make_pair(counter, str));
+        if (SvalType.count(str)){
+            IvalType[counter] = SvalType[str];
+        }
 		counter++;
 	}
 

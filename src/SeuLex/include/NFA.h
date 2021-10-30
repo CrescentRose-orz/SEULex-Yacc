@@ -123,6 +123,13 @@ public:
         }   
         return rt;
     }
+    vector<pair<int,int>> getAllTrans(){
+        vector<pair<int,int>> rt;
+        for (auto iter = state.begin(); iter != state.end(); ++iter){
+            rt.push_back(*iter);
+        }
+        return rt;
+    }
 };
 
 class NFA:public basicFA<NFA_Node>{

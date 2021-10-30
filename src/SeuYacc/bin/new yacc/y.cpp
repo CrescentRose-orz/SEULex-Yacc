@@ -1,188 +1,28 @@
-#include"DataStructure.h"
-
-vector<string> reduceActionCode; 
-std::map<string,string> SvalType;
-std::unordered_map<int,string>IvalType;
-bool hasUnion;
-std::string unionCode;
-
-std::vector<int> producerBaseIdx;
-
-// 存放所有string与int相互映射关系
-unordered_map<string, int> StrToInt;
-unordered_map<int, string> IntToStr;
-
-// 存放Int形式产生式->产生式在数据结构中的存放序号的映射关系
-//unordered_map<vector<int>, int> ProToPos;
-
-// Int形式产生式左部->Int形式产生式右部下标的映射关系
-// 存的是translationRule—>下标的集合
-unordered_map<int, vector<int>> LHSToPos;
-
-
-// 终结符与非终结符边界，非终结符与左结合运算符边界
-// 终结符对应的Int范围为[0,TNBound)
-// 非终结符对应的Int范围为[TNbound,NLBound)
-int TNBound,NLBound;
-int maxLen,maxIdx;
-
-// 全局数据变量
-
-// 存放Str形式的终结符
-unordered_set<string> Terminals_Str;
-// 存放Str形式的非终结符
-unordered_set<string> Nonterminals_Str;
-// 存放Str形式的产生式
-ProducerVecStr TranslationRule_Str;
-// 存放Str形式的左结合运算符
-unordered_set<string> Left_Str;
-// 存放Str形式的左结合运算符->优先级的映射
-unordered_map<string, int> Left_Precedence;
-// 存储所有单个字符(Int形式)->First集合(Int形式)的映射
-map<int, unordered_set<int>> First;
-// 存储Str形式的开始符
-string start;
-// 存储Str形式的C声明部分
-string Declarations;
-// 存储Str形式的辅助性C语言例程
-string CRoutines;
-
-// 存放Int形式的产生式
-ProducerVecInt TranslationRule_Int;
-
-string YYHEADER(
-    R"(#include<iostream>
+#include "y.tab.h"
+//#include "lex.yy.c"
+#include<iostream>
 #include<deque>
 #include<stack>
 #include<vector>
-#include<exception>
-#include<cstdlib>
+#include<bits/stdc++.h>
 #include<cstring>
-#include"y.tab.h"
-
+typedef int YYSPTYPE;
 using std::stack;
-using namespace std;
-const int initialStatus = 0;
-YYSTYPE yyVal;
-extern int yyEOF;
-extern FILE* yyin;
-extern FILE* yyout;
-int yyLex();
 
-class LexerEOFException:public std::exception{
-public:
-	LexerEOFException():std::exception(){}
-	LexerEOFException(std::string info){}
-	const char* what(){
-		return "meet 'end of file' Flag while parser try to read more tokens.";
-	}
-};
 
-class yyParser{
+
+class yaccParser{
 private:
-    int token,now;
-    stack<YYSTYPE> valStack;
-    stack<int> status;
-    stack<int> symbol;
-    int read();
-    void shift(int target);
-    void reduce(int producer);
-    int parse();
+	std::stack<int> valStack;
 public:
-    void yyParse(){
-		int flag = 1;
-        status.push(initialStatus);
-        read();
-        while(flag){
-			if (0 < (flag = parse())){
-				read();
-			}
-		}
-    }
-};
-)");
+	void yyparse(){
 
-
-string YY_PARSER_FUNCTION(R"(
-int yyParser::read(){
-		//memset(yyVal,0,sizeof(YYSTYPE));
-        system("pause");
-		if (yyEOF){
-			throw LexerEOFException();
-		}
-        token = yyLex();
-        cout<<"get token "<<I2S[token]<<" text val:"<<yytext<<endl;
-		system("pause");
-        return 0;
-    }
-void yyParser::shift(int target){
-		valStack.push(yyVal);
-		symbol.push(token);
-        cout<<"from "<<now;
-        now = target;
-        cout<<" shift to target "<<target<<endl;
-		status.push(now);
-    }
-int yyParser::parse(){
-    int now = status.top();
-    if (ACTION[now][token] > 0){
-        // ACTION[now][lookAhead] > 0 , shift
-        cout<<"shifting..."<<endl;
-		shift(ACTION[now][token]-1);
-		return 1;
-    } else if (ACTION[now][token] < 0){
-        // ACTION[now][lookAhead] < 0 , reduce
-        cout<<"reducing... action "<<ACTION[now][token]<<endl;
-		reduce(-ACTION[now][token]-1);
-		return -1;
-    } else {
-		//ACTION[now][lookAhead] == 0,accept
-        // by default,acc = 0
-		cout<<"error occurs"<<endl;
-        cout<<"now at"<<now<<" get lookAhead "<<token<<"("<<I2S[token]<<") "<<endl;
-		return 0;
-    }
-}
-)");
-
-string YY_REDUCER_BODY1(R"(
-void yyParser::reduce(int producer){
-{
-        int cnt = proCnt[producer]; 
-        int newSymbol = proGet[producer];
-        YYSTYPE *proVal = new YYSTYPE[cnt+1];
-        int *sb = new int[cnt+1];
-
-        for (int i = cnt; i > 0; --i){
-            sb[i] = symbol.top();
-            symbol.pop();
-            status.pop();
-			proVal[i] = valStack.top();
-			valStack.pop();
-        }
-        symbol.push(newSymbol);
-        cout<<I2S[newSymbol]<<"->";
-        for (int i = 1; i <= cnt; ++i){
-            cout<<I2S[sb[i]]<<" ";
-        }
-        cout<<endl;
-        delete[] sb;
-		switch(now){
-)");
-string YY_REDUCER_BODY2(R"(
-		}
-        cout<<"reduce get"<<newSymbol<<" namely "<<I2S[newSymbol]<<endl;
-        now = status.top();
-        cout<<"goto "<<_GOTO[now][newSymbol-TNBound]<<endl;
-        now = _GOTO[now][newSymbol-TNBound];
-		status.push(now);
-		valStack.push(proVal[0]);
-		delete[] proVal;
 	}
-}
-)");
 
-string C_SOURCE_CODE(R"(
+};
+
+
+
 // The following are from the yacc file
 int vTail = 0;
 char outputBuff1[5000],outputBuff2[5000];
@@ -430,4 +270,4 @@ char temp[100];
 	system("pause");
 }
     
-    )");
+    

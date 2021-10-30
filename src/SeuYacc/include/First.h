@@ -21,5 +21,5 @@ void solveFirst();
 
 void solveSingle(int idx,unordered_set<int> &vis);
 
-
+void solveSingleFirst(int idx,bool &changesFlag);
 

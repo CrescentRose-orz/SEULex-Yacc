@@ -16,6 +16,10 @@
         op = c;
         this->l = l;
         this->r = r;
+        if (l < 0|| r < l){
+            string s("usage: r1{a,b} a>=0 && a<=b ");
+            throw invalid_argument(s.c_str());
+        }
     }
     // operator int(){
     //     return (int)op;
@@ -155,6 +159,9 @@
             }
             switch (raw[idx]){
                 case '{':
+                    while(raw.at(idx+1) == ' ' ||raw.at(idx+1) =='\t'){
+                        ++idx;
+                    }
                     if (raw.at(idx+1)<='9'&&0<=raw.at(idx+1)){
                         newRE += raw[idx];
                         while (raw[idx]!='}'){
@@ -164,6 +171,7 @@
                                 throw invalid_argument("'}' expected in "+raw);
                             }
                         }
+                        ++idx;
                     } else {
                         // append
                         string name;

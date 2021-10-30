@@ -304,7 +304,7 @@ int lineStatus;
 void Lex::readRE_action(){
 string &&RE = readRE(),act;
 char c,lastc;
-int qcnt = 0,ccnt = 0;    
+int qcnt = 0,ccnt = 0,bcnt = 0;    
     targetRE.emplace_back(RE);
     c = fin.get();
     while (space(c)){
@@ -312,7 +312,9 @@ int qcnt = 0,ccnt = 0;
     }
     lastc= 0;
     if (c == '\n' || c == '\r'){
-        throw invalid_argument("Error : get end of line when scaning actions\n");
+        RE.append(" get this Regular expression but occurrs ");
+        RE.append("Error : get end of line when scaning actions\n");
+        throw invalid_argument(RE);
     }
     if (c != '{'){
         cerr<<"get RE"<<RE<<endl;
@@ -321,9 +323,10 @@ int qcnt = 0,ccnt = 0;
         s += '\n';
         throw invalid_argument(s);         
     } 
-    qcnt = ccnt = 0;
+
+    bcnt = qcnt = ccnt = 0;
     c = fin.get();
-    while ((c!='}')||qcnt||ccnt){
+    while ((c!='}')||qcnt||ccnt||bcnt){
         if (!space(c)){
            if (c!='\n'){
                if (c!='\r'){
@@ -334,16 +337,27 @@ int qcnt = 0,ccnt = 0;
                     if (c == '\''){
                         ccnt ^= 1;
                     }
+                    if (!qcnt&&!ccnt){
+                        if (c=='{')
+                            ++bcnt;
+                        if (c=='}'){
+                            --bcnt;
+                        }
+                    }
                }               
            } else{
                ++lineCnt;
+               act += '\n';
            }
+        } else {
+            act += c;
         }
         lastc = c;
         c = fin.get();
     }
-    trim(act);
+    //trim(act);
     Action.emplace_back(Action.size() + 1,act);
+    cout<<"ok with RE"<<RE<<endl;
     while (c !='\n'){
         c = fin.get();
     }    
@@ -489,6 +503,7 @@ void Lex::start(int flag){
             handlePredefinedStatement();
         #endif
         scanRules();
+        cout<<"Rules finishend!"<<endl;
         scanAuxiliaryFunction();
         fin.close();
         cout<<"file close ok"<<endl;
@@ -523,7 +538,7 @@ void Lex::start(int flag){
         logger.end("minimizing dfa");
         miniDFA.vFA.print(fout);
         logger.start("Generating code");
-        fout.open("lex.yy.c",ios::out);
+        fout.open("lex.yy.cpp",ios::out);
         if (flag){
             fout<<R"(
 #define return(x) printf(#x)
@@ -563,7 +578,7 @@ int input(){
 }
 
 )"<<endl;
-        trim(funCodeBuff);
+        //trim(funCodeBuff);
         fout<<funCodeBuff<<endl;
         fout<<R"(/*----function defined by lex.l*/)"<<endl;
         if (flag){

@@ -101,7 +101,7 @@ public:
      * @exception LALR规约表中存在冲突
      * @return int 构建状态，0表示成功构建，1表示构建失败
      */
-    int constructParsingTable();
+    int constructParsingTable(bool isCPP = 0);
 
     void printNode(int idx){
         pool[idx].print();

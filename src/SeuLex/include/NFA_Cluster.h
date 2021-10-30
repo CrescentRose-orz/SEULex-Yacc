@@ -17,6 +17,7 @@ public:
     int head;
     int tail;
     static bool checkBracket(string &bracket,int l,int r);
+    //NFA_Cluster copy(NFA &buff,NFA_Cluster &origin);
     NFA_Cluster(int head);
     NFA_Cluster(int head,int tail);
     //single char,.
@@ -32,13 +33,14 @@ public:
     //bracket todo 【】
     static NFA_Cluster getBracket(NFA &buff,string &bracket,int l,int r);
     //todo{}
-    static NFA_Cluster getBrace(NFA &buff,string &bracket,int l ,int r);
+    static NFA_Cluster getBrace(NFA &buff,NFA_Cluster a,int l ,int r);
     static NFA_Cluster createEmpty(NFA &buff);
     static NFA_Cluster createSingle(NFA &buff,NFA_Node node);
     static NFA_Cluster RE2NFA_Cluster(string RE,NFA &buff);
     static NFA_Cluster RE2NFA(string RE,NFA &buff,action _action);
     static void cal(NFA &buff,stack<NFA_Cluster> &operandStack,RE_operator op);
     static NFA_Cluster getTrans(NFA&buff,char c);
+    static NFA_Cluster copy(NFA &buff,NFA_Cluster &origin);
 };
 /*
 . 匹配任何单个字符，除\n.                       
