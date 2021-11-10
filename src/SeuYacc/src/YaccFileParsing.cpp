@@ -60,7 +60,7 @@ std::string str,type("NULL");
 
 
 int yaccFileParsing(const string& fileName, string& start, unordered_set<string>& Terminals_Str, ProducerVecStr& TranslationRule_Str, string& Declarations, string& CRoutines, unordered_set<string>& Left_Str, unordered_map<string, int>& Left_Precedence){
-enum _command{token,type,_start,_union,left,right,endSeg,defaultType};
+enum _command{token,type,_start,_union,left,right,endSeg,defaultType,code};
 std::unordered_map<string,enum _command> COMMAND;
 	COMMAND["\%token"] = token;
 	COMMAND["\%type"] = type;
@@ -70,6 +70,7 @@ std::unordered_map<string,enum _command> COMMAND;
 	COMMAND["\%right"] = right;
 	COMMAND["\%\%"] = endSeg;
 	COMMAND["\%default"] = defaultType;
+	COMMAND["\%{"] = code;
     // 读取yacc规约文件
 	ifstream inFile;
 	cout<<"reading file"<<endl;
@@ -115,6 +116,23 @@ std::unordered_map<string,enum _command> COMMAND;
 			throw invalid_argument(ss.str());
 		}
 		switch(COMMAND[str]){
+			case code:
+				{
+					getline(inFile, str);\
+					while (str.find("%}") != string::npos && !inFile.eof()) {
+						// 将结果存入Declarations中
+						Declarations += str + "\n";
+						getline(inFile, str);
+					}
+					// 错误：声明部分未完成文件却已结束
+					if (inFile.eof()) {
+						cout << "ERROR: Incomplete Declarations Part!" << endl;
+						return 1;
+					}
+				}
+
+
+				break;
 			case token:
 				{
 					getline(inFile,str);

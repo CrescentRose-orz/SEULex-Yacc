@@ -435,7 +435,7 @@ unordered_map<int,int> member;
 
 void DFA::generateCode(fstream &file,int flag){
     int buff[charSetMAX + 1];
-    file<<"int next["<<pool.size()<<"]["<<charSetMAX + 1<<"] = {";
+    file<<"int yyLexerNext["<<pool.size()<<"]["<<charSetMAX + 1<<"] = {";
     for (int i = 0; i < pool.size(); ++i){
         memset(buff,-1,sizeof(buff));
         for (auto iter = pool[i].stateBegin();iter != pool[i].stateEnd(); ++iter){ 
@@ -478,8 +478,8 @@ int yyLex(){
         return '#';
     }
     buff[_leng++] = c;
-    while (c != -1 &&next[nowState][c] != -1){
-        nowState = next[nowState][c];
+    while (c != -1 &&yyLexerNext[nowState][c] != -1){
+        nowState = yyLexerNext[nowState][c];
         if (act[nowState] != -1){
             {
                 actIdx = act[nowState];

@@ -179,6 +179,11 @@ void solveSingleFirst(int idx,bool &changesFlag){
 	}
 	for (auto pros:LHSToPos[idx]){
 		cout<<"get new producer for "<<idx<<endl;
+		cout<<I2S(idx)<<"->";
+		for (auto r:getRight(pros)){
+			cout<<I2S(r)<<" ";
+		}
+		cout<<endl;
 		for (auto now:getRight(pros)){
 			cout<<"get "<<I2S(now)<<endl;
 			// if (now == idx){
@@ -189,16 +194,16 @@ void solveSingleFirst(int idx,bool &changesFlag){
 			bool flag = false;
 			for (auto _first:First[now]){
 				if (_first != -1 ){
-					if (now != idx && First[idx].count(_first) == 0){
+					if ( First[idx].count(_first) == 0){
 						First[idx].insert(_first);
 						changesFlag = true;
 					}
 				} else {
 					flag = true;
 				}
-				if (!flag){
-					break;
-				}
+			}
+			if (!flag){
+				break;
 			}
 		}
 	}

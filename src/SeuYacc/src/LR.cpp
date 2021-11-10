@@ -236,23 +236,24 @@ int LR::constructParsingTable(bool isCPP){
     ofstream out;
     cout<<"begin constructParsing"<<endl;
 	out.open("y.tab.h", ios::out);
-
+    
 	out << "#ifndef Y_TAB_H" << endl;
 	out << "#define Y_TAB_H" << endl;
-
-    out << endl;
     out << unionCode<<endl;
-    out << "// epsilon" << endl;
-    out << "#define " << "" <<"epsilon -1" << endl;
+    
+    out << "// epsilon?" << endl;
+    //out << "#define " << "" <<"epsilon -1" << endl;
     out <<"#define "<<"TNBound "<<TNBound<<endl;
     out << endl;
-
+    out <<"extern YYSTYPE yyVal;"<<endl;
+    out <<"extern FILE* yyin;"<<endl;
     out << "// terminals" << endl;
     for (int i = 128; i < TNBound; i++)
 		out << "#define " << IntToStr[i] <<" "<< i << endl;
 
     out << endl;
-
+    out <<YY_CLASS_DEFINITION<<endl;
+    out << endl;
     out << "// nonterminals" << endl;
     for (int i = TNBound; i < NLBound; i++)
 		out << "#define " << IntToStr[i] <<" "<< i << endl;
@@ -276,12 +277,14 @@ int LR::constructParsingTable(bool isCPP){
     out.open("y.tab.cpp", ios::out);
     // ----------头文件部分----------
     out << Declarations <<endl;
+
     if (isCPP){
         out<<"#define ISCPP"<<endl;
         out<<YYHEADER<<endl;
     }
     if (isCPP){
         out << YY_PARSER_FUNCTION << endl;
+        out <<"YYSTYPE yyVal;"<<endl;
         out << YY_REDUCER_BODY1 <<endl;
         for (int i = 0; i < TranslationRule_Int.size(); ++i){
             out << R"(
@@ -303,9 +306,10 @@ int LR::constructParsingTable(bool isCPP){
             if (i){
                 out << R"(
                     )"<<reduceActionCode[i-1]<<endl;
-                out << R"(
-                    #undef $$)"<<endl;
+
             }
+            out << R"(
+                    #undef $$)"<<endl;
             for (int j = 0; j < TranslationRule_Int[i].second.size();++j){
                 out <<R"(
                 #undef $)"<<j+1<<endl;

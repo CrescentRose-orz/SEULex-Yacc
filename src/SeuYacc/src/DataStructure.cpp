@@ -78,32 +78,39 @@ public:
 	}
 };
 
+)");
+string YY_CLASS_DEFINITION(
+	R"(
 class yyParser{
+
 private:
     int token,now;
     stack<YYSTYPE> valStack;
     stack<int> status;
-    stack<int> symbol;
+    stack<int> yySymbolStack;
     int read();
     void shift(int target);
     void reduce(int producer);
     int parse();
 public:
-    void yyParse(){
-		int flag = 1;
-        status.push(initialStatus);
-        read();
-        while(flag){
-			if (0 < (flag = parse())){
-				read();
-			}
-		}
-    }
+    void yyParse();
+	asmParser parser;
 };
+
 )");
 
 
 string YY_PARSER_FUNCTION(R"(
+void yyParser::yyParse(){
+	int flag = 1;
+	status.push(initialStatus);
+	read();
+	while(flag != -2){
+		if (0 < (flag = parse())){
+			read();
+		}
+	}
+}
 int yyParser::read(){
 		//memset(yyVal,0,sizeof(YYSTYPE));
         system("pause");
@@ -117,7 +124,7 @@ int yyParser::read(){
     }
 void yyParser::shift(int target){
 		valStack.push(yyVal);
-		symbol.push(token);
+		yySymbolStack.push(token);
         cout<<"from "<<now;
         now = target;
         cout<<" shift to target "<<target<<endl;
@@ -127,6 +134,10 @@ int yyParser::parse(){
     int now = status.top();
     if (ACTION[now][token] > 0){
         // ACTION[now][lookAhead] > 0 , shift
+		if (ACTION[now][token] == acc){
+			cout<<"ACCEPT!"<<endl;
+			return -2;
+		}
         cout<<"shifting..."<<endl;
 		shift(ACTION[now][token]-1);
 		return 1;
@@ -151,23 +162,25 @@ void yyParser::reduce(int producer){
         int cnt = proCnt[producer]; 
         int newSymbol = proGet[producer];
         YYSTYPE *proVal = new YYSTYPE[cnt+1];
-        int *sb = new int[cnt+1];
+        int *yy_sb = new int[cnt+1];
 
         for (int i = cnt; i > 0; --i){
-            sb[i] = symbol.top();
-            symbol.pop();
+            yy_sb[i] = yySymbolStack.top();
+            yySymbolStack.pop();
             status.pop();
 			proVal[i] = valStack.top();
 			valStack.pop();
         }
-        symbol.push(newSymbol);
+        yySymbolStack.push(newSymbol);
         cout<<I2S[newSymbol]<<"->";
         for (int i = 1; i <= cnt; ++i){
-            cout<<I2S[sb[i]]<<" ";
+            cout<<I2S[yy_sb[i]]<<" ";
         }
         cout<<endl;
-        delete[] sb;
-		switch(now){
+        delete[] yy_sb;
+        std::cout<<"begin action for now: "<<now<<"action: "<<producer<<endl;
+		switch(producer){
+
 )");
 string YY_REDUCER_BODY2(R"(
 		}

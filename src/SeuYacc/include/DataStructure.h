@@ -75,7 +75,7 @@ extern vector<string> reduceActionCode;
 
 // 存放Int形式的产生式
 extern ProducerVecInt TranslationRule_Int;
-
+extern string YY_CLASS_DEFINITION;
 extern string YYHEADER;
 extern string YY_REDUCER_BODY2;
 extern string YY_REDUCER_BODY1;
