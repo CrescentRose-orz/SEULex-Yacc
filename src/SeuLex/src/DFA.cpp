@@ -265,7 +265,7 @@ NFA_eclosure startPoint(_NFA);
 //     unordered_set<int> num;
 //     eclosureHash hash;
 // }Item;
-
+#define debug_MINI
 DFA DFA::minimize(){
 DFA rt(logger);
 queue<unordered_set<int>> q;
@@ -315,8 +315,8 @@ unordered_map<int,int> member;
         int flag = false;
         unordered_set<int> now = q.front();
         q.pop();
-        if (now.size() != 1&&stable < q.size()){
-            for (int i = 30; i <=charSetMAX; ++i){
+        if (now.size() != 1&&stable <= q.size() + 1){
+            for (int i = 0; i <=charSetMAX; ++i){
                 //int flag = pool[*now.cbegin()].getTrans(i);
                 unordered_map<int,unordered_set<int>> newSplit;
                 for (auto iter =now.cbegin();iter!=now.cend();++iter){
@@ -355,7 +355,7 @@ unordered_map<int,int> member;
         if (flag ){
             continue;
         }
-        if (stable < q.size()){
+        if (stable <= q.size() + 1){
             #ifdef debug_MINI 
             cout<<"group: ";
             for (auto p:now){
