@@ -272,8 +272,10 @@ queue<unordered_set<int>> q;
 unordered_set<int> nonterminal;
 unordered_map<int,unordered_set<int>>  Terminal;
 unordered_map<int,int> belong;
+unordered_map<int,int> finalBelong;
 int cnt = 1;
 int st = -1;
+int stable = 0;
 unordered_map<int,int> member;
     belong[-1] = -1;
     for (int i = 0 ; i < pool.size();++i){  
@@ -313,7 +315,7 @@ unordered_map<int,int> member;
         int flag = false;
         unordered_set<int> now = q.front();
         q.pop();
-        if (now.size() != 1){
+        if (now.size() != 1&&stable < q.size()){
             for (int i = 30; i <=charSetMAX; ++i){
                 //int flag = pool[*now.cbegin()].getTrans(i);
                 unordered_map<int,unordered_set<int>> newSplit;
@@ -322,30 +324,80 @@ unordered_map<int,int> member;
                 }
                 if (newSplit.size()>1){
                     flag = true;
+                    stable = 0;
+                    #ifdef debug_MINI 
+                    cout<<"group: ";
+                    for (auto p:now){
+                        cout<<p<<" ";
+                    }
+                    cout<<"split into:"<<endl;
+                    #endif
                     for (auto iter = newSplit.cbegin();iter != newSplit.cend();++iter){
                         ++st;
+
                         for (auto &id:iter->second){
+                            #ifdef debug_MINI 
+                            cout<<id<<" ";
+                            #endif
                             belong[id] = st;
                         }
+                        #ifdef debug_MINI 
+                        cout<<endl;
+                        #endif
                         q.push(iter->second);
                     }
                     break;
+                } else {
+
                 }
             }
         }
-        if (flag){continue;}
+        if (flag ){
+            continue;
+        }
+        if (stable < q.size()){
+            #ifdef debug_MINI 
+            cout<<"group: ";
+            for (auto p:now){
+                cout<<p<<" ";
+            }
+            cout<<"ok"<<endl;
+            #endif
+            q.push(now);
+            ++stable;
+            #ifdef debug_MINI 
+            cout<<"now stable "<<stable<<" now queue"<<q.size()<<endl;
+            #endif
+            continue;
+        }
+        //cout<<" all stable!"<<endl;
+        //if (flag){continue;}
         if (!now.count(0)){
             member[cnt]=(*now.cbegin());
             #ifdef debug_MINI 
-
+            map<int,int> dflag;
+            for (auto iter = pool[*now.cbegin()].stateBegin(); iter != pool[*now.cbegin()].stateEnd();++iter){
+                dflag[iter->first] = belong[iter->second];
+            }
             stringstream ss;
             ss<<"final group "<<cnt<<" with delegate "<<*now.cbegin() <<" has ";
             #endif
             for (auto &id:now){
-                belong[id] = cnt;
-            #ifdef debug_MINI 
+                int pcnt = 0;
+                finalBelong[id] = cnt;
+                #ifdef debug_MINI 
 
                 ss<<" "<<id;
+                for (auto iter = pool[*now.cbegin()].stateBegin(); iter != pool[*now.cbegin()].stateEnd();++iter){
+                    if (dflag[iter->first] != belong[iter->second]){
+                        cout<<"ERROR to group "<<member[cnt]<<" with "<<id<<endl;
+                        cout<<"input "<<(char)iter->first<<" get "<<dflag[iter->first]<<" while "<<id<<" get "<<belong[iter->second]<<endl;
+                    }
+                    ++pcnt;
+                }
+                if (pcnt != dflag.size()){
+                    cout<<"ERROR to group "<<member[cnt]<<" with "<<id<<" delegate has "<<dflag.size()<<" trans while "<<id<<" has "<<pcnt<<endl;
+                }
                 #endif
             }
             ++cnt;
@@ -359,7 +411,7 @@ unordered_map<int,int> member;
             ss<<"final group "<<0<<" with delegate "<<*now.cbegin() <<" has ";
             #endif
             for (auto &id:now){
-                belong[id] = 0;
+                finalBelong[id] = 0;
                 #ifdef debug_MINI
                 ss<<" "<<id;
                 #endif
@@ -373,10 +425,11 @@ unordered_map<int,int> member;
     for (int i = 0; i < cnt; ++i){
         rt.add();
         for (auto iter = pool[member[i]].stateBegin(); iter != pool[member[i]].stateEnd();++iter){
-            if (belong[iter->second]>=cnt){
+            
+            if (finalBelong[iter->second]>=cnt){
                 #ifdef debug_MINI 
                 stringstream ss;
-                ss<<"try to add edge to"<<belong[iter->second]<<" while total node is"<<cnt<<endl;
+                ss<<"try to add edge to"<<finalBelong[iter->second]<<" while total node is"<<cnt<<endl;
 
                 throw invalid_argument(ss.str());
                                 #endif
@@ -384,11 +437,11 @@ unordered_map<int,int> member;
             #ifdef debug_MINI
             {
                 stringstream ss;
-                ss<<"add edge from "<<i<<" to "<<belong[iter->second]<<" with c ="<<iter->first;
+                ss<<"add edge from "<<i<<" to "<<finalBelong[iter->second]<<" with c ="<<iter->first;
                 logger.customMSG(ss.str());
             }
             #endif
-            rt.addTrans(i,belong[iter->second],iter->first);
+            rt.addTrans(i,finalBelong[iter->second],iter->first);
         }
         if (pool[member[i]].valid()){
             #ifdef debug_MINI
@@ -421,10 +474,6 @@ unordered_map<int,int> member;
     }
     return rt;
 }
-
-
-
-
 
 
 
@@ -483,7 +532,7 @@ int yyLex(){
         if (act[nowState] != -1){
             {
                 actIdx = act[nowState];
-                yypos = c == '\n'?ftell(yyin)-1:ftell(yyin);
+                yypos =ftell(yyin);// c == '\n'?ftell(yyin)-1:ftell(yyin);
                 yyleng = _leng;
             }
         } else {

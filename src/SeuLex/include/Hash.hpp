@@ -2,9 +2,9 @@
 #include<bits/stdc++.h>
 
 using namespace std;
-const int HASH_CNT = 2;
-const int MAX_HASH_CNT = 2;
-const long long HASH_KEY[MAX_HASH_CNT] = {19260817,2281701377};
+const int HASH_CNT = 3;
+const int MAX_HASH_CNT = 3;
+const long long HASH_KEY[MAX_HASH_CNT] = {19260817,2281701377,5039};
 inline long long qPow(long long x,long long p){
 long long ans = 1;
     while(p){
@@ -55,11 +55,19 @@ public:
         if (!valid){
             throw invalid_argument("this hashKey has not been initialized!");
         }
+        bool flag = 1;
+        int cnt = 0;
         for (int i = 0 ; i <HASH_CNT; ++i){
             if (hash[i] != other.hash[i]){
-                return 0;
+                flag = 0;
+            } else {
+                ++cnt;
             }
         }
+        if (!flag&&cnt){
+            cout<<"WARNING HASH INFLECT DETECTED! CNT:"<<cnt<<endl;
+        }
+        return flag;
         return 1;
     }
     
@@ -80,11 +88,20 @@ public:
         }
     }
     bool operator ==(const eclosureHash &other)const{
+        bool flag = 1;
+        int cnt = 0;
         for (int i = 0 ; i <HASH_CNT; ++i){
             if (hash[i] != other.hash[i]){
-                return 0;
+               flag = 0;
+               // return 0;
+            } else {
+                ++cnt;
             }
         }
+        if (!flag&&cnt){
+            cout<<"WARNING HASH INFLECT DETECTED! CNT:"<<cnt<<endl;
+        }
+        return flag;
         return 1; 
     }
 };

@@ -305,6 +305,7 @@ void Lex::readRE_action(){
 string &&RE = readRE(),act;
 char c,lastc;
 int qcnt = 0,ccnt = 0,bcnt = 0;    
+    cout<<"get RE:"<<RE<<endl;
     targetRE.emplace_back(RE);
     c = fin.get();
     while (space(c)){
@@ -326,7 +327,7 @@ int qcnt = 0,ccnt = 0,bcnt = 0;
 
     bcnt = qcnt = ccnt = 0;
     c = fin.get();
-    while ((c!='}')||qcnt||ccnt||bcnt){
+    while (c!=-1&&((c!='}')||qcnt||ccnt||bcnt)){
         if (!space(c)){
            if (c!='\n'){
                if (c!='\r'){
@@ -354,6 +355,10 @@ int qcnt = 0,ccnt = 0,bcnt = 0;
         }
         lastc = c;
         c = fin.get();
+    }
+    if (c == -1){
+        cout<<"ERROR MEET END OF FILE!"<<endl;
+        exit(-1);
     }
     //trim(act);
     Action.emplace_back(Action.size() + 1,act);
@@ -528,8 +533,9 @@ void Lex::start(int flag){
             ss<<"total "<<_DFA.pool.size()<<" nodes"<<endl;
             logger.customMSG(ss.str());
         }
+        cout<<"DFA ok"<<endl;
         fout.open("DFA.dot",ios::out);
-
+        
         logger.start("minimizing dfa");
         DFA &&miniDFA = _DFA.minimize();
         stringstream ss;
@@ -590,6 +596,7 @@ int input(){
         // }
         // cout<<miniDFA[0].act.getIdx();
         // system("pause");
+        //_DFA.generateCode(fout,flag);
         miniDFA.generateCode(fout,flag);
         if (!flag){
             generateAction(fout,flag);

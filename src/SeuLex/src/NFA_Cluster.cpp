@@ -488,25 +488,35 @@ bool trans = 0;
 
 NFA_Cluster NFA_Cluster::RE2NFA(string RE,NFA &buff,action _action){
     NFA_Cluster &&head = NFA_Cluster::RE2NFA_Cluster(RE[0]=='^'?RE.substr(1,RE.size()-(RE[RE.size()-1]=='$'?2:1)):RE,buff);
-    int nhead = buff.add(),ntail = buff.add();
-    {
+    //int nhead = buff.add(),ntail = buff.add();
+    int nhead = head.head;
+    int ntail = head.tail;
+    // {
+    //     WrLock(buff.Wrlock);
+    //     buff[nhead].addTrans(head.head,'\n');
+    // }
+    if (RE[0] == '^'){
         WrLock(buff.Wrlock);
+        nhead = buff.add();
         buff[nhead].addTrans(head.head,'\n');
-    }
-    if (RE[0] != '^'){
-        WrLock(buff.Wrlock);
-        buff[nhead].addTrans(head.head,eps);
+        //buff[nhead].addTrans(head.head,eps);
     }            
     head.head = nhead;
-    {
+    // {
+    //     WrLock(buff.Wrlock);
+    //     buff[ntail].setAction(_action);
+    //     buff[head.tail].addTrans(ntail,'\n');
+    // }
+    if (RE[RE.size()-1] == '$'){
+        WrLock(buff.Wrlock);
+        ntail = buff.add();
+        buff[head.tail].addTrans(ntail,'\n');
+        //buff[head.tail].addTrans(ntail,eps);
+    }
+    {  
         WrLock(buff.Wrlock);
         buff[ntail].setAction(_action);
-        buff[head.tail].addTrans(ntail,'\n');
     }
-    if (RE[RE.size()-1] != '$'){
-        WrLock(buff.Wrlock);
-        buff[head.tail].addTrans(ntail,eps);
-    }  
     head.tail = ntail;  
     #ifdef DEBUG
     stringstream s;

@@ -114,7 +114,7 @@ void yyParser::yyParse(){
 int yyParser::read(){
 		//memset(yyVal,0,sizeof(YYSTYPE));
         system("pause");
-		if (yyEOF){
+		if (yyEOF == 2){
 			throw LexerEOFException();
 		}
         token = yyLex();

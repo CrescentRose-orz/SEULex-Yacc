@@ -239,8 +239,12 @@ int LR::constructParsingTable(bool isCPP){
     
 	out << "#ifndef Y_TAB_H" << endl;
 	out << "#define Y_TAB_H" << endl;
+    out <<"#include<stack>" <<endl;
+    out <<"using std::stack;" <<endl;
+    out <<"extern FILE* yyin;"<<endl;
+    out <<"extern int yyEOF;"<<endl;
     out << unionCode<<endl;
-    
+
     out << "// epsilon?" << endl;
     //out << "#define " << "" <<"epsilon -1" << endl;
     out <<"#define "<<"TNBound "<<TNBound<<endl;
@@ -284,7 +288,6 @@ int LR::constructParsingTable(bool isCPP){
     }
     if (isCPP){
         out << YY_PARSER_FUNCTION << endl;
-        out <<"YYSTYPE yyVal;"<<endl;
         out << YY_REDUCER_BODY1 <<endl;
         for (int i = 0; i < TranslationRule_Int.size(); ++i){
             out << R"(
