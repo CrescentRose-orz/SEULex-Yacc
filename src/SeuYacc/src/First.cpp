@@ -145,7 +145,9 @@ void solveFirst(){
 unordered_set<int> vis;
 queue<int> changes;
 bool flag = true;
+	#ifdef DEBUG_FIRST
 	cout<<"solving first, NLBound = "<<NLBound<<endl;
+	#endif
 	for (int i = 0 ; i < NLBound; ++i){
 		solveSingleFirst(i,flag);
 		//changes.push(i);
@@ -169,23 +171,30 @@ bool flag = true;
 }
 
 void solveSingleFirst(int idx,bool &changesFlag){
+	#ifdef DEBUG_FIRST
 	if (idx<128)
 		cout<<"solving "<<idx<<" : "<<(char)idx<<endl;
 	else
 		cout<<"solving "<<idx<<" : "<<I2S(idx)<<endl;
+	#endif
 	if (isTerminal(idx)){
 		First[idx].insert(idx);
 		return;
 	}
 	for (auto pros:LHSToPos[idx]){
+		#ifdef DEBUG_FIRST
 		cout<<"get new producer for "<<idx<<endl;
 		cout<<I2S(idx)<<"->";
 		for (auto r:getRight(pros)){
 			cout<<I2S(r)<<" ";
 		}
 		cout<<endl;
+		#endif
 		for (auto now:getRight(pros)){
+
+			#ifdef DEBUG_FIRST
 			cout<<"get "<<I2S(now)<<endl;
+			#endif
 			// if (now == idx){
 			// 	if ()
 			// 	break;

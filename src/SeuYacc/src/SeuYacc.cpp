@@ -92,6 +92,7 @@ int main(int argc, char const* argv[]){
     //getFirst();
     solveFirst();
     cout<<"first solving ok"<<endl;
+    #ifdef DEBUG_FIRST
     cout<<"first:"<<endl;
     for (int i = 0; i < NLBound;++i){
         if (i<128){
@@ -104,7 +105,7 @@ int main(int argc, char const* argv[]){
         }
         cout<<endl;
     }
-
+    #endif
     //
     // ----------------以上为求取所有单字符First部分----------------
     // ----------------下面开始进行LR1项目集簇的构造----------------

@@ -265,7 +265,7 @@ NFA_eclosure startPoint(_NFA);
 //     unordered_set<int> num;
 //     eclosureHash hash;
 // }Item;
-#define debug_MINI
+//#define debug_MINI
 DFA DFA::minimize(){
 DFA rt(logger);
 queue<unordered_set<int>> q;
@@ -460,7 +460,7 @@ unordered_map<int,int> member;
             s<<"get node "<<i<<"char  "<<iter->first<<" to state"<<iter->second<<endl;
             logger.customMSG(s.str());
             #endif
-                    #ifdef debug_MINI
+            #ifdef debug_MINI
             stringstream ss;
             ss<<"node "<<i<<" has edge"<<iter->first<<" to "<<iter->second<<endl;
             logger.customMSG(ss.str());
