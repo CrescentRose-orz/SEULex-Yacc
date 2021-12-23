@@ -42,7 +42,7 @@ public:
     int addTrans(int from, int to, int c);
     int head();
     bool exist(NFA_eclosure &_e);
-    int idx(NFA_eclosure &_e);
+    int idx(NFA_eclosure &_e);  
     int insert(NFA_eclosure &_e);
     void NFA2DFA(NFA& _NFA);
     void expandEclosure(NFA_eclosure &nowE);

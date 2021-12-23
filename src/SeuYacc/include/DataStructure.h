@@ -8,7 +8,7 @@ extern std::map<string,string> SvalType;
 extern std::unordered_map<int,string>IvalType;
 extern bool hasUnion;
 extern string unionCode;
-
+extern string CPPHeaders;
 
 // 为后续方便使用相关数据结构，此文件定义了使用到的数据结构
 

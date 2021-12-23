@@ -1,6 +1,6 @@
 #include"DFA.h"
-
-
+// #define DEBUG
+// #define DEBUG2
 DFA::DFA(){}
 DFA::DFA(Logger &log):basicFA(log){}
 int DFA::add(){
@@ -28,6 +28,12 @@ int DFA::addTrans(int from, int to, int c){
         cout<<"ERROR! try to add"<<from<<" to "<<to<<" with "<<c<<"!"<<endl;
     }
     pool[from].addTrans(to,c);
+    #ifdef DEBUG
+    if (from == 155&& to == 153){
+        cout<<"got u!!!"<<endl;
+        system("pause");
+    }
+    #endif
     return 0;
 }
 bool DFA::exist(NFA_eclosure &_e){
@@ -90,8 +96,20 @@ int DFA::insert(NFA_eclosure &_e){
         DFAMap[_e.hash] = rt;
         if (_e._action.getIdx() != 0){
             pool[rt].setAction(_e._action);
+            if (_e._action.getIdx()==1||_e._action.getIdx()==2){
+                stringstream s;
+                s<<_e<<" has action "<<_e._action.getIdx()<<" inserted!"<<endl;
+                cout<<s.str()<<endl;
+                this->logger.customMSG(s.str());
+            }
         }
     }
+        #ifdef DEBUG
+                stringstream s;
+                s<<_e<<" named as "<<rt<<endl;
+                cout<<s.str()<<endl;
+                this->logger.customMSG(s.str());   
+        #endif
     return rt;
 }
 
@@ -101,6 +119,7 @@ void DFA::expandEclosure(NFA_eclosure &nowE){
         NFA_eclosure &&newE = nowE.move(i);
         int to;
         bool flag;
+        bool debugFlag = 0;
         {
             #ifdef USE_MULTITHREAD
             RdLock(visMutex);
@@ -115,6 +134,9 @@ void DFA::expandEclosure(NFA_eclosure &nowE){
             }
             if (!exist(newE)){
                 to = insert(newE);
+                #ifdef DEBUG
+                debugFlag = 1;
+                #endif
                 #ifdef USE_MULTITHREAD
                 ++taskCnt;
                 //cout<<"add task!"<<endl;
@@ -134,16 +156,28 @@ void DFA::expandEclosure(NFA_eclosure &nowE){
                     #endif
                     vis[tmp] = to;
                 }
+            } else {
+                to = idx(newE);
             }
         } else {
             to = vis[newE.hash];
         }
-        addTrans(idx(nowE),to,i);       
         #ifdef DEBUG
         stringstream s;
-        s<<now<<" to " <<newE<<" with "<<i;
+        if (flag){
+            if (debugFlag)
+            s<<"build a new one";
+            else
+                s<<"find after EXPAND";
+        } else {
+            s<<"exist an old one(before expand)";
+        }
+        s<<nowE<<" to " <<newE<<" with "<<i;
         logger.customMSG(s.str());
+        cout<<s.str()<<endl;
         #endif
+        addTrans(idx(nowE),to,i);       
+
     }
     #ifdef USE_MULTITHREAD
     --taskCnt;
@@ -357,16 +391,16 @@ unordered_map<int,int> member;
         }
         if (stable <= q.size() + 1){
             #ifdef debug_MINI 
-            cout<<"group: ";
-            for (auto p:now){
-                cout<<p<<" ";
-            }
-            cout<<"ok"<<endl;
+            // cout<<"group: ";
+            // for (auto p:now){
+            //     cout<<p<<" ";
+            // }
+            // cout<<"ok"<<endl;
             #endif
             q.push(now);
             ++stable;
             #ifdef debug_MINI 
-            cout<<"now stable "<<stable<<" now queue"<<q.size()<<endl;
+            //cout<<"now stable "<<stable<<" now queue"<<q.size()<<endl;
             #endif
             continue;
         }
@@ -455,7 +489,7 @@ unordered_map<int,int> member;
         } 
 
         for (auto iter = rt.pool[i].stateBegin();iter !=rt.pool[i].stateEnd(); ++iter){ 
-            #ifdef DEBUG
+            #ifdef debug_MINI
             stringstream s;
             s<<"get node "<<i<<"char  "<<iter->first<<" to state"<<iter->second<<endl;
             logger.customMSG(s.str());

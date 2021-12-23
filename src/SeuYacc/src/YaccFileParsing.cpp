@@ -343,6 +343,16 @@ std::unordered_map<string,enum _command> COMMAND;
 			}
 			while (!str.empty()&&str[0]!='{'&& str != "|" && str != ";" ){
                 // 将产生式右部放入一个向量
+				if (str.find('{')!=string::npos&&str!="'{'"){
+					cout<<"WARNING: '{ detected in producer, do you forget to add space between action and producer?"<<endl;
+					cout<<"occurs here:"<<endl;
+					cout<<p.first<<"->";
+					for (auto &s:p.second){
+						cout<<s<<" ";
+					}
+					cout<<str<<endl;
+					system("pause");
+				}
 				p.second.push_back(str);
 				inFile >> str;
 			}

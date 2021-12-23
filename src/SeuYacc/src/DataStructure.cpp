@@ -61,12 +61,12 @@ string YYHEADER(
 #include"y.tab.h"
 
 using std::stack;
-using namespace std;
 const int initialStatus = 0;
 YYSTYPE yyVal;
 extern int yyEOF;
 extern FILE* yyin;
 extern FILE* yyout;
+bool yyerrorFlag;
 int yyLex();
 
 class LexerEOFException:public std::exception{
@@ -88,13 +88,15 @@ private:
     stack<YYSTYPE> valStack;
     stack<int> status;
     stack<int> yySymbolStack;
+	stack<tokenPlace> placeStack;
     int read();
     void shift(int target);
     void reduce(int producer);
     int parse();
+	int yyMeetError();
 public:
     void yyParse();
-	asmParser parser;
+	//asmParser parser;
 };
 
 )");
@@ -113,23 +115,79 @@ void yyParser::yyParse(){
 }
 int yyParser::read(){
 		//memset(yyVal,0,sizeof(YYSTYPE));
-        system("pause");
+        // char c;
+        // c= getchar();
+        //system("pause");
 		if (yyEOF == 2){
 			throw LexerEOFException();
 		}
         token = yyLex();
+        #ifdef DEBUG_YACC
         cout<<"get token "<<I2S[token]<<" text val:"<<yytext<<endl;
+        #endif
+        #ifdef DEBUG
 		system("pause");
+        #endif
         return 0;
     }
 void yyParser::shift(int target){
 		valStack.push(yyVal);
 		yySymbolStack.push(token);
+        placeStack.push(nowTokenPlace);
+        #ifdef DEBUG
         cout<<"from "<<now;
+        #endif
         now = target;
+        #ifdef DEBUG
         cout<<" shift to target "<<target<<endl;
-		status.push(now);
+		#endif
+        status.push(now);
     }
+int yyParser::yyMeetError(){
+
+		//ACTION[now][lookAhead] == 0,error
+        int errToken = RSerror ;
+        yyerrorFlag = true;
+        while(!yyEOF&&!status.empty()){
+            status.pop();
+            valStack.pop();
+            placeStack.pop();
+            yySymbolStack.pop();
+            if (status.empty()){
+                return -2;
+            }
+            now = status.top();
+            if (ACTION[now][errToken] == 0){
+                continue;
+            } else {
+                placeStack.push(nowTokenPlace);
+                valStack.push(yyVal);
+                yySymbolStack.push(RSerror);
+                now = ACTION[now][errToken]-1;
+                status.push(now);
+                while (!yyEOF){
+                    errToken = read();
+                    if (ACTION[now][errToken] > 0){
+                        placeStack.push(nowTokenPlace);
+                        valStack.push(yyVal);
+                        yySymbolStack.push(RSerror);
+                        now = ACTION[now][errToken]-1;
+                        status.push(now);
+                        //shift
+                    } else if (ACTION[now][errToken] != 0) {
+                        //ended		
+                        reduce(-ACTION[now][errToken]-1);       
+                        return -1;
+                    } else {
+                        return yyMeetError();
+                    }
+                }
+                return -2;
+            }
+        }
+		return -2;
+}
+
 int yyParser::parse(){
     int now = status.top();
     if (ACTION[now][token] > 0){
@@ -138,30 +196,54 @@ int yyParser::parse(){
 			cout<<"ACCEPT!"<<endl;
 			return -2;
 		}
+        #ifdef DEBUG
         cout<<"shifting..."<<endl;
-		shift(ACTION[now][token]-1);
+        #endif
+        shift(ACTION[now][token]-1);
 		return 1;
     } else if (ACTION[now][token] < 0){
         // ACTION[now][lookAhead] < 0 , reduce
+        #ifdef DEBUG
         cout<<"reducing... action "<<ACTION[now][token]<<endl;
-		reduce(-ACTION[now][token]-1);
+		#endif
+        reduce(-ACTION[now][token]-1);
 		return -1;
     } else {
-		//ACTION[now][lookAhead] == 0,accept
-        // by default,acc = 0
-		cout<<"error occurs"<<endl;
+		//ACTION[now][lookAhead] == 0,error
+        vector<string> possibleToken;
+        for (int i = 0 ;i < TNBound;++i){
+            if (ACTION[now][i]!=0){
+                possibleToken.push_back(I2S[i]);
+            }
+        }
+        for (int i = TNBound; i < NLBound; ++i){
+            if (_GOTO[now][i]!=-1){
+                possibleToken.push_back(I2S[i]);
+            }            
+        }
+        cout<<"[syntax error] at"<<nowTokenPlace.genMsg();
+        for (auto &s:possibleToken){
+            cout<<", "<<s;
+        }
+        cout<<"expected but "<<I2S[token]<<" found"<<endl;
+        cout<<"error occurs"<<endl;
         cout<<"now at"<<now<<" get lookAhead "<<token<<"("<<I2S[token]<<") "<<endl;
-		return 0;
+        return yyMeetError();
     }
 }
+
+
+     // #define SHOW_PRODUCER
+
 )");
 
-string YY_REDUCER_BODY1(R"(
+string YY_REDUCER_BODY1(R"(      
+
 void yyParser::reduce(int producer){
-{
-        int cnt = proCnt[producer]; 
+	    int cnt = proCnt[producer]; 
         int newSymbol = proGet[producer];
         YYSTYPE *proVal = new YYSTYPE[cnt+1];
+        tokenPlace *proPlace = new tokenPlace[cnt+1];
         int *yy_sb = new int[cnt+1];
 
         for (int i = cnt; i > 0; --i){
@@ -169,29 +251,45 @@ void yyParser::reduce(int producer){
             yySymbolStack.pop();
             status.pop();
 			proVal[i] = valStack.top();
+            proPlace[i] = placeStack.top();
+            placeStack.pop();
 			valStack.pop();
         }
         yySymbolStack.push(newSymbol);
+        #ifdef SHOW_PRODUCER
         cout<<I2S[newSymbol]<<"->";
         for (int i = 1; i <= cnt; ++i){
             cout<<I2S[yy_sb[i]]<<" ";
         }
         cout<<endl;
+        #endif
         delete[] yy_sb;
+        #ifdef DEBUG_YACC
         std::cout<<"begin action for now: "<<now<<"action: "<<producer<<endl;
+		#endif
+        proPlace[0] = proPlace[1];
+        #include"undef.h"
 		switch(producer){
 
 )");
 string YY_REDUCER_BODY2(R"(
 		}
+        #ifdef DEBUG
         cout<<"reduce get"<<newSymbol<<" namely "<<I2S[newSymbol]<<endl;
+        #endif
         now = status.top();
+                #ifdef DEBUG
         cout<<"goto "<<_GOTO[now][newSymbol-TNBound]<<endl;
+        #endif
+        #ifdef DEBUG_YACC
+        cout<<"action ok"<<endl;
+        #endif
         now = _GOTO[now][newSymbol-TNBound];
 		status.push(now);
+        placeStack.push(proPlace[0]);
 		valStack.push(proVal[0]);
+        delete[] proPlace;
 		delete[] proVal;
-	}
 }
 )");
 
@@ -289,7 +387,7 @@ int addRItem(visualToken token){
 	++vTail;
 }
 
-
+string CPPHeaders;
 int valTop = -1;
 int sTop = -1;
 int sSt[10000];

@@ -11,8 +11,8 @@
 #define eps 128
 #define charSetMAX 128
 #define charSetMin 32
-#define controlMin 9
-#define controlMax 12
+#define controlMin 7
+#define controlMax 13
 #define VISUAL
 
 #define DEBUG_OPBRACE

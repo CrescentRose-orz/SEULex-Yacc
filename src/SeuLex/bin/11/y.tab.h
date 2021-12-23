@@ -1,9 +1,16 @@
 #ifndef Y_TAB_H
 #define Y_TAB_H
 #include<stack>
+#include<cstdio>
 using std::stack;
 extern FILE* yyin;
 extern int yyEOF;
+
+extern bool isFloat;
+typedef  union{
+	int intNum;
+	double floatNum;
+}YYSTYPE;
 
 // epsilon?
 #define TNBound 191
@@ -83,14 +90,12 @@ private:
     stack<YYSTYPE> valStack;
     stack<int> status;
     stack<int> yySymbolStack;
-	stack<tokenPlace> placeStack;
     int read();
     void shift(int target);
     void reduce(int producer);
     int parse();
 public:
     void yyParse();
-	//asmParser parser;
 };
 
 
@@ -166,7 +171,6 @@ public:
 #define postfix_expression 258
 #define struct_declaration 259
 #define acc 159
-#define NLBound260
 
 #define NTerminalBase 191
 #define isTerminal(x) (x<191)

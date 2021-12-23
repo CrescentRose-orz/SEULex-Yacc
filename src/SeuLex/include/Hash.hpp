@@ -2,9 +2,9 @@
 #include<bits/stdc++.h>
 
 using namespace std;
-const int HASH_CNT = 3;
-const int MAX_HASH_CNT = 3;
-const long long HASH_KEY[MAX_HASH_CNT] = {19260817,2281701377,5039};
+const int HASH_CNT = 4;
+const int MAX_HASH_CNT = 4;
+const long long HASH_KEY[MAX_HASH_CNT] = {19260817,2281701377,5039,10000007};
 inline long long qPow(long long x,long long p){
 long long ans = 1;
     while(p){
@@ -100,6 +100,7 @@ public:
         }
         if (!flag&&cnt){
             cout<<"WARNING HASH INFLECT DETECTED! CNT:"<<cnt<<endl;
+            system("pause");
         }
         return flag;
         return 1; 

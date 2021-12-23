@@ -232,8 +232,21 @@ int LR::constructParsingTable(bool isCPP){
     int state_num = this->pool.size();
     int nonterminal_num = NLBound - TNBound;
     int terminal_num = TNBound;
-    // 首先生成y.tab.h，其中存储了终结符与int之间的映射
     ofstream out;
+    out.open("undef.h",ios::out);
+	out << "#ifndef UNDEF_Y_TAB_H" << endl;
+	out << "#define UNDEF_Y_TAB_H" << endl;
+    
+    for (int i = 128; i < TNBound; i++)
+		out << "#undef " << IntToStr[i] <<endl;
+    out << "// nonterminals" << endl;
+    for (int i = TNBound; i < NLBound; i++)
+		out << "#undef " << IntToStr[i] << endl;
+    out <<"#undef acc "<<endl;
+    out << "#endif"<<endl;
+    out.close();
+    // 首先生成y.tab.h，其中存储了终结符与int之间的映射
+
     cout<<"begin constructParsing"<<endl;
 	out.open("y.tab.h", ios::out);
     
@@ -262,6 +275,7 @@ int LR::constructParsingTable(bool isCPP){
     for (int i = TNBound; i < NLBound; i++)
 		out << "#define " << IntToStr[i] <<" "<< i << endl;
     out <<"#define acc "<<acc<<endl;
+    out <<"#define NLBound "<<NLBound<<endl;
     out << endl;
     out <<"#define NTerminalBase "<<TNBound<<endl;
     out <<"#define isTerminal(x) (x<"<<TNBound<<")"<<endl;
@@ -281,11 +295,12 @@ int LR::constructParsingTable(bool isCPP){
     out.open("y.tab.cpp", ios::out);
     // ----------头文件部分----------
     out << Declarations <<endl;
-
+    out << CRoutines <<endl;
     if (isCPP){
         out<<"#define ISCPP"<<endl;
         out<<YYHEADER<<endl;
     }
+
     if (isCPP){
         out << YY_PARSER_FUNCTION << endl;
         out << YY_REDUCER_BODY1 <<endl;
@@ -293,6 +308,7 @@ int LR::constructParsingTable(bool isCPP){
             out << R"(
             case )"<<i<<":"<<endl;
             out << R"(
+                #define $$$ proPlace[0]
                 #define $$ proVal[0])";
             if (hasUnion&&IvalType.count(TranslationRule_Int[i].first)){
                 out<<"."<<IvalType[TranslationRule_Int[i].first];
@@ -300,6 +316,7 @@ int LR::constructParsingTable(bool isCPP){
             out<<endl;
             for (int j = 0; j < TranslationRule_Int[i].second.size();++j){
                 out <<R"(
+                #define $$)"<<j+1<<" proPlace["<<j+1<<"]"<<R"(
                 #define $)"<<j+1<<" proVal["<<j+1<<"]";
                 if (hasUnion&&IvalType.count(TranslationRule_Int[i].second[j])){
                     out<<"."<<IvalType[TranslationRule_Int[i].second[j]];
@@ -313,9 +330,13 @@ int LR::constructParsingTable(bool isCPP){
             }
             out << R"(
                     #undef $$)"<<endl;
+            out << R"(
+                    #undef $$$)"<<endl;
             for (int j = 0; j < TranslationRule_Int[i].second.size();++j){
                 out <<R"(
                 #undef $)"<<j+1<<endl;
+                out <<R"(
+                #undef $$)"<<j+1<<endl;
             }
             out<<R"(
                 break;)"<<endl;
@@ -475,7 +496,7 @@ int LR::constructParsingTable(bool isCPP){
 
     }
     delete []temp;
-    out << CRoutines <<endl;
+
     // 构建成功
     out.close();
     return 0;
