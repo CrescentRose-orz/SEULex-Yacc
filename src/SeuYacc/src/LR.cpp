@@ -1,7 +1,7 @@
 #include"LR.h"
 
 // 定义acc
-#define acc StrToInt.size()+1
+#define acc 1000000
 
 LR::LR(){
     tail = 0;
